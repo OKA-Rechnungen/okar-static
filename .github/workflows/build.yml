@@ -39,20 +39,20 @@ jobs:
       - name: Install Saxon, Ant and Fundament
         run: |
           sudo apt-get update && sudo apt-get install openjdk-11-jre-headless ant -y --no-install-recommends
-          ./shellscripts/script.sh
+          build_app/scripts/script.sh
       - name: install python things
         run: pip install -r requirements.txt
       - name: Fetch the data
-        run: ./fetch_data.sh
+        run: build_app/scripts/fetch_data.sh
       - name: Build the app
-        run: ant
+        run: ant -f build_app/xslt/build.xml
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: './html'
+          path: 'html'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
