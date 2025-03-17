@@ -1,56 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project basedir="." name="tei2html">
+    <property name="xslpath" value="./build_app/xslt" />
     <property name="index" value="./data/meta/about.xml"/>
     <property name="target" value="./html"/>
     <property name="target_xml" value="./html/xml-view"/>
     <delete>
         <fileset dir="${target}" includes="*.html"/>
     </delete>
-    <xslt in="${index}" out="${target}/index.html" style="./xslt/index.xsl">
+    <xslt in="${index}" out="${target}/index.html" style="${xslpath}/index.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="${index}" out="${target}/404.html" style="./xslt/404.xsl">
+    <xslt in="${index}" out="${target}/404.html" style="${xslpath}/404.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt style="./xslt/editions.xsl"  basedir="./data/editions" destdir="${target}" includes="*.xml">
+    <xslt style="${xslpath}/editions.xsl"  basedir="./data/editions" destdir="${target}" includes="*.xml">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt style="./xslt/meta.xsl"  basedir="./data/meta" destdir="${target}" includes="*.xml">
+    <xslt style="${xslpath}/meta.xsl"  basedir="./data/meta" destdir="${target}" includes="*.xml">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="${index}" out="${target}/toc.html" style="./xslt/toc.xsl">
+    <xslt in="${index}" out="${target}/toc.html" style="${xslpath}/toc.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="${index}" out="${target}/search.html" style="./xslt/search.xsl">
+    <xslt in="${index}" out="${target}/search.html" style="${xslpath}/search.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/imprint.xml" out="${target}/imprint.html" style="./xslt/imprint.xsl">
+    <xslt in="./data/imprint.xml" out="${target}/imprint.html" style="${xslpath}/imprint.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/indices/listperson.xml" out="${target}/listperson.html" style="./xslt/listperson.xsl">
+    <xslt in="./data/indices/listperson.xml" out="${target}/listperson.html" style="${xslpath}/listperson.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/indices/listplace.xml" out="${target}/listplace.html" style="./xslt/listplace.xsl">
+    <xslt in="./data/indices/listplace.xml" out="${target}/listplace.html" style="${xslpath}/listplace.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/indices/listorg.xml" out="${target}/listorg.html" style="./xslt/listorg.xsl">
+    <xslt in="./data/indices/listorg.xml" out="${target}/listorg.html" style="${xslpath}/listorg.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/indices/listbibl.xml" out="${target}/listbibl.html" style="./xslt/listbibl.xsl">
+    <xslt in="./data/indices/listbibl.xml" out="${target}/listbibl.html" style="${xslpath}/listbibl.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/indices/listperson.xml" out="${target}/beacon.txt" style="./xslt/beacon.xsl">
+    <xslt in="./data/indices/listperson.xml" out="${target}/beacon.txt" style="${xslpath}/beacon.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
