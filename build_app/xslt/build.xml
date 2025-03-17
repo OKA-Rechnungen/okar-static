@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." name="tei2html">
-    <property name="xslpath" value="./build_app/xslt" />
-    <property name="index" value="./data/meta/about.xml"/>
-    <property name="target" value="./html"/>
-    <property name="target_xml" value="./html/xml-view"/>
+<project basedir="../.." name="tei2html">
+    <property name="xslpath" value="${basedir}/build_app/xslt" />
+    <property name="index" value="${basedir}/data/meta/about.xml"/>
+    <property name="target" value="${basedir}/html"/>
+    <property name="target_xml" value="${basedir}/html/xml-view"/>
     <delete>
         <fileset dir="${target}" includes="*.html"/>
     </delete>
