@@ -2,7 +2,8 @@
 
 REDMINE_ID="24844?format=xhtml&locale="
 IMPRINT_XML=./data/imprint.xml
-rm ${IMPRINT_XML}
+mkdir -p data
+rm -f ${IMPRINT_XML}
 echo '<?xml version="1.0" encoding="UTF-8"?>'
 echo "<root>" >> ${IMPRINT_XML}
 echo '<div lang="de">' >> ${IMPRINT_XML}
