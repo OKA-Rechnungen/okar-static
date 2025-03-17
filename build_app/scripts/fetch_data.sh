@@ -11,4 +11,4 @@ rm main.zip
 rm -rf ./okar-data-main
 
 echo "fetch imprint"
-./shellscripts/dl_imprint.sh
+./build_app/scripts/dl_imprint.sh
