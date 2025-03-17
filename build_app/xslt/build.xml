@@ -15,11 +15,11 @@
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt style="${xslpath}/editions.xsl"  basedir="./data/editions" destdir="${target}" includes="*.xml">
+    <xslt style="${xslpath}/editions.xsl"  basedir="${basedir}/data/editions" destdir="${target}" includes="*.xml">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt style="${xslpath}/meta.xsl"  basedir="./data/meta" destdir="${target}" includes="*.xml">
+    <xslt style="${xslpath}/meta.xsl" basedir="${basedir}/data/meta" destdir="${target}" includes="*.xml">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
@@ -31,27 +31,27 @@
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/imprint.xml" out="${target}/imprint.html" style="${xslpath}/imprint.xsl">
+    <xslt in="${basedir}/data/imprint.xml" out="${target}/imprint.html" style="${xslpath}/imprint.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/indices/listperson.xml" out="${target}/listperson.html" style="${xslpath}/listperson.xsl">
+    <xslt in="${basedir}/data/indices/listperson.xml" out="${target}/listperson.html" style="${xslpath}/listperson.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/indices/listplace.xml" out="${target}/listplace.html" style="${xslpath}/listplace.xsl">
+    <xslt in="${basedir}/data/indices/listplace.xml" out="${target}/listplace.html" style="${xslpath}/listplace.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/indices/listorg.xml" out="${target}/listorg.html" style="${xslpath}/listorg.xsl">
+    <xslt in="${basedir}/data/indices/listorg.xml" out="${target}/listorg.html" style="${xslpath}/listorg.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/indices/listbibl.xml" out="${target}/listbibl.html" style="${xslpath}/listbibl.xsl">
+    <xslt in="${basedir}/data/indices/listbibl.xml" out="${target}/listbibl.html" style="${xslpath}/listbibl.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="./data/indices/listperson.xml" out="${target}/beacon.txt" style="${xslpath}/beacon.xsl">
+    <xslt in="${basedir}/data/indices/listperson.xml" out="${target}/beacon.txt" style="${xslpath}/beacon.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
@@ -69,7 +69,7 @@
         <replacetoken>xmlns="http://www.w3.org/1999/xhtml"</replacetoken>
     </replace>
     <copy todir="${target}" flatten="true">
-        <fileset dir="./data/">
+        <fileset dir="${basedir}/data/">
             <include name="**/*.xml"/>
         </fileset>
     </copy>
