@@ -16,10 +16,10 @@
                <div class="row">
                   <div class="col-lg-1 col-md-auto col-sm-2 col-xs-6 ml-auto text-center">
                      <div class="py-3">
-                        <a href="https://www.oeaw.ac.at/acdh"><img src="images/ACDHCH_logo.png" width="40" alt="Austrian Centre for Digital Humanities" title="Austrian Centre for Digital Humanities"/></a>
+                        <a href="https://www.oeaw.ac.at/acdh"><img src="images/logo_acdh.png" width="40" alt="Austrian Centre for Digital Humanities" title="Austrian Centre for Digital Humanities"/></a>
                      </div>
                      <div class="py-3">
-                        <a href="http://www.oeaw.ac.at/oesterreichische-akademie-der-wissenschaften/"><img src="images/logo-kurz.png" width="60" alt="Österreichische Akademie der Wissenschaften" title="Österreichische Akademie der Wissenschaften"/></a>
+                        <a href="http://www.oeaw.ac.at/oesterreichische-akademie-der-wissenschaften/"><img src="images/logo_oeaw.png" width="60" alt="Österreichische Akademie der Wissenschaften" title="Österreichische Akademie der Wissenschaften"/></a>
                      </div>
                   </div>
                   <div class="col-lg-4 col-md-3 col-sm-3 texts">
