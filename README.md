@@ -8,14 +8,9 @@
 
 ## initial (one time) setup
 
-* run `./shellscripts/dl_saxon.sh`
-* run `./fetch_data.sh`
-* run `ant`
-
-## set up GitHub repo
-* create a public, new, and empty (without README, .gitignore, license) GitHub repo https://github.com/oka-rechnungen/okar-static 
-* run `git init` in the root folder of your application okar-static
-* execute the commands described under `…or push an existing repository from the command line` in your new created GitHub repo https://github.com/oka-rechnungen/okar-static
+* run `.build_app/scripts/dl_saxon.sh`
+* run `.build_app/scripts/fetch_data.sh`
+* run `ant -f build_app/xslt/build.xsl`
 
 ## start dev server
 
