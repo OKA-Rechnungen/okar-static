@@ -26,7 +26,7 @@
                            </a>
                            </figure>
                         </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6">
+                        <div class="col-lg-6 col-md-6 col-sm-6" style="text-align: left;">
                            <p>
                               ACDH-CH ÖAW<br/>
                               Austrian Centre for Digital Humanities and Cultural Heritage<br/>
