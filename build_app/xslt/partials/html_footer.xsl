@@ -37,7 +37,7 @@
                         </p>
                   </div>
                   <div class="col-lg-2 col-md-3 col-sm-3 text-center">
-                         <h5 class="font-weight-bold hide-mobile align-left">PARTNER::</h5>
+                         <h5 class="font-weight-bold hide-mobile align-left">PARTNER:</h5>
 			<figure>
                      <a href="https://www.wien.gv.at"><img src="images/logo_stadtwien.png" title="Stadt Wien – Wiener Stadt- und Landesarchiv" height="50" alt=""/></a>
     			</figure><br/>
