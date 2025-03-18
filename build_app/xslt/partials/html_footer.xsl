@@ -51,7 +51,7 @@
                         <a href="https://www.bmkoes.gv.at/"><img src="images/logo_bmkoes.svg" height="50" title="Finanziert vom Bundeministeirum für Kunst, Kultur, öffentlichen Dienst und Sport" alt="Finanziert vom Bundeministeirum für Kunst, Kultur, öffentlichen Dienst und Sport"/></a>
                     </figure><br/>
                      <figure>
-                        <a href="https://next-generation-eu.europa.eu/index_de"><img src="images/logo_eu.svg" height="50" title="Finanziert von der Europäischen Union – NextGenerationEU" alt="Finanziert von der Europäischen Union – NextGenerationEU"/></a>
+                        <a href="https://next-generation-eu.europa.eu/index_de"><img src="images/logo_eu.png" height="50" title="Finanziert von der Europäischen Union – NextGenerationEU" alt="Finanziert von der Europäischen Union – NextGenerationEU"/></a>
                     </figure>
                   </div>
                </div>
