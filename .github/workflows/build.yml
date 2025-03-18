@@ -41,7 +41,7 @@ jobs:
           sudo apt-get update && sudo apt-get install openjdk-11-jre-headless ant -y --no-install-recommends
           build_app/scripts/script.sh
       - name: install python things
-        run: pip install -r requirements.txt
+        run: pip install -r config/requirements.txt
       - name: Fetch the data
         run: build_app/scripts/fetch_data.sh
       - name: Build the app
