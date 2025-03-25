@@ -145,3 +145,6 @@ desktop.ini
 
 # MacOS
 .DS_Store
+
+# Local stuff
+*.local
