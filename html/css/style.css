@@ -3,8 +3,82 @@ div#map {
     height: 50vh;
 }
 
+.vspace-0 {
+    margin-top: 4.5ex ;
+}
+
+.vspace-1 {
+    margin-top: 9ex ;
+}
+
 /** Match bootstrap navlink focus outline color. */
 :focus-visible {
     outline: 0;
     box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+}
+
+.mobile-50w{
+    max-width: 100%;
+    max-height: 60px;
+}
+
+@media (max-width: 1200px) {
+    .vspace-0 {
+        margin-top: 7.7ex ;
+    }
+    .vspace-1 {
+        margin-top: 7.5ex ;
+    }
+}
+
+@media (max-width: 1024px) {
+    .mobile-50{
+        max-width: 100%
+    }
+    
+    .vspace-0 {
+        margin-top: 7.5ex ;
+    }
+}
+
+@media (max-width: 992px) {
+    .tablet-0 {
+        display: none;
+    }
+
+    .mobile-50w{
+        max-height: 50px;
+    }
+    .vspace-0 {
+        margin-top: 2ex ;
+    }
+    .vspace-1 {
+        margin-top: 1.8ex ;
+    }
+}
+
+@media (max-width: 800px) {
+    .mobile-50{
+        max-width: 50%
+    }
+
+    .mobile-50-h{
+        height: 50px;
+    }
+    .padding-mobile{
+        padding-bottom: 2ex;
+    }
+    
+    .mobile-50w{
+        max-height: 40px;
+    }
+    .vspace-0 {
+        margin-top: 2ex ;
+    }
+}
+
+@media (max-width: 576px) {
+    .mobile-0{
+        display: none;        
+    }
 }
