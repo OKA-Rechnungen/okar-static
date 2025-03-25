@@ -42,11 +42,18 @@ div#map {
 }
 
 @media (max-width: 992px) {
-    .mobile-0 {
-        display: none ;
+    .tablet-0 {
+        display: none;
     }
+
     .mobile-50w{
         max-height: 50px;
+    }
+    .vspace-0 {
+        margin-top: 2ex ;
+    }
+    .vspace-1 {
+        margin-top: 1.8ex ;
     }
 }
 
@@ -70,3 +77,8 @@ div#map {
     }
 }
 
+@media (max-width: 576px) {
+    .mobile-0{
+        display: none;        
+    }
+}

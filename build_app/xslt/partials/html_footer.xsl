@@ -28,11 +28,11 @@
                               </div>
                            </div>
                         </div>
-                        <div class="col-lg-10 col-md-6 col-sm-0 mobile-0" style="text-align: left;">
+                        <div class="col-lg-10 col-md-6 col-sm-0 tablet-0" style="text-align: left;">
                            <p>
                               Austrian Centre for Digital Humanities and Cultural Heritage<br/>
                               Österreichische Akademie der Wissenschaften</p>
-                           <div class="vspace-1 col-12 mobile-0"/>
+                           <div class="vspace-1 col-12 mobile-1"/>
                            <p>Bäckerstraße 13, 1010 Wien<br/>
                               <i class="bi bi-telephone" aria-hidden="true"/>
                               <span class="visually-hidden">Telefon</span>&#160;<a href="tel:+431515812200">+43 1 51581-2200</a><br/>
@@ -41,19 +41,19 @@
                         </div>
                      </div>
                   </div>
-                  <div class="col-lg-3 col-md-5 col-sm-5 col-12 padding-mobile" style="max-height: 60px">
+                  <div class="col-lg-3 col-md-5 col-sm-5 col-12 ml-auto padding-mobile">
                      <h5 class="font-weight-bold mobile-0 align-left">PARTNER:</h5>
                      <div class="col-lg-12 col-md-12 col-sm-12 col-12">
                         <div class="row">
                            <div class="col-sm-12 col-6 text-center">
                               <a href="https://www.wien.gv.at">
-                                 <img src="images/logo_stadtwien.png" class="mobile-50w" title="Stadt Wien – Wiener Stadt- und Landesarchiv"  alt="WStLA"/>
+                                 <img src="images/logo_stadtwien.png" class="mobile-50w" max-height="100%" title="Stadt Wien – Wiener Stadt- und Landesarchiv"  alt="WStLA"/>
                               </a>
                            </div>
                            <div class="vspace-0 col-12 mobile-0"/>
                            <div class="col-sm-12 col-6 text-center">
                               <a href="https://www.transkribus.org/">
-                                 <img src="images/logo_transkribus.png" class="mobile-50w" title="Transkribus" alt="Transkribus"/>
+                                 <img src="images/logo_transkribus.png" max-height="100%" class="mobile-50w" title="Transkribus" alt="Transkribus"/>
                               </a>
                            </div>
                         </div>
