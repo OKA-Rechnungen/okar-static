@@ -20,7 +20,7 @@
                                     <img src="images/logo_acdh.png"  class="mobile-50w" alt="Austrian Centre for Digital Humanities" title="Austrian Centre for Digital Humanities"/>
                                  </a>
                               </div>
-                              <div class="vspace-0 col-12"/>
+                              <div class="vspace-1 col-12 mobile-0"/>
                               <div class="col-sm-12 col-6 text-center">
                                  <a href="http://www.oeaw.ac.at/oesterreichische-akademie-der-wissenschaften/">
                                     <img src="images/logo_oeaw.png" class="mobile-50w" alt="Österreichische Akademie der Wissenschaften" title="Österreichische Akademie der Wissenschaften"/>
@@ -30,9 +30,9 @@
                         </div>
                         <div class="col-lg-10 col-md-6 col-sm-0 mobile-0" style="text-align: left;">
                            <p>
-                              ACDH-CH ÖAW<br/>
                               Austrian Centre for Digital Humanities and Cultural Heritage<br/>
                               Österreichische Akademie der Wissenschaften</p>
+                           <div class="vspace-1 col-12 mobile-0"/>
                            <p>Bäckerstraße 13, 1010 Wien<br/>
                               <i class="bi bi-telephone" aria-hidden="true"/>
                               <span class="visually-hidden">Telefon</span>&#160;<a href="tel:+431515812200">+43 1 51581-2200</a><br/>
@@ -50,7 +50,7 @@
                                  <img src="images/logo_stadtwien.png" class="mobile-50w" title="Stadt Wien – Wiener Stadt- und Landesarchiv"  alt="WStLA"/>
                               </a>
                            </div>
-                           <div class="vspace-0 col-12"/>
+                           <div class="vspace-0 col-12 mobile-0"/>
                            <div class="col-sm-12 col-6 text-center">
                               <a href="https://www.transkribus.org/">
                                  <img src="images/logo_transkribus.png" class="mobile-50w" title="Transkribus" alt="Transkribus"/>
@@ -68,7 +68,7 @@
                                  <img src="images/logo_bmkoes.svg" max-height="100%" class="mobile-50w" title="Finanziert vom Bundeministeirum für Kunst, Kultur, öffentlichen Dienst und Sport" alt="Finanziert vom Bundeministeirum für Kunst, Kultur, öffentlichen Dienst und Sport"/>
                               </a>
                            </div>
-                           <div class="vspace-0 col-12"/>
+                           <div class="vspace-0 col-12 mobile-0"/>
                            <div class="col-sm-12 col-6 text-center">
                               <a href="https://next-generation-eu.europa.eu/index_de">
                                  <img src="images/logo_eu.png" max-height="100%" class="mobile-50w" title="Finanziert von der Europäischen Union – NextGenerationEU" alt="Finanziert von der Europäischen Union – NextGenerationEU"/>

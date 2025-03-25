@@ -6,6 +6,11 @@ div#map {
 .vspace-0 {
     margin-top: 4.5ex ;
 }
+
+.vspace-1 {
+    margin-top: 9ex ;
+}
+
 /** Match bootstrap navlink focus outline color. */
 :focus-visible {
     outline: 0;
@@ -21,8 +26,10 @@ div#map {
     .vspace-0 {
         margin-top: 7.7ex ;
     }
+    .vspace-1 {
+        margin-top: 7.5ex ;
+    }
 }
-
 
 @media (max-width: 1024px) {
     .mobile-50{
@@ -63,10 +70,3 @@ div#map {
     }
 }
 
-
-@media (max-width: 576px) {
-    .vspace-0 {
-       margin-top: 0ex ;
-       display: none ;
-    }
-}
