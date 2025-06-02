@@ -87,7 +87,41 @@
                                 <xsl:call-template name="annotation-options"></xsl:call-template>
                             </div>
                         </div>
+                          <div class="edition_container ">
+                        <div class="offcanvas offcanvas-start" tabindex="-1"
+                            id="offcanvasNavigation" aria-labelledby="offcanvasNavigationLabel"
+                            data-bs-scroll="true" data-bs-backdrop="false">
+                            <div class="offcanvas-header" />
+                            <div class="offcanvas-body" />
+                        </div>
+                        <div class="offcanvas offcanvas-end" tabindex="0" id="offcanvasOptions"
+                            aria-labelledby="offcanvasOptionsLabel" data-bs-scroll="true"
+                            data-bs-backdrop="false">
+                        </div>
+                        <div class="wp-transcript">
+                            <!-- <div id="editor-widget">
+                                <xsl:call-template name="annotation-options"></xsl:call-template>
+                            </div> -->
+                            <div id="container-resize" class="row transcript active">
+                                <div id="img-resize" class="col-md-6 col-lg-6 col-sm-12 facsimiles">
+                                    <div id="viewer">
+                                        <div id="container_facs_1" class="osd-container"/>
+                                    </div>
+                                </div>
+                                <div id="text-resize" lang="de" class="col-md-6 col-lg-6 col-sm-12 text yes-index">
+                                    <div id="transcript">
+                                        <xsl:apply-templates/>
+                                        <p class="last-paragraph"><br /></p>
+                                    </div>
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- 
                         <xsl:apply-templates select=".//tei:body"></xsl:apply-templates>
+
                         <p style="text-align:center;">
                             <xsl:for-each select=".//tei:note[not(./tei:p)]">
                                 <div class="footnotes" id="{local:makeId(.)}">
@@ -109,14 +143,14 @@
                                     <xsl:apply-templates/>
                                 </div>
                             </xsl:for-each>
-                        </p>
+                        </p> -->
 
                     </div>
-                    <xsl:for-each select="//tei:back">
+                    <!-- <xsl:for-each select="//tei:back">
                         <div class="tei-back">
                             <xsl:apply-templates/>
                         </div>
-                    </xsl:for-each>
+                    </xsl:for-each> -->
                 </main>
                 <xsl:call-template name="html_footer"/>
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"/>
