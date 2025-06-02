@@ -8,9 +8,11 @@
     <xsl:output encoding="UTF-8" media-type="text/html" method="html" version="5.0" indent="yes" omit-xml-declaration="yes"/>
     
     <xsl:import href="./partials/shared.xsl"/>
+    <xsl:import href="./partials/osd-container.xsl" />
     <xsl:import href="./partials/html_navbar.xsl"/>
     <xsl:import href="./partials/html_head.xsl"/>
     <xsl:import href="./partials/html_footer.xsl"/>
+     <xsl:import href="./partials/tei-facsimile.xsl"/>
     <xsl:import href="./partials/aot-options.xsl"/>
 
     <xsl:variable name="prev">
@@ -110,18 +112,17 @@
                                 </div>
                                 <div id="text-resize" lang="de" class="col-md-6 col-lg-6 col-sm-12 text yes-index">
                                     <div id="transcript">
+                                        TKRP
                                         <xsl:apply-templates/>
+                                        TKRP
                                         <p class="last-paragraph"><br /></p>
                                     </div>
                                 </div> 
                             </div>
                         </div>
                     </div>
-
-
                     <!-- 
                         <xsl:apply-templates select=".//tei:body"></xsl:apply-templates>
-
                         <p style="text-align:center;">
                             <xsl:for-each select=".//tei:note[not(./tei:p)]">
                                 <div class="footnotes" id="{local:makeId(.)}">
@@ -144,7 +145,6 @@
                                 </div>
                             </xsl:for-each>
                         </p> -->
-
                     </div>
                     <!-- <xsl:for-each select="//tei:back">
                         <div class="tei-back">
