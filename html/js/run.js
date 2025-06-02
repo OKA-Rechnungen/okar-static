@@ -156,11 +156,11 @@ var editor = new LoadEditor({
       html_class: "form-select",
     },
     is: {
-      name: "Facsimiles On/Off",
+      name: "Facksimiles on/off",
       variants: [
         {
           opt: "es",
-          title: "Facsimiles On/Off",
+          title: "Facksimiles ein/aus",
           urlparam: "img",
           chg_citation: "citation-url",
           fade: "fade",
@@ -191,4 +191,3 @@ var editor = new LoadEditor({
     wr: false,
     up: true,
   });
-  

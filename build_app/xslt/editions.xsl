@@ -36,11 +36,11 @@
                 <xsl:call-template name="html_head">
                     <xsl:with-param name="html_title" select="$doc_title"></xsl:with-param>
                 </xsl:call-template>
-                <style>
+                <!-- <style>
                     .navBarNavDropdown ul li:nth-child(2) {
                         display: none !important;
                     }
-                </style>
+                </style> -->
             </head>
             <body class="d-flex flex-column h-100">
                 <xsl:call-template name="nav_bar"/>
@@ -153,7 +153,8 @@
                     </xsl:for-each> -->
                 </main>
                 <xsl:call-template name="html_footer"/>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"/>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/5.0.1/openseadragon.min.js"/>
+                <script type="text/javascript" src="js/osd_scroll.js"></script>
                 <script src="https://unpkg.com/de-micro-editor@0.3.4/dist/de-editor.min.js"></script>
                 <script type="text/javascript" src="js/run.js"></script>
             </body>
