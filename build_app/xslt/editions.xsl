@@ -112,9 +112,7 @@
                                 </div>
                                 <div id="text-resize" lang="de" class="col-md-6 col-lg-6 col-sm-12 text yes-index">
                                     <div id="transcript">
-                                        TKRP
                                         <xsl:apply-templates/>
-                                        TKRP
                                         <p class="last-paragraph"><br /></p>
                                     </div>
                                 </div> 
@@ -160,4 +158,6 @@
             </body>
         </html>
     </xsl:template>
+        <xsl:template match="tei:facsimile" />
+
 </xsl:stylesheet>
