@@ -14,8 +14,10 @@ data/mets
 __pycache__/
 *.py[cod]
 *$py.class
+
 .in
 .out
+
 # C extensions
 *.so
 
