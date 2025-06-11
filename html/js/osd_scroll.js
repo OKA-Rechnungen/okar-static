@@ -55,7 +55,8 @@ var img_format = "/full/!1024,1024/0/default.jpg" ;
 var img = img_baseurl + img_collection + img_part + img_filename + img_format;
 var imageURL = {
     type: 'image',
-    url: img 
+    url: img , 
+    origin: "anonymous"
 };
 console.log(imageURL)
 tileSources.push(imageURL);
@@ -138,7 +139,7 @@ function loadNewImage(new_item) {
                 success: function(event) {
                     function ready() {
                         setTimeout(() => {
-                            viewer.world.removeItem(viewer.world.getItemAt(0));
+                            viewer.world.removeItem(old_image);
                         }, 200)
                     }
                     // test if item was loaded and trigger function to remove previous item
@@ -161,21 +162,30 @@ scrolls to next or prev span element with class pb (pagebreak)
 ##################################################################
 */
 var element_a = document.getElementsByClassName('pb');
+console.log(element_a) ;
 var prev = document.querySelector("div[title='Previous page']");
+console.log(prev) ;
 var next = document.querySelector("div[title='Next page']");
+console.log(next) ;
 prev.style.opacity = 1;
 next.style.opacity = 1;
 prev.addEventListener("click", () => {
-    if (prev_idx < 0) {
-        prev_idx = 0;
+    if (prev_idx = idx) {
+        if (prev_idx != 0) {
+            prev_idx = idx - 1;
+        }
     }
-    if (idx == 0) {
-        element_a[idx].scrollIntoView();
+    if (idx <= 0) {
+        element_a[0].scrollIntoView();
     } else {
         element_a[prev_idx].scrollIntoView();
     }
 });
 next.addEventListener("click", () => {
+    if (idx > element_a.length - 1) {
+        idx = element_a.length - 1;
+        prev_idx = idx -1 ;
+    }
     element_a[idx].scrollIntoView();
 });
 

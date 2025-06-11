@@ -6,7 +6,10 @@ div#map {
 .vspace-0 {
     margin-top: 4.5ex ;
 }
-
+#text-resize {
+    max-height: 90vh ;
+    overflow-y: scroll;
+}
 .vspace-1 {
     margin-top: 9ex ;
 }
