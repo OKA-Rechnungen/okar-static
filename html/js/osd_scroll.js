@@ -47,16 +47,15 @@ creates an array for osd viewer with static images
 */
 var element = document.getElementsByClassName('pb');
 var tileSources = [];
-var img = element[0].getAttribute("source");
-console.log(img) ;
+var img_filename = element[0].getAttribute("source");
 var img_baseurl = "https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/" ;
-var img_collection =  img.match(/^(.+?)_\d+\.tif$/)[1] ;
+var img_collection =  img_filename.match(/^(.+?)_\d+\.tif$/)[1] ;
 var img_part = "/files/images/" ;
 var img_format = "/full/!1024,1024/0/default.jpg" ;
-full_url = img_baseurl + img_collection + img_part + img + img_format;
+var img = img_baseurl + img_collection + img_part + img_filename + img_format;
 var imageURL = {
     type: 'image',
-    url: full_url
+    url: img 
 };
 console.log(imageURL)
 tileSources.push(imageURL);
@@ -128,8 +127,8 @@ function to trigger image load and remove events
 function loadNewImage(new_item) {
     if (new_item) {
         // source attribute hold image item id without url
-        var new_image = new_item.getAttribute("source");
-        var old_image = viewer.world.getItemAt(0);
+        var new_image =  img_baseurl + img_collection + img_part + new_item.getAttribute("source") + img_format;
+        var old_image = img_baseurl + img_collection + img_part + viewer.world.getItemAt(0)  + img_format;
         if (old_image) {
             // get url from current/old image and replace the image id with
             // new id of image to be loaded
