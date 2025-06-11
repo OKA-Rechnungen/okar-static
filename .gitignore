@@ -14,7 +14,8 @@ data/meta/*.xml
 __pycache__/
 *.py[cod]
 *$py.class
-
+.in
+.out
 # C extensions
 *.so
 
