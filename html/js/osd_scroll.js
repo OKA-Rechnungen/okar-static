@@ -47,20 +47,16 @@ creates an array for osd viewer with static images
 */
 var element = document.getElementsByClassName('pb');
 var tileSources = [];
-var img_filename = element[0].getAttribute("source");
-var img_baseurl = "https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/" ;
-var img_collection =  img_filename.match(/^(.+?)_\d+\.tif$/)[1] ;
-var img_part = "/files/images/" ;
-var img_format = "/full/!1024,1024/0/default.jpg" ;
-var img = img_baseurl + img_collection + img_part + img_filename + img_format;
+var img = element[0].getAttribute("source");
+var img_collection =  img.match(/^(.+?)_\d+\.tif$/)[1] ;
+img = `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${img_collection}/files/images/${img}/full/!1024,1024/0/default.jpg` ;
 var imageURL = {
     type: 'image',
     url: img , 
     origin: "anonymous"
 };
-console.log(imageURL)
 tileSources.push(imageURL);
-
+console.log(tileSources) ;
 /*
 ##################################################################
 initialize osd
@@ -127,9 +123,13 @@ function to trigger image load and remove events
 */
 function loadNewImage(new_item) {
     if (new_item) {
+        var new_image = new_item.getAttribute("source");
+        var img_collection =  new_image.match(/^(.+?)_\d+\.tif$/)[1] ;
         // source attribute hold image item id without url
-        var new_image =  img_baseurl + img_collection + img_part + new_item.getAttribute("source") + img_format;
-        var old_image = img_baseurl + img_collection + img_part + viewer.world.getItemAt(0)  + img_format;
+        new_image = `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${img_collection}/files/images/${new_image}/full/!1024,1024/0/default.jpg` ;
+
+        var old_image = viewer.world.getItemAt(0) ;
+        old_image = `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${img_collection}/files/images/${old_image}/full/!1024,1024/0/default.jpg` ;
         if (old_image) {
             // get url from current/old image and replace the image id with
             // new id of image to be loaded
@@ -162,11 +162,8 @@ scrolls to next or prev span element with class pb (pagebreak)
 ##################################################################
 */
 var element_a = document.getElementsByClassName('pb');
-console.log(element_a) ;
 var prev = document.querySelector("div[title='Previous page']");
-console.log(prev) ;
 var next = document.querySelector("div[title='Next page']");
-console.log(next) ;
 prev.style.opacity = 1;
 next.style.opacity = 1;
 prev.addEventListener("click", () => {
