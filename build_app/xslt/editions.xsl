@@ -158,6 +158,14 @@
             </body>
         </html>
     </xsl:template>
-        <xsl:template match="tei:facsimile" />
+
+    <xsl:template match="tei:pb">                                                                                                                                                                                                                              
+        <xsl:variable name="facs" select="substring-after(data(@facs), '#')"/>
+        <xsl:variable name="facs_url" 
+  select="replace(replace((ancestor::tei:TEI//tei:surface[@xml:id=$facs]/tei:graphic/@url)[1], '.jpeg', ''), '-', '_')"/>
+
+        <span class="pb" source="{$facs_url}" />
+    </xsl:template>
+    <xsl:template match="tei:facsimile" />
 
 </xsl:stylesheet>
