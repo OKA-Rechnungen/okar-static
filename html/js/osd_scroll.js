@@ -48,9 +48,14 @@ creates an array for osd viewer with static images
 var element = document.getElementsByClassName('pb');
 var tileSources = [];
 var img = element[0].getAttribute("source");
+var img_baseurl = "https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/" ;
+var img_collection = "WSTLA_OKA_B1_1_165_1" ;
+var img_part = "/files/images/" ;
+var img_format = "/full/!1024,1024/0/default.jpg" ;
+full_url = img_baseurl + img_collection + img_part + img + img_format;
 var imageURL = {
     type: 'image',
-    url: img
+    url: full_url
 };
 tileSources.push(imageURL);
 
