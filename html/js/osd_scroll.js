@@ -125,6 +125,7 @@ function to trigger image load and remove events
 function loadNewImage(new_item) {
     if (new_item) {
         var new_image = new_item.getAttribute("source");
+        console.log(new_image) ;
         var img_collection =  new_image.match(/^(.+?)_\d+\.(jpg|tif)$/)[1] ;
         // source attribute hold image item id without url
         new_image = `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${img_collection}/files/images/${new_image}/full/!1024,1024/0/default.jpg` ;
