@@ -48,7 +48,8 @@ creates an array for osd viewer with static images
 var element = document.getElementsByClassName('pb');
 var tileSources = [];
 var img = element[0].getAttribute("source");
-var img_collection =  img.match(/^(.+?)_\d+\.tif$/)[1] ;
+console.log(img)
+var img_collection =  img.match(/^(.+?)_\d+\.jpg$/)[1] ;
 img = `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${img_collection}/files/images/${img}/full/!1024,1024/0/default.jpg` ;
 var imageURL = {
     type: 'image',
