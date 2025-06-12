@@ -8,7 +8,7 @@ div#map {
 }
 
 #viewer {
-    position: sticky ;
+    position: sticky!important ;
     top: 8% ;
 }
 
