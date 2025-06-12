@@ -9,6 +9,7 @@ div#map {
 
 #viewer {
     position: sticky!important ;
+    height: auto ;
     top: 8% ;
 }
 
