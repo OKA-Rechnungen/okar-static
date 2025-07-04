@@ -30,7 +30,7 @@
                         </div>
                         <div class="col-lg-10 col-md-6 col-sm-0 tablet-0" style="text-align: left;">
                            <p>
-                              Austrian Centre for Digital Humanities and Cultural Heritage<br/>
+                              Austrian Centre for Digital Humanities<br/>
                               Österreichische Akademie der Wissenschaften</p>
                            <div class="vspace-1 col-12 mobile-1"/>
                            <p>Bäckerstraße 13, 1010 Wien<br/>
@@ -80,7 +80,7 @@
                </div>
             </div>
          </div>
-         <div class="footer-imprint-bar hide-reading" id="wrapper-footer-secondary" style="text-align:center; padding:0.4rem 0; font-size: 0.9rem;"> © 2025 OEAW | <a href="imprint.html">Impressum</a> |      <a href="{$github_url}">
+         <div class="footer-imprint-bar hide-reading" id="wrapper-footer-secondary" style="text-align:center; padding:0.4rem 0; font-size: 0.9rem;"> © 2025 ÖAW | <a href="imprint.html">Impressum</a> |      <a href="{$github_url}">
             <i class="bi bi-github" title="GitHub" alt="GitHub" aria-hidden="true">
                <span class="visually-hidden">GitHub</span>
                </i>
