@@ -30,7 +30,7 @@
                         </div>
                         <div class="col-lg-10 col-md-6 col-sm-0 tablet-0" style="text-align: left;">
                            <p>
-                              Austrian Centre for Digital Humanities and Cultural Heritage<br/>
+                              Austrian Centre for Digital Humanities<br/>
                               Österreichische Akademie der Wissenschaften</p>
                            <div class="vspace-1 col-12 mobile-1"/>
                            <p>Bäckerstraße 13, 1010 Wien<br/>
