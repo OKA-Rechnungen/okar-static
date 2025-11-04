@@ -1,221 +1,335 @@
 /*
 ##################################################################
-get container holding images urls as child elements
-get container for osd viewer
-get container wrapper of osd viewer
+Single page transcript navigation with OpenSeadragon image sync.
 ##################################################################
 */
-// var container = document.getElementById("container_facs_2");
-// container.style.display = "none";
-var height = screen.height;
-var container = document.getElementById("container_facs_1");
-var wrapper = document.getElementsByClassName("facsimiles")[0];
+(function() {
+    var screenHeight = window.innerHeight || screen.height || 800;
+    var osdContainer = document.getElementById('container_facs_1');
+    var facsimileWrapper = document.getElementsByClassName('facsimiles')[0];
+    var sectionContainer = document.getElementById('section');
+    var viewerWrapper = document.getElementById('viewer');
 
-/*
-##################################################################
-check if osd viewer is visible or not
-if true get width from sibling container
-if false get with from sibling container divided by half
-height is always the screen height minus some offset
-##################################################################
-*/
-if (!wrapper.classList.contains("fade")) {
-    container.style.height = `${String(height / 2)}px`;
-    // set osd wrapper container width
-    var container = document.getElementById("section");
-    if (container !== null) {
-        var width = container.clientWidth;
+    if (osdContainer) {
+        osdContainer.style.height = `${String(screenHeight / 2)}px`;
     }
-    var container = document.getElementById("viewer");
-    container.style.width = `${String(width - 25)}px`;
-} else {
-    container.style.height = `${String(height / 2)}px`;
-    // set osd wrapper container width
-    var container = document.getElementById("section");
-    if (container !== null) {
-        var width = container.clientWidth;
+
+    if (facsimileWrapper && sectionContainer && viewerWrapper) {
+        var sectionWidth = sectionContainer.clientWidth;
+        var viewerWidth = facsimileWrapper.classList.contains('fade') ? sectionWidth / 2 : sectionWidth - 25;
+        viewerWrapper.style.width = `${String(Math.max(viewerWidth, 0))}px`;
     }
-    var container = document.getElementById("viewer");
-    container.style.width = `${String(width / 2)}px`;
-}
 
-/*
-##################################################################
-get all image urls stored in span el class tei-xml-images
-creates an array for osd viewer with static images
-##################################################################
-*/
-var element = document.getElementsByClassName('pb');
-var tileSources = [];
-var img = element[0].getAttribute("source");
-var imageURL = {
-    type: 'image',
-    url: img
-};
-tileSources.push(imageURL);
+    var transcript = document.getElementById('transcript');
+    if (!transcript) {
+        return;
+    }
 
-/*
-##################################################################
-initialize osd
-##################################################################
-*/
-var viewer = OpenSeadragon({
-    id: 'container_facs_1',
-    prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.0.0/images/',
-    sequenceMode: true,
-    showNavigator: true,
-    tileSources: tileSources
-});
-/*
-##################################################################
-remove container holding the images url
-##################################################################
-*/
-// setTimeout(function() {
-//     document.getElementById("container_facs_2").remove();
-// }, 500);
+    var pbElements = Array.from(transcript.querySelectorAll('span.pb'));
+    if (!pbElements.length) {
+        return;
+    }
 
-/*
-##################################################################
-index and previous index for click navigation in osd viewer
-locate index of anchor element
-##################################################################
-*/
-var idx = 0;
-var prev_idx = -1;
+    var textContainer = document.getElementById('text-resize');
+    var pageTitle = document.title || '';
+    var recordIdPart = '';
 
-/*
-##################################################################
-triggers on scroll and switches osd viewer image base on 
-viewport position of next and previous element with class pb
-pb = pagebreaks
-##################################################################
-*/
-window.addEventListener("scroll", function(event) {
-    // elements in view
-    var esiv = [];
-    for (let el of element) {
-        if (isInViewportAll(el)) {
-            esiv.push(el);
+    if (pageTitle.indexOf('_') !== -1) {
+        recordIdPart = pageTitle.split('_').slice(1).join('_').trim();
+    }
+
+    if (!recordIdPart) {
+        var pathSegment = (window.location.pathname || '').split('/').pop() || '';
+        recordIdPart = pathSegment.replace(/\.html?$/i, '');
+    }
+
+    var safeRecordId = encodeURIComponent(recordIdPart);
+    var contentRoot = pbElements[0].parentNode;
+
+    if (!contentRoot) {
+        return;
+    }
+
+    var introFragment = document.createDocumentFragment();
+    var walker = contentRoot.firstChild;
+    var firstPb = pbElements[0];
+
+    while (walker && walker !== firstPb) {
+        var introNext = walker.nextSibling;
+        introFragment.appendChild(walker);
+        walker = introNext;
+    }
+
+    var pages = [];
+
+    pbElements.forEach(function(pb, index) {
+        var pageWrapper = document.createElement('div');
+        pageWrapper.className = 'transcript-page';
+        pageWrapper.dataset.pageIndex = String(index + 1);
+
+        if (index === 0 && introFragment.childNodes.length) {
+            pageWrapper.appendChild(introFragment);
         }
-    }
-    if (esiv.length != 0) {
-        // first element in view
-        var eiv = esiv[0];
-        // get idx of element
-        var eiv_idx = Array.from(element).findIndex((el) => el === eiv);
-        idx = eiv_idx + 1;
-        prev_idx = eiv_idx - 1
-        // test if element is in viewport position to load correct image
-        if (isInViewport(element[eiv_idx])) {
-            loadNewImage(element[eiv_idx]);
-        }
-    }
-});
 
-/*
-##################################################################
-function to trigger image load and remove events
-##################################################################
-*/
-function loadNewImage(new_item) {
-    if (new_item) {
-        // source attribute hold image item id without url
-        var new_image = new_item.getAttribute("source");
-        var old_image = viewer.world.getItemAt(0);
-        if (old_image) {
-            // get url from current/old image and replace the image id with
-            // new id of image to be loaded
-            // access osd viewer and add simple image and remove current image
-            viewer.addSimpleImage({
-                url: new_image,
-                success: function(event) {
-                    function ready() {
-                        setTimeout(() => {
-                            viewer.world.removeItem(viewer.world.getItemAt(0));
-                        }, 200)
-                    }
-                    // test if item was loaded and trigger function to remove previous item
-                    if (event.item) {
-                        // .getFullyLoaded()
-                        ready();
-                    } else {
-                        event.item.addOnceHandler('fully-loaded-change', ready());
-                    }
-                }
+        var nextPb = pbElements[index + 1] || null;
+        var node = pb.nextSibling;
+
+        pageWrapper.appendChild(pb);
+        pb.hidden = true;
+
+        while (node && node !== nextPb) {
+            var nextNode = node.nextSibling;
+            pageWrapper.appendChild(node);
+            node = nextNode;
+        }
+
+        var source = pb.getAttribute('source') || '';
+        var label = pb.dataset.pageNumber || String(index + 1);
+
+        pageWrapper.dataset.pageLabel = label;
+
+        pages.push({
+            wrapper: pageWrapper,
+            imageSource: source,
+            label: label
+        });
+    });
+
+    contentRoot.innerHTML = '';
+
+    pages.forEach(function(page) {
+        page.wrapper.style.display = 'none';
+        page.wrapper.setAttribute('aria-hidden', 'true');
+        contentRoot.appendChild(page.wrapper);
+    });
+
+    var navControls = {
+        first: null,
+        prev: null,
+        next: null,
+        last: null,
+        numberButtons: []
+    };
+
+    var navContainer = null;
+    var navWrapper = null;
+
+    function createNavButton(label, onClick) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-sm btn-outline-secondary';
+        button.textContent = label;
+        button.addEventListener('click', onClick);
+        return button;
+    }
+
+    var navInsertTarget = null;
+
+    if (textContainer && textContainer.contains(transcript)) {
+        navInsertTarget = textContainer;
+    } else if (transcript.parentNode) {
+        navInsertTarget = transcript.parentNode;
+    }
+
+    if (navInsertTarget) {
+        navContainer = document.createElement('nav');
+        navContainer.className = 'page-navigation d-flex flex-wrap align-items-center gap-2 mb-3';
+        navContainer.setAttribute('aria-label', 'Seiten-Navigation');
+
+        navWrapper = document.createElement('div');
+        navWrapper.className = 'd-flex flex-wrap align-items-center gap-2';
+        navContainer.appendChild(navWrapper);
+
+        navInsertTarget.insertBefore(navContainer, transcript);
+
+        navControls.first = createNavButton('<<', function() {
+            showPageByIndex(0);
+        });
+        navWrapper.appendChild(navControls.first);
+
+        navControls.prev = createNavButton('<', function() {
+            showPageByIndex(currentPageIndex - 1);
+        });
+        navWrapper.appendChild(navControls.prev);
+
+        pages.forEach(function(page, idx) {
+            var numberButton = createNavButton(String(idx + 1), function() {
+                showPageByIndex(idx);
             });
+            numberButton.setAttribute('aria-label', 'Seite ' + (page.label || idx + 1));
+            navControls.numberButtons.push(numberButton);
+            navWrapper.appendChild(numberButton);
+        });
+
+        navControls.next = createNavButton('>', function() {
+            showPageByIndex(currentPageIndex + 1);
+        });
+        navWrapper.appendChild(navControls.next);
+
+        navControls.last = createNavButton('>>', function() {
+            showPageByIndex(pages.length - 1);
+        });
+        navWrapper.appendChild(navControls.last);
+    }
+
+    var osdViewer = null;
+    var currentImageSource = null;
+
+    if (osdContainer && typeof OpenSeadragon !== 'undefined') {
+        osdViewer = OpenSeadragon({
+            id: 'container_facs_1',
+            prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.0.0/images/',
+            sequenceMode: false,
+            showNavigator: true
+        });
+    }
+
+    function buildIiifUrl(source) {
+        if (!source || !safeRecordId) {
+            return '';
+        }
+
+        var safeSource = encodeURIComponent(source);
+        return `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${safeRecordId}/files/images/${safeSource}/full/!400,400/0/default.jpg`;
+    }
+
+    function loadOsdImage(source) {
+        if (!osdViewer) {
+            return;
+        }
+
+        if (!source) {
+            osdViewer.close();
+            currentImageSource = null;
+            return;
+        }
+
+        if (currentImageSource === source) {
+            return;
+        }
+
+        var imageUrl = buildIiifUrl(source);
+
+        if (!imageUrl) {
+            osdViewer.close();
+            currentImageSource = null;
+            return;
+        }
+
+        currentImageSource = source;
+        osdViewer.open({
+            type: 'image',
+            url: imageUrl
+        });
+    }
+
+    function updateUrl(pageNumber) {
+        if (!window.history || !window.history.replaceState) {
+            return;
+        }
+
+        var url = new URL(window.location.href);
+
+        if (pageNumber === 1) {
+            url.searchParams.delete('p');
+        } else {
+            url.searchParams.set('p', pageNumber);
+        }
+
+        window.history.replaceState({}, '', url);
+    }
+
+    var currentPageIndex = -1;
+
+    function updateNavState() {
+        if (!navContainer) {
+            return;
+        }
+
+        var atStart = currentPageIndex === 0;
+        var atEnd = currentPageIndex === pages.length - 1;
+
+        if (navControls.first) {
+            navControls.first.disabled = atStart;
+        }
+
+        if (navControls.prev) {
+            navControls.prev.disabled = atStart;
+        }
+
+        if (navControls.next) {
+            navControls.next.disabled = atEnd;
+        }
+
+        if (navControls.last) {
+            navControls.last.disabled = atEnd;
+        }
+
+        navControls.numberButtons.forEach(function(btn, idx) {
+            if (idx === currentPageIndex) {
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-secondary');
+                btn.setAttribute('aria-current', 'page');
+            } else {
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-outline-secondary');
+                btn.removeAttribute('aria-current');
+            }
+        });
+    }
+
+    function showPageByIndex(index, options) {
+        if (typeof index !== 'number') {
+            index = parseInt(index, 10);
+        }
+
+        if (Number.isNaN(index)) {
+            index = 0;
+        }
+
+        index = Math.min(Math.max(index, 0), pages.length - 1);
+
+        if (currentPageIndex === index && (!options || options.force !== true)) {
+            return;
+        }
+
+        if (currentPageIndex !== -1) {
+            pages[currentPageIndex].wrapper.style.display = 'none';
+            pages[currentPageIndex].wrapper.setAttribute('aria-hidden', 'true');
+        }
+
+        pages[index].wrapper.style.display = 'block';
+        pages[index].wrapper.setAttribute('aria-hidden', 'false');
+
+        currentPageIndex = index;
+
+        loadOsdImage(pages[index].imageSource);
+        updateNavState();
+
+        if (!options || options.updateHistory !== false) {
+            updateUrl(index + 1);
+        }
+
+        if (textContainer) {
+            textContainer.scrollTop = 0;
+        } else {
+            window.scrollTo(0, 0);
         }
     }
-}
 
-/*
-##################################################################
-accesses osd viewer prev and next button to switch image and
-scrolls to next or prev span element with class pb (pagebreak)
-##################################################################
-*/
-var element_a = document.getElementsByClassName('anchor-pb');
-var prev = document.querySelector("div[title='Previous page']");
-var next = document.querySelector("div[title='Next page']");
-prev.style.opacity = 1;
-next.style.opacity = 1;
-prev.addEventListener("click", () => {
-    if (idx == 0) {
-        element_a[idx].scrollIntoView();
-    } else {
-        element_a[prev_idx].scrollIntoView();
-    }
-});
-next.addEventListener("click", () => {
-    element_a[idx].scrollIntoView();
-});
+    var params = new URLSearchParams(window.location.search);
+    var requestedPage = parseInt(params.get('p'), 10);
+    var initialIndex = Number.isNaN(requestedPage) ? 0 : requestedPage - 1;
 
-/*
-##################################################################
-function to check if element is close to top of window viewport
-##################################################################
-*/
-function isInViewport(element) {
-    // Get the bounding client rectangle position in the viewport
-    var bounding = element.getBoundingClientRect();
-    // Checking part. Here the code checks if el is close to top of viewport.
-    // console.log("Top");
-    // console.log(bounding.top);
-    // console.log("Bottom");
-    // console.log(bounding.bottom);
-    if (
-        bounding.top <= 180 &&
-        bounding.bottom <= 210 &&
-        bounding.top >= 0 &&
-        bounding.bottom >= 0
-    ) {
-        return true;
-    } else {
-        return false;
-    }
-}
+    initialIndex = Math.min(Math.max(initialIndex, 0), pages.length - 1);
 
-/*
-##################################################################
-function to check if element is anywhere in window viewport
-##################################################################
-*/
-function isInViewportAll(element) {
-    // Get the bounding client rectangle position in the viewport
-    var bounding = element.getBoundingClientRect();
-    // Checking part. Here the code checks if el is close to top of viewport.
-    // console.log("Top");
-    // console.log(bounding.top);
-    // console.log("Bottom");
-    // console.log(bounding.bottom);
-    if (
-        bounding.top >= 0 &&
-        bounding.left >= 0 &&
-        bounding.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        bounding.right <= (window.innerWidth || document.documentElement.clientWidth)
-    ) {
-        return true;
-    } else {
-        return false;
-    }
-}
+    showPageByIndex(initialIndex, { updateHistory: false, force: true });
+
+    window.addEventListener('popstate', function() {
+        var popParams = new URLSearchParams(window.location.search);
+        var popRequested = parseInt(popParams.get('p'), 10);
+        var popIndex = Number.isNaN(popRequested) ? 0 : popRequested - 1;
+        popIndex = Math.min(Math.max(popIndex, 0), pages.length - 1);
+        showPageByIndex(popIndex, { updateHistory: false, force: true });
+    });
+})();
