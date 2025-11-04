@@ -8,9 +8,11 @@
     <xsl:output encoding="UTF-8" media-type="text/html" method="html" version="5.0" indent="yes" omit-xml-declaration="yes"/>
     
     <xsl:import href="./partials/shared.xsl"/>
+    <xsl:import href="./partials/osd-container.xsl" />
     <xsl:import href="./partials/html_navbar.xsl"/>
     <xsl:import href="./partials/html_head.xsl"/>
     <xsl:import href="./partials/html_footer.xsl"/>
+     <xsl:import href="./partials/tei-facsimile.xsl"/>
     <xsl:import href="./partials/aot-options.xsl"/>
 
     <xsl:variable name="prev">
@@ -36,93 +38,125 @@
                 <xsl:call-template name="html_head">
                     <xsl:with-param name="html_title" select="$doc_title"></xsl:with-param>
                 </xsl:call-template>
-                <style>
+                <!-- <style>
                     .navBarNavDropdown ul li:nth-child(2) {
                         display: none !important;
                     }
-                </style>
+                </style> -->
             </head>
             <body class="d-flex flex-column h-100">
                 <xsl:call-template name="nav_bar"/>
-                <main class="flex-shrink-0 flex-grow-1">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-md-2 col-lg-2 col-sm-12 text-start">
-                                <xsl:if test="ends-with($prev,'.html')">
-                                    <a>
-                                        <xsl:attribute name="href">
-                                            <xsl:value-of select="$prev"/>
-                                        </xsl:attribute>
-                                        <i class="fs-2 bi bi-chevron-left" title="Zurück zum vorigen Dokument" visually-hidden="true">
-                                            <span class="visually-hidden">Zurück zum vorigen Dokument</span>
-                                        </i>
-                                    </a>
-                                </xsl:if>
-                            </div>
-                            <div class="col-md-8 col-lg-8 col-sm-12 text-center">
-                                <h1>
-                                    <xsl:value-of select="$doc_title"/>
-                                </h1>
-                                <div>
-                                    <a href="{$teiSource}">
-                                        <i class="bi bi-download fs-2" title="Zum TEI/XML Dokument" visually-hidden="true">
-                                            <span class="visually-hidden">Zum TEI/XML Dokument</span>
-                                        </i>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="col-md-2 col-lg-2 col-sm-12 text-start">
-                                <xsl:if test="ends-with($next, '.html')">
-                                    <a>
-                                        <xsl:attribute name="href">
-                                            <xsl:value-of select="$next"/>
-                                        </xsl:attribute>
-                                        <i class="fs-2 bi bi-chevron-right" title="Weiter zum nächsten Dokument" visually-hidden="true">
-                                            <span class="visually-hidden">Weiter zum nächsten Dokument</span>
-                                        </i>
-                                    </a>
-                                </xsl:if>
-                            </div>
-                            <div id="editor-widget">
-                                <xsl:call-template name="annotation-options"></xsl:call-template>
-                            </div>
+                <main class="hfeed site flex-grow" id="page">
+                    <div class="edition_container ">
+                        <div class="offcanvas offcanvas-start" tabindex="-1"
+                            id="offcanvasNavigation" aria-labelledby="offcanvasNavigationLabel"
+                            data-bs-scroll="true" data-bs-backdrop="false">
+                            <div class="offcanvas-header" />
+                            <div class="offcanvas-body" />
                         </div>
-                        <xsl:apply-templates select=".//tei:body"></xsl:apply-templates>
-                        <p style="text-align:center;">
-                            <xsl:for-each select=".//tei:note[not(./tei:p)]">
-                                <div class="footnotes" id="{local:makeId(.)}">
-                                    <xsl:element name="a">
-                                        <xsl:attribute name="name">
-                                            <xsl:text>fn</xsl:text>
-                                            <xsl:number level="any" format="1" count="tei:note"/>
-                                        </xsl:attribute>
-                                        <a>
-                                            <xsl:attribute name="href">
-                                                <xsl:text>#fna_</xsl:text>
-                                                <xsl:number level="any" format="1" count="tei:note"/>
-                                            </xsl:attribute>
-                                            <span style="font-size:7pt;vertical-align:super; margin-right: 0.4em">
-                                                <xsl:number level="any" format="1" count="tei:note"/>
-                                            </span>
+                        <div class="offcanvas offcanvas-end" tabindex="0" id="offcanvasOptions"
+                            aria-labelledby="offcanvasOptionsLabel" data-bs-scroll="true"
+                            data-bs-backdrop="false">
+                        </div>
+                        
+                        <div class="row" id="edition_metadata">
+                            <xsl:variable name="doc_type"
+                                select="//tei:sourceDesc/tei:msDesc/tei:physDesc/tei:objectDesc/@form[1]"/>
+                            <h2 align="center">
+                                <xsl:value-of select="$doc_title"/>
+                            </h2>
+                            <div class="row" id="fa_links">
+                                <div class="col-4"  style="text-align:right">
+                                    <xsl:if test="ends-with($prev,'.html')">
+                                        <h3>
+                                            <a>
+                                                <xsl:attribute name="href">
+                                                    <xsl:value-of select="$prev"/>
+                                                </xsl:attribute>
+                                                <i class="fa-solid fa-caret-left left" title="zurück"/>
+                                            </a>
+                                        </h3>
+                                    </xsl:if>
+                                </div>
+                                <div class="col-4 docinfo" style="text-align:center">
+                                    <h3 align="center">
+                                        <a href="{$teiSource}">
+                                            <i class="fa-solid fa-file-code center" title="TEI/XML"/>
                                         </a>
-                                    </xsl:element>
-                                    <xsl:apply-templates/>
+                                    </h3>
                                 </div>
-                            </xsl:for-each>
-                        </p>
-
-                    </div>
-                    <xsl:for-each select="//tei:back">
-                        <div class="tei-back">
-                            <xsl:apply-templates/>
+                                <div class="col-4" style="text-align:left">
+                                    <xsl:if test="ends-with($next, '.html')">
+                                        <h3>
+                                            <a>
+                                                <xsl:attribute name="href">
+                                                    <xsl:value-of select="$next"/>
+                                                </xsl:attribute>
+                                                <i class="fa-solid fa-caret-right right" title="weiter"/>
+                                            </a>
+                                        </h3>
+                                    </xsl:if>
+                                </div>
+                            </div> 
                         </div>
-                    </xsl:for-each>
+                        <!--    THIS IS THE MAIN DIV -->                     
+                        <div class="wp-transcript">
+                            <div id="container-resize" class="row transcript active">
+                                <!--  <div id="text-resize" class="col-md-4 col-lg-4 col-sm-1 text" /> -->
+                                <div id="img-resize" class="col-md-6 col-lg-6 col-sm-12 facsimiles" >   <!-- OSD container (facsimiles).  Maybe 6 (1/2 of the total)-->
+                                    <div id="viewer">
+                                        <div id="container_facs_1" class="osd-container"/>
+                                    </div>
+                                </div>
+                                <div id="text-resize" lang="de" class="col-md-6 col-lg-6 col-sm-12 text yes-index"> <!--- Maybe 6 (1/2 of the total) -->
+                                    <div id="transcript">
+                                        <xsl:apply-templates/> <!-- Text transcription -->
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- create list* elements for entities bs-modal -->
+                        </div>
+                    </div>
                 </main>
                 <xsl:call-template name="html_footer"/>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"/>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/5.0.1/openseadragon.min.js"/>
+                <script type="text/javascript" src="js/osd_scroll.js"></script>
                 <script src="https://unpkg.com/de-micro-editor@0.3.4/dist/de-editor.min.js"></script>
                 <script type="text/javascript" src="js/run.js"></script>
             </body>
         </html>
     </xsl:template>
+
+    <xsl:template match="tei:pb">
+        <xsl:variable name="facs" select="substring-after(data(@facs), '#')"/>
+        <xsl:variable name="graphic_url" select="(ancestor::tei:TEI//tei:surface[@xml:id=$facs]/tei:graphic/@url)[1]"/>
+        <!-- Extract the filename and convert to IIIF format -->
+        <!-- Input format: 0001_WSTLA-OKA-B1-1-095-1_00002.jpg -->
+        <!-- Output format: WSTLA-OKA-B1-1-095-1_00001.tif -->
+        <xsl:variable name="facs_url">
+            <xsl:choose>
+                <!-- Check if URL contains the expected pattern -->
+                <xsl:when test="contains($graphic_url, '_') and contains($graphic_url, 'WSTLA')">
+                    <!-- Split on first underscore to remove page prefix (0001_) -->
+                    <xsl:variable name="after_first_underscore" select="substring-after($graphic_url, '_')"/>
+                    <!-- Replace .jpg or .jpeg with .tif -->
+                    <xsl:value-of select="replace(replace($after_first_underscore, '\.jpe?g', '.tif'), '\.JPE?G', '.tif')"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <!-- Fallback: use original URL -->
+                    <xsl:value-of select="$graphic_url"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+
+        <xsl:variable name="pb-type" select="if (@type) then @type else 'primary'"/>
+        <xsl:variable name="witness-ref" select="if (@edRef) then (if (starts-with(@edRef, '#')) then @edRef else concat('#', @edRef)) else '#primary'"/>
+        <xsl:variable name="page-number">
+            <xsl:number level="any" count="tei:pb"/>
+        </xsl:variable>
+
+        <span class="pb {$pb-type}" source="{$facs_url}" wit="{$witness-ref}" data-pb-type="{$pb-type}" data-page-number="{$page-number}"/>
+    </xsl:template>
+    <xsl:template match="tei:facsimile" />
+
 </xsl:stylesheet>
