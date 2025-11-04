@@ -47,10 +47,19 @@ creates an array for osd viewer with static images
 */
 var element = document.getElementsByClassName('pb');
 var tileSources = [];
+
+// Extract record ID from page title (format: "YYYY_WSTLA-OKA-...")
+var pageTitle = document.title;
+var recordId = pageTitle.split('_').slice(1).join('_'); // Remove year prefix
+
+// Build IIIF URL from first image source
 var img = element[0].getAttribute("source");
+var imageName = img.replace('.tif', ''); // e.g., "00001"
+var iiifUrl = `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${recordId}/files/images/${recordId}_${imageName}.tif/full/!400,400/0/default.jpg`;
+
 var imageURL = {
     type: 'image',
-    url: img
+    url: iiifUrl
 };
 tileSources.push(imageURL);
 
@@ -121,7 +130,12 @@ function to trigger image load and remove events
 function loadNewImage(new_item) {
     if (new_item) {
         // source attribute hold image item id without url
-        var new_image = new_item.getAttribute("source");
+        var new_image_source = new_item.getAttribute("source");
+        
+        // Build IIIF URL from image source
+        var imageName = new_image_source.replace('.tif', ''); // e.g., "00001"
+        var new_image = `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${recordId}/files/images/${recordId}_${imageName}.tif/full/!400,400/0/default.jpg`;
+        
         var old_image = viewer.world.getItemAt(0);
         if (old_image) {
             // get url from current/old image and replace the image id with
