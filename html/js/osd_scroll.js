@@ -108,7 +108,8 @@ Single page transcript navigation with OpenSeadragon image sync.
         prev: null,
         next: null,
         last: null,
-        numberButtons: []
+        numberButtons: [],
+        numberContainer: null
     };
 
     var navContainer = null;
@@ -152,13 +153,17 @@ Single page transcript navigation with OpenSeadragon image sync.
         });
         navWrapper.appendChild(navControls.prev);
 
-        pages.forEach(function(page, idx) {
+        navControls.numberContainer = document.createElement('div');
+        navControls.numberContainer.className = 'page-number-container d-flex flex-wrap align-items-center gap-2';
+        navWrapper.appendChild(navControls.numberContainer);
+
+        navControls.numberButtons = pages.map(function(page, idx) {
             var numberButton = createNavButton(String(idx + 1), function() {
                 showPageByIndex(idx);
             });
             numberButton.setAttribute('aria-label', 'Seite ' + (page.label || idx + 1));
-            navControls.numberButtons.push(numberButton);
-            navWrapper.appendChild(numberButton);
+            numberButton.dataset.pageIndex = String(idx);
+            return numberButton;
         });
 
         navControls.next = createNavButton('>', function() {
@@ -170,6 +175,8 @@ Single page transcript navigation with OpenSeadragon image sync.
             showPageByIndex(pages.length - 1);
         });
         navWrapper.appendChild(navControls.last);
+    } else {
+        navControls.numberButtons = [];
     }
 
     var osdViewer = null;
@@ -241,10 +248,114 @@ Single page transcript navigation with OpenSeadragon image sync.
 
     var currentPageIndex = -1;
 
+    function buildVisiblePageItems(totalPages, currentIndex) {
+        var maxButtons = 10;
+        if (totalPages <= maxButtons) {
+            return Array.from({ length: totalPages }, function(_, i) { return i; });
+        }
+
+        var effectiveIndex = currentIndex >= 0 ? currentIndex : 0;
+        var tailCount = Math.min(2, totalPages);
+        var blockSize = Math.max(maxButtons - tailCount, 0);
+        if (blockSize === 0) {
+            return Array.from({ length: totalPages }, function(_, i) { return i; });
+        }
+
+        var ranges = [];
+
+        if (effectiveIndex <= 4) {
+            var blockEnd = Math.min(blockSize - 1, totalPages - 1);
+            ranges.push({ start: 0, end: blockEnd });
+            var tailStart = Math.max(totalPages - tailCount, blockEnd + 1);
+            if (tailStart <= totalPages - 1) {
+                ranges.push({ start: tailStart, end: totalPages - 1 });
+            }
+        } else if (effectiveIndex >= totalPages - 5) {
+            var headEnd = Math.min(1, totalPages - 1);
+            if (headEnd >= 0) {
+                ranges.push({ start: 0, end: headEnd });
+            }
+            var blockStart = Math.max(totalPages - blockSize, 0);
+            ranges.push({ start: blockStart, end: totalPages - 1 });
+        } else {
+            var tailStartMiddle = Math.max(totalPages - tailCount, 0);
+            var start = effectiveIndex - (blockSize - 2);
+            if (start < 0) {
+                start = 0;
+            }
+            var end = start + blockSize - 1;
+            if (end >= tailStartMiddle) {
+                end = tailStartMiddle - 1;
+                start = Math.max(0, end - blockSize + 1);
+            }
+            ranges.push({ start: start, end: end });
+            if (tailStartMiddle <= totalPages - 1) {
+                ranges.push({ start: tailStartMiddle, end: totalPages - 1 });
+            }
+        }
+
+        ranges = ranges.filter(function(range) { return range.start <= range.end; });
+        ranges.sort(function(a, b) { return a.start - b.start; });
+
+        var merged = [];
+        ranges.forEach(function(range) {
+            if (!merged.length) {
+                merged.push({ start: range.start, end: range.end });
+                return;
+            }
+            var last = merged[merged.length - 1];
+            if (range.start <= last.end + 1) {
+                last.end = Math.max(last.end, range.end);
+            } else {
+                merged.push({ start: range.start, end: range.end });
+            }
+        });
+
+        var items = [];
+        var prevEnd = null;
+        merged.forEach(function(range) {
+            if (prevEnd !== null && range.start > prevEnd + 1) {
+                items.push('ellipsis');
+            }
+            for (var i = range.start; i <= range.end; i++) {
+                items.push(i);
+            }
+            prevEnd = range.end;
+        });
+
+        return items;
+    }
+
+    function renderNumberButtons() {
+        if (!navControls.numberContainer || !navControls.numberButtons.length) {
+            return;
+        }
+
+        var items = buildVisiblePageItems(pages.length, currentPageIndex);
+        var container = navControls.numberContainer;
+        container.innerHTML = '';
+
+        items.forEach(function(item) {
+            if (item === 'ellipsis') {
+                var ellipsis = document.createElement('span');
+                ellipsis.className = 'pagination-ellipsis text-muted';
+                ellipsis.textContent = '…';
+                container.appendChild(ellipsis);
+            } else {
+                var button = navControls.numberButtons[item];
+                if (button) {
+                    container.appendChild(button);
+                }
+            }
+        });
+    }
+
     function updateNavState() {
         if (!navContainer) {
             return;
         }
+
+        renderNumberButtons();
 
         var atStart = currentPageIndex === 0;
         var atEnd = currentPageIndex === pages.length - 1;
