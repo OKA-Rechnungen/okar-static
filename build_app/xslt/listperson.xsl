@@ -45,9 +45,18 @@
                             </thead>
                             <tbody>
                                 <xsl:for-each select=".//tei:person[@xml:id]">
-                                    <xsl:variable name="id">
-                                        <xsl:value-of select="data(@xml:id)"/>
-                                    </xsl:variable>
+                                            <!-- detect duplicate xml:id occurrences and append suffix when needed -->
+                                            <xsl:variable name="occurrence" select="count(preceding::tei:person[@xml:id = current()/@xml:id])"/>
+                                            <xsl:variable name="id">
+                                                <xsl:choose>
+                                                    <xsl:when test="$occurrence &gt; 0">
+                                                        <xsl:value-of select="concat(data(@xml:id), '-', $occurrence + 1)"/>
+                                                    </xsl:when>
+                                                    <xsl:otherwise>
+                                                        <xsl:value-of select="data(@xml:id)"/>
+                                                    </xsl:otherwise>
+                                                </xsl:choose>
+                                            </xsl:variable>
                                     <tr>
                                         <td>
                                             <a>
