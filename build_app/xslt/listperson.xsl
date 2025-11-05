@@ -45,23 +45,15 @@
                             </thead>
                             <tbody>
                                 <xsl:for-each select=".//tei:person[@xml:id]">
-                                            <!-- detect duplicate xml:id occurrences and append suffix when needed -->
-                                            <xsl:variable name="occurrence" select="count(preceding::tei:person[@xml:id = current()/@xml:id])"/>
-                                            <xsl:variable name="id">
-                                                <xsl:choose>
-                                                    <xsl:when test="$occurrence &gt; 0">
-                                                        <xsl:value-of select="concat(data(@xml:id), '-', $occurrence + 1)"/>
-                                                    </xsl:when>
-                                                    <xsl:otherwise>
-                                                        <xsl:value-of select="data(@xml:id)"/>
-                                                    </xsl:otherwise>
-                                                </xsl:choose>
-                                            </xsl:variable>
+                                    <!-- detect duplicate xml:id occurrences and append suffix when needed -->
+                                    <xsl:variable name="base-id" select="data(@xml:id)"/>
+                                    <xsl:variable name="occurrence" select="count(preceding::tei:person[@xml:id = $base-id])"/>
+                                    <xsl:variable name="effective-id" select="if ($occurrence &gt; 0) then concat($base-id, '-', $occurrence + 1) else $base-id"/>
                                     <tr>
                                         <td>
                                             <a>
                                               <xsl:attribute name="href">
-                                              <xsl:value-of select="concat($id, '.html')"/>
+                                              <xsl:value-of select="concat($effective-id, '.html')"/>
                                               </xsl:attribute>
                                               <i class="bi bi-link-45deg"/>
                                             </a>
@@ -73,7 +65,7 @@
                                             <xsl:value-of select=".//tei:forename/text()"/>
                                         </td>
                                         <td>
-                                            <xsl:value-of select="$id"/>
+                                            <xsl:value-of select="$effective-id"/>
                                         </td>
                                     </tr>
                                 </xsl:for-each>
@@ -89,7 +81,10 @@
 
 
         <xsl:for-each select=".//tei:person[@xml:id]">
-            <xsl:variable name="filename" select="concat(./@xml:id, '.html')"/>
+            <xsl:variable name="base-id" select="data(@xml:id)"/>
+            <xsl:variable name="occurrence" select="count(preceding::tei:person[@xml:id = $base-id])"/>
+            <xsl:variable name="effective-id" select="if ($occurrence &gt; 0) then concat($base-id, '-', $occurrence + 1) else $base-id"/>
+            <xsl:variable name="filename" select="concat($effective-id, '.html')"/>
             <xsl:variable name="name" select="normalize-space(string-join(./tei:persName[1]//text()))"></xsl:variable>
             <xsl:result-document href="{$filename}">
                 <html class="h-100">
