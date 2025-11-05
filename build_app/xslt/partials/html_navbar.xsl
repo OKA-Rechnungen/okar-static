@@ -30,7 +30,7 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="toc.html">Editionseinheiten</a>
                             </li>
-
+<!-- 
                             <li class="nav-item dropdown disabled">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Register</a>
                                 <ul class="dropdown-menu">
@@ -48,7 +48,7 @@
                                     </li>
                                 </ul>
                             </li>
-
+-->
                             <li class="nav-item">
                                 <a title="Suche" class="nav-link" href="search.html">Suche</a>
                             </li>
