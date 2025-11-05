@@ -130,32 +130,30 @@
     <xsl:template match="tei:pb">
         <xsl:variable name="facs" select="substring-after(data(@facs), '#')"/>
         <xsl:variable name="graphic_url" select="(ancestor::tei:TEI//tei:surface[@xml:id=$facs]/tei:graphic/@url)[1]"/>
-        <!-- Extract the filename and convert to IIIF format -->
-        <!-- Input format: 0001_WSTLA-OKA-B1-1-095-1_00002.jpg -->
-        <!-- Output format: WSTLA-OKA-B1-1-095-1_00001.tif -->
-        <xsl:variable name="facs_url">
+
+        <xsl:variable name="page-number" as="xs:integer"
+            select="if (@n castable as xs:integer)
+                    then xs:integer(@n)
+                    else xs:integer(count(preceding::tei:pb)) + 1"/>
+
+        <xsl:variable name="base-name">
             <xsl:choose>
-                <!-- Check if URL contains the expected pattern -->
-                <xsl:when test="contains($graphic_url, '_') and contains($graphic_url, 'WSTLA')">
-                    <!-- Split on first underscore to remove page prefix (0001_) -->
-                    <xsl:variable name="after_first_underscore" select="substring-after($graphic_url, '_')"/>
-                    <!-- Replace .jpg or .jpeg with .tif -->
-                    <xsl:value-of select="replace(replace($after_first_underscore, '\.jpe?g', '.tif'), '\.JPE?G', '.tif')"/>
+                <xsl:when test="string-length($graphic_url) &gt; 0">
+                    <xsl:value-of select="replace(replace($graphic_url, '^\d+_', ''), '(_\d+)?\.[^.]+$', '')"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <!-- Fallback: use original URL -->
-                    <xsl:value-of select="$graphic_url"/>
+                    <xsl:value-of select="replace($teiSource, '\.xml$', '')"/>
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
 
+        <xsl:variable name="facs_url"
+            select="concat($base-name, '_', format-number($page-number, '00000'), '.tif')"/>
+
         <xsl:variable name="pb-type" select="if (@type) then @type else 'primary'"/>
         <xsl:variable name="witness-ref" select="if (@edRef) then (if (starts-with(@edRef, '#')) then @edRef else concat('#', @edRef)) else '#primary'"/>
-        <xsl:variable name="page-number">
-            <xsl:number level="any" count="tei:pb"/>
-        </xsl:variable>
 
-        <span class="pb {$pb-type}" source="{$facs_url}" wit="{$witness-ref}" data-pb-type="{$pb-type}" data-page-number="{$page-number}"/>
+        <span class="pb {$pb-type}" source="{$facs_url}" wit="{$witness-ref}" data-pb-type="{$pb-type}" data-page-number="{string($page-number)}"/>
     </xsl:template>
     <xsl:template match="tei:facsimile" />
 
