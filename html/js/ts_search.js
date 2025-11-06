@@ -190,11 +190,11 @@ search.addWidgets([
       empty: 'Keine Resultate für <q>{{ query }}</q>',
       item: [
         '<article class="ts-hit-item">',
-        '  <h5 class="ts-hit-title"><a href="{{id}}" target="_blank">{{#helpers.highlight}}{ "attribute": "title" }{{/helpers.highlight}}</a></h5>',
+        '  <h5 class="ts-hit-title"><a href="{{link}}" target="_blank">{{#helpers.highlight}}{ "attribute": "title" }{{/helpers.highlight}}</a></h5>',
         '  <div class="ts-hit-body row g-3 align-items-start">',
         '    {{#thumbnail}}',
-        '    <div class="col-12 col-md-4 col-lg-3 ts-hit-thumbnail">',
-        '      <a href="{{id}}" target="_blank" aria-label="Seitenvorschau in neuem Tab öffnen">',
+  '    <div class="col-12 col-md-12 col-lg-12 ts-hit-thumbnail">',
+        '      <a href="{{link}}" target="_blank" aria-label="Seitenvorschau in neuem Tab öffnen">',
         '        <img src="{{thumbnail}}" alt="Seitenvorschau" loading="lazy" class="img-fluid rounded shadow-sm" />',
         '      </a>',
         '    </div>',
@@ -206,6 +206,80 @@ search.addWidgets([
         '  </div>',
         '</article>',
       ].join('\n'),
+    },
+    transformItems: function (items) {
+      var helper = search && search.helper ? search.helper : null;
+      var fallbackQuery = '';
+      if (helper && helper.state && typeof helper.state.query === 'string') {
+        fallbackQuery = helper.state.query.trim();
+      }
+
+      function collectMatchedWords(result) {
+        if (!result) {
+          return [];
+        }
+        var words = [];
+        if (Array.isArray(result.matchedWords)) {
+          words = words.concat(result.matchedWords);
+        }
+        if (Array.isArray(result.matched_tokens)) {
+          words = words.concat(result.matched_tokens);
+        }
+        return words;
+      }
+
+      function dedupeTerms(terms) {
+        var seen = Object.create(null);
+        return terms
+          .map(function (term) {
+            return String(term || '').trim();
+          })
+          .filter(function (term) {
+            if (!term) {
+              return false;
+            }
+            var key = term.toLowerCase();
+            if (seen[key]) {
+              return false;
+            }
+            seen[key] = true;
+            return true;
+          });
+      }
+
+      return items.map(function (item) {
+        var markTerms = [];
+        if (item._snippetResult) {
+          if (item._snippetResult.full_text) {
+            markTerms = markTerms.concat(collectMatchedWords(item._snippetResult.full_text));
+          }
+          if (item._snippetResult.title) {
+            markTerms = markTerms.concat(collectMatchedWords(item._snippetResult.title));
+          }
+        }
+        if (!markTerms.length && item.highlight) {
+          if (item.highlight.full_text) {
+            markTerms = markTerms.concat(collectMatchedWords(item.highlight.full_text));
+          }
+          if (item.highlight.title) {
+            markTerms = markTerms.concat(collectMatchedWords(item.highlight.title));
+          }
+        }
+        if (!markTerms.length && fallbackQuery) {
+          markTerms = fallbackQuery.split(/\s+/);
+        }
+
+        var uniqTerms = dedupeTerms(markTerms);
+        var markValue = uniqTerms.join(' ');
+
+        var link = item.id;
+        if (markValue) {
+          var separator = link.indexOf('?') === -1 ? '?' : '&';
+          link = link + separator + 'mark=' + encodeURIComponent(markValue);
+        }
+
+        return Object.assign({}, item, { link: link });
+      });
     },
   }),
 
