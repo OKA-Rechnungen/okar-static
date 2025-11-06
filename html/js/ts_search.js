@@ -214,6 +214,63 @@ search.addWidgets([
         fallbackQuery = helper.state.query.trim();
       }
 
+      function normalizeSnippet(raw) {
+        if (!raw) {
+          return '';
+        }
+        var text = String(raw)
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .toLowerCase();
+        return text;
+      }
+
+      var uniqueItems = [];
+      var seenSnippetsPerRecord = Object.create(null);
+
+      items.forEach(function (item) {
+        var recordKey = item.rec_id || item.id || '';
+        if (!recordKey) {
+          uniqueItems.push(item);
+          return;
+        }
+
+        var snippetSource = '';
+        if (
+          item._snippetResult &&
+          item._snippetResult.full_text &&
+          typeof item._snippetResult.full_text.value === 'string'
+        ) {
+          snippetSource = item._snippetResult.full_text.value;
+        } else if (
+          item.highlight &&
+          item.highlight.full_text &&
+          typeof item.highlight.full_text.value === 'string'
+        ) {
+          snippetSource = item.highlight.full_text.value;
+        } else if (typeof item.full_text === 'string') {
+          snippetSource = item.full_text;
+        }
+
+        var snippetKey = normalizeSnippet(snippetSource);
+        if (!snippetKey) {
+          uniqueItems.push(item);
+          return;
+        }
+
+        if (!seenSnippetsPerRecord[recordKey]) {
+          seenSnippetsPerRecord[recordKey] = Object.create(null);
+        }
+
+        if (seenSnippetsPerRecord[recordKey][snippetKey]) {
+          return;
+        }
+
+        seenSnippetsPerRecord[recordKey][snippetKey] = true;
+        uniqueItems.push(item);
+      });
+
       function collectMatchedWords(result) {
         if (!result) {
           return [];
@@ -247,7 +304,7 @@ search.addWidgets([
           });
       }
 
-      return items.map(function (item) {
+      return uniqueItems.map(function (item) {
         var markTerms = [];
         if (item._snippetResult) {
           if (item._snippetResult.full_text) {
