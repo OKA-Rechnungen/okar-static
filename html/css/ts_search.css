@@ -82,8 +82,9 @@
 }
 
 .ts-hit-thumbnail img {
-    max-height: 160px;
-    width: auto;
+    max-height: 400px;
+    width: 100%;
+    height: auto;
 }
 
 .ts-hit-text p {
@@ -177,13 +178,11 @@
 
 @media (max-width: 767.98px) {
     .search-panel__facets {
+        padding: 1.25rem;
+    }
 
     .ts-hit-thumbnail img {
-        max-height: 200px;
-        width: 100%;
-        height: auto;
-    }
-        padding: 1.25rem;
+        max-height: 260px;
     }
 
     .ais-Hits-item {

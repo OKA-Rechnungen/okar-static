@@ -16,6 +16,21 @@
     <xsl:template match="tei:div">
         <div><xsl:apply-templates/></div>
     </xsl:template>
+    <xsl:template match="tei:ab">
+        <div class="ab">
+            <xsl:if test="@xml:id">
+                <xsl:attribute name="id">
+                    <xsl:value-of select="@xml:id"/>
+                </xsl:attribute>
+            </xsl:if>
+            <xsl:if test="@facs">
+                <xsl:attribute name="data-facs">
+                    <xsl:value-of select="@facs"/>
+                </xsl:attribute>
+            </xsl:if>
+            <xsl:apply-templates/>
+        </div>
+    </xsl:template>
     <xsl:template match="tei:pb">
         <span class="anchor-pb"></span>
         <span class="pb" source="{@facs}"><xsl:value-of select="./@n"/></span>

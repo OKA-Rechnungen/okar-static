@@ -65,6 +65,68 @@ Single page transcript navigation with OpenSeadragon image sync.
 
     var pages = [];
 
+    function buildTranscriptRow(wrapper) {
+        if (!wrapper) {
+            return null;
+        }
+
+        var children = Array.prototype.slice.call(wrapper.children || []);
+        var abBlocks = children.filter(function(node) {
+            return node.nodeType === 1 && node.classList.contains('ab');
+        });
+
+        if (!abBlocks.length) {
+            return null;
+        }
+
+        var row = document.createElement('div');
+        row.className = 'row transcript-row g-4';
+        row.style.display = 'none';
+
+        var visibleCount = abBlocks.length;
+        var multiColumn = visibleCount === 2;
+        var columnClass = multiColumn ? 'col-12 col-lg-6 transcript-column' : 'col-12 transcript-column';
+
+        abBlocks.forEach(function(abBlock) {
+            var column = document.createElement('div');
+            column.className = columnClass;
+            column.appendChild(abBlock);
+            row.appendChild(column);
+        });
+
+        var anchor = wrapper.querySelector('span.pb');
+        if (anchor && anchor.nextSibling) {
+            wrapper.insertBefore(row, anchor.nextSibling);
+        } else {
+            wrapper.appendChild(row);
+        }
+
+        return row;
+    }
+
+    function resolvePageIndexFromElement(element) {
+        if (!element) {
+            return -1;
+        }
+
+        var current = element;
+        while (current && current !== transcript) {
+            if (current.classList && current.classList.contains('transcript-page')) {
+                var indexValue = current.dataset.pageIndex;
+                if (indexValue) {
+                    var parsed = parseInt(indexValue, 10);
+                    if (!Number.isNaN(parsed)) {
+                        return parsed - 1;
+                    }
+                }
+                break;
+            }
+            current = current.parentNode;
+        }
+
+        return -1;
+    }
+
     function normalizeImageSource(source, context) {
         var recordId = context && context.recordId ? String(context.recordId).trim() : '';
         var pageIndex = context && typeof context.pageIndex === 'number' ? context.pageIndex : null;
@@ -122,10 +184,13 @@ Single page transcript navigation with OpenSeadragon image sync.
 
         pageWrapper.dataset.pageLabel = label;
 
+        var transcriptRow = buildTranscriptRow(pageWrapper);
+
         pages.push({
             wrapper: pageWrapper,
             imageSource: normalizedSource,
-            label: label
+            label: label,
+            row: transcriptRow
         });
     });
 
@@ -441,10 +506,16 @@ Single page transcript navigation with OpenSeadragon image sync.
         if (currentPageIndex !== -1) {
             pages[currentPageIndex].wrapper.style.display = 'none';
             pages[currentPageIndex].wrapper.setAttribute('aria-hidden', 'true');
+            if (pages[currentPageIndex].row) {
+                pages[currentPageIndex].row.style.display = 'none';
+            }
         }
 
         pages[index].wrapper.style.display = 'block';
         pages[index].wrapper.setAttribute('aria-hidden', 'false');
+        if (pages[index].row) {
+            pages[index].row.style.display = '';
+        }
 
         currentPageIndex = index;
 
@@ -462,6 +533,24 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
     }
 
+    function showPageForElement(element, options) {
+        var index = resolvePageIndexFromElement(element);
+        if (index === -1) {
+            return;
+        }
+        showPageByIndex(index, options);
+    }
+
+    function showPageByNumber(pageNumber, options) {
+        if (typeof pageNumber !== 'number') {
+            pageNumber = parseInt(pageNumber, 10);
+        }
+        if (Number.isNaN(pageNumber) || pageNumber < 1) {
+            pageNumber = 1;
+        }
+        showPageByIndex(pageNumber - 1, options);
+    }
+
     var params = new URLSearchParams(window.location.search);
     var requestedPage = parseInt(params.get('p'), 10);
     var initialIndex = Number.isNaN(requestedPage) ? 0 : requestedPage - 1;
@@ -477,4 +566,21 @@ Single page transcript navigation with OpenSeadragon image sync.
         popIndex = Math.min(Math.max(popIndex, 0), pages.length - 1);
         showPageByIndex(popIndex, { updateHistory: false, force: true });
     });
+
+    window.okarTranscript = window.okarTranscript || {};
+    window.okarTranscript.showPageByIndex = function(index, options) {
+        showPageByIndex(index, options);
+    };
+    window.okarTranscript.showPageByNumber = function(pageNumber, options) {
+        showPageByNumber(pageNumber, options);
+    };
+    window.okarTranscript.showPageForElement = function(element, options) {
+        showPageForElement(element, options);
+    };
+    window.okarTranscript.getActivePageNumber = function() {
+        return currentPageIndex + 1;
+    };
+    window.okarTranscript.resolvePageIndexFromElement = function(element) {
+        return resolvePageIndexFromElement(element);
+    };
 })();
