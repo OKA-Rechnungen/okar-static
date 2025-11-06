@@ -40,10 +40,13 @@ Single page transcript navigation with OpenSeadragon image sync.
 
     if (!recordIdPart) {
         var pathSegment = (window.location.pathname || '').split('/').pop() || '';
-        recordIdPart = pathSegment.replace(/\.html?$/i, '');
+        recordIdPart = pathSegment.replace(/\.html?$/i, '').trim();
     }
 
+    recordIdPart = recordIdPart.trim();
+
     var safeRecordId = encodeURIComponent(recordIdPart);
+    var recordIdBase = recordIdPart ? recordIdPart.trim() : '';
     var contentRoot = pbElements[0].parentNode;
 
     if (!contentRoot) {
@@ -61,6 +64,48 @@ Single page transcript navigation with OpenSeadragon image sync.
     }
 
     var pages = [];
+
+    function normalizeImageSource(source, context) {
+        if (typeof source !== 'string' || !source) {
+            return source;
+        }
+
+        var pathParts = source.split('/');
+        var filename = pathParts.pop() || '';
+        if (!filename) {
+            return source;
+        }
+
+        var dotIndex = filename.lastIndexOf('.');
+        var namePart = dotIndex === -1 ? filename : filename.slice(0, dotIndex);
+        var extension = dotIndex === -1 ? '' : filename.slice(dotIndex);
+
+        var lastUnderscore = namePart.lastIndexOf('_');
+        var normalizedName;
+
+        if (lastUnderscore === -1) {
+            normalizedName = namePart.replace(/_/g, '-');
+        } else {
+            var prefix = namePart.slice(0, lastUnderscore);
+            var suffix = namePart.slice(lastUnderscore);
+            normalizedName = prefix.replace(/_/g, '-') + suffix;
+        }
+
+        var recordId = context && context.recordId ? String(context.recordId).trim() : '';
+
+        if (recordId) {
+            var originalStartsWithRecordId = namePart.indexOf(recordId) === 0;
+            var digitsOnly = /^\d+$/.test(normalizedName);
+
+            if (!originalStartsWithRecordId && digitsOnly) {
+                var paddedDigits = normalizedName.padStart(Math.max(normalizedName.length, 5), '0');
+                normalizedName = recordId + '_' + paddedDigits;
+            }
+        }
+
+        pathParts.push(normalizedName + extension);
+        return pathParts.join('/');
+    }
 
     pbElements.forEach(function(pb, index) {
         var pageWrapper = document.createElement('div');
@@ -84,13 +129,18 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
 
         var source = pb.getAttribute('source') || '';
+    var normalizedSource = normalizeImageSource(source, { recordId: recordIdBase });
+        if (normalizedSource !== source) {
+            pb.dataset.originalSource = source;
+            pb.setAttribute('source', normalizedSource);
+        }
         var label = pb.dataset.pageNumber || String(index + 1);
 
         pageWrapper.dataset.pageLabel = label;
 
         pages.push({
             wrapper: pageWrapper,
-            imageSource: source,
+            imageSource: normalizedSource,
             label: label
         });
     });
