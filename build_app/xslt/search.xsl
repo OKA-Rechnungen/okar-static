@@ -11,23 +11,50 @@
     <xsl:import href="partials/html_footer.xsl"/>
     <xsl:template match="/">
         <xsl:variable name="doc_title" select="'Volltextsuche'"/>
-        <html class="h-100">
+        <html class="page">
             <head>
                 <xsl:call-template name="html_head">
-                    <xsl:with-param name="html_title" select="$doc_title"></xsl:with-param>
+                    <xsl:with-param name="html_title" select="$doc_title"/>
                 </xsl:call-template>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@8.1.0/themes/algolia-min.css"/>
+                <link rel="stylesheet" href="css/ts_search.css" type="text/css"/>
             </head>
-            
-            <body class="d-flex flex-column h-100">
+            <body class="d-flex flex-column">
                 <xsl:call-template name="nav_bar"/>
-                <main class="flex-shrink-0 flex-grow-1">
-                    <div class="container">
-                        <h1>
+                <main class="flex-grow">
+                    <div class="container flex-1">
+                        <h2 class="align-center">
                             <xsl:value-of select="$doc_title"/>
-                        </h1>
+                        </h2>
+                    </div>
+                    <div class="container-md">
+                        <div class="search-panel">
+                            <div class="row g-4 search-panel__rows">
+                                <div class="col-lg-3 col-md-4 col-12 search-panel__facets">
+                                    <div id="stats-container"/>
+                                    <div id="searchbox"/>
+                                    <div id="clear-refinements"/>
+                                    <p class="search-panel__hint">Verwenden Sie die Filter, um die Ergebnisliste weiter einzugrenzen.</p>
+                                    <div id="fuzzy-toggle"/>
+                                    <div id="refinement-list-signature"/>
+                                    <div id="refinement-range-year"/>
+                                    <div id="refinement-list-kaemmerer"/>
+                                    <div id="refinement-list-beilage"/>
+                                </div>
+                                <div class="col-lg-9 col-md-8 col-12 search-panel__results">
+                                    <div id="current-refinements"/>
+                                    <div id="hits"/>
+                                    <div id="pagination"/>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </main>
                 <xsl:call-template name="html_footer"/>
+                <script src="https://cdn.jsdelivr.net/npm/typesense-instantsearch-adapter@2/dist/typesense-instantsearch-adapter.min.js"/>
+                <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.66.0/dist/instantsearch.production.min.js"/>
+                <script src="js/ts_search.js"/>
+                <script src="js/ts_update_url.js"/>
             </body>
         </html>
     </xsl:template>

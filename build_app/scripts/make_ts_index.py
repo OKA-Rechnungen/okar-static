@@ -1,15 +1,57 @@
 #!/usr/bin/env python
 import glob
 import os
+import re
 
 from typesense.api_call import ObjectNotFound
 from acdh_cfts_pyutils import TYPESENSE_CLIENT as client
-from acdh_cfts_pyutils import CFTS_COLLECTION
 from acdh_tei_pyutils.tei import TeiReader
 from tqdm import tqdm
 
 
-files = glob.glob("./data/editions/*/*.xml")
+YEAR_CANDIDATE_ATTRS = (
+    "//tei:origin/tei:origDate/@when",
+    "//tei:origin/tei:origDate/@notBefore",
+    "//tei:origin/tei:origDate/@from",
+    "//tei:origin/tei:origDate/@notAfter",
+    "//tei:sourceDesc//tei:date/@when",
+    "//tei:sourceDesc//tei:date/@from",
+    "//tei:sourceDesc//tei:date/@notBefore",
+)
+
+YEAR_CANDIDATE_TEXTS = (
+    "//tei:origin/tei:origDate/text()",
+    "//tei:sourceDesc//tei:date/text()",
+)
+
+
+def extract_year_from_string(value):
+    if not value:
+        return None
+    match = re.search(r"-?(\d{4})", value)
+    if not match:
+        return None
+    try:
+        return int(match.group(1))
+    except ValueError:
+        return None
+
+
+def resolve_year(doc):
+    for path in YEAR_CANDIDATE_ATTRS:
+        for candidate in doc.any_xpath(path):
+            year = extract_year_from_string(candidate)
+            if year:
+                return year
+    for path in YEAR_CANDIDATE_TEXTS:
+        for candidate in doc.any_xpath(path):
+            year = extract_year_from_string(candidate)
+            if year:
+                return year
+    return None
+
+
+files = glob.glob("./data/editions/**/*.xml", recursive=True)
 
 
 try:
@@ -30,120 +72,107 @@ current_schema = {
             "optional": True,
             "facet": True,
         },
-        {"name": "persons", "type": "string[]", "facet": True, "optional": True},
-        {"name": "places", "type": "string[]", "facet": True, "optional": True},
-        {"name": "orgs", "type": "string[]", "facet": True, "optional": True},
+        {"name": "signature", "type": "string", "facet": True, "optional": True},
+        {"name": "kaemmerer", "type": "string[]", "facet": True, "optional": True},
+        {"name": "beilage_present", "type": "bool", "facet": True, "optional": True},
+        {"name": "beilage_text", "type": "string", "optional": True},
     ],
 }
 
 client.collections.create(current_schema)
 
 
-def get_entities(ent_type, ent_node, ent_name):
-    entities = []
-    e_path = f'.//tei:rs[@type="{ent_type}"]/@ref'
-    for p in body:
-        ent = p.xpath(e_path, namespaces={"tei": "http://www.tei-c.org/ns/1.0"})
-        ref = [ref.replace("#", "") for e in ent if len(ent) > 0 for ref in e.split()]
-        for r in ref:
-            p_path = f'.//tei:{ent_node}[@xml:id="{r}"]//tei:{ent_name}[1]'
-            en = doc.any_xpath(p_path)
-            if en:
-                entity = " ".join(" ".join(en[0].xpath(".//text()")).split())
-                if len(entity) != 0:
-                    entities.append(entity)
-                else:
-                    with open("log-entities.txt", "a") as f:
-                        f.write(f"{r} in {record['id']}\n")
-    return [ent for ent in sorted(set(entities))]
-
-
 records = []
-cfts_records = []
+nsmap = {"tei": "http://www.tei-c.org/ns/1.0"}
+
+
 for x in tqdm(files, total=len(files)):
-    doc = TeiReader(xml=x, xsl="./xslt/preprocess_typesense.xsl")
+    doc = TeiReader(xml=x)
+    record_year = resolve_year(doc)
+    shelfmarks = doc.any_xpath("//tei:msIdentifier/tei:idno[@type='shelfmark']/text()")
+    signature = " ".join(" ".join(shelfmarks).split())
+
+    kaemmerer_nodes = doc.any_xpath(
+        "//tei:standOff/tei:listPerson/tei:person[contains(translate(@role, 'ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜẞ', 'abcdefghijklmnopqrstuvwxyzäöüß'), 'kämmerer')]"
+    )
+    kaemmerer = []
+    for person in kaemmerer_nodes:
+        preferred = " ".join(
+            " ".join(person.xpath("tei:persName[@type='norm'][1]//text()", namespaces=nsmap)).split()
+        )
+        fallback = " ".join(
+            " ".join(person.xpath("tei:persName[1]//text()", namespaces=nsmap)).split()
+        )
+        label = preferred or fallback
+        if label:
+            kaemmerer.append(label)
+    kaemmerer = sorted(set(kaemmerer))
+
+    beilage_text_nodes = doc.any_xpath("//tei:accMat//text()")
+    beilage_text = " ".join(" ".join(beilage_text_nodes).split())
+    beilage_present = bool(beilage_text)
     facs = doc.any_xpath(".//tei:body/tei:div/tei:pb/@facs")
     pages = 0
     for v in facs:
-        p_group = f".//tei:body/tei:div/tei:p[preceding-sibling::tei:pb[1]/@facs='{v}']|.//tei:body/tei:div/tei:lg[preceding-sibling::tei:pb[1]/@facs='{v}']"
+        p_group = (
+            ".//tei:body/tei:div/tei:p[preceding-sibling::tei:pb[1]/@facs='{f}']|"
+            ".//tei:body/tei:div/tei:lg[preceding-sibling::tei:pb[1]/@facs='{f}']|"
+            ".//tei:body/tei:div/tei:ab[preceding-sibling::tei:pb[1]/@facs='{f}']"
+        ).format(f=v)
         body = doc.any_xpath(p_group)
         pages += 1
-        cfts_record = {
-            "project": "OKAR",
-        }
         record = {}
-        record["id"] = os.path.split(x)[-1].replace(".xml", f".html?tab={str(pages)}")
-        cfts_record["id"] = record["id"]
-        cfts_record["resolver"] = f"https://github.com/oka-rechnungen/okar-static/{record['id']}"
+        record["id"] = os.path.split(x)[-1].replace(".xml", f".html?p={str(pages)}")
         record["rec_id"] = os.path.split(x)[-1]
-        cfts_record["rec_id"] = record["rec_id"]
         r_title = " ".join(
             " ".join(
                 doc.any_xpath('.//tei:titleStmt/tei:title[@level="a"]/text()')
             ).split()
         )
-        record["title"] = f"{r_title} Page {str(pages)}"
-        cfts_record["title"] = record["title"]
-        try:
-            date_str = doc.any_xpath("//tei:origin/tei:origDate/@notBefore")[0]
-        except IndexError:
-            date_str = doc.any_xpath("//tei:origin/tei:origDate/text()")[0]
-            data_str = date_str.split("--")[0]
-            if len(date_str) > 3:
-                date_str = date_str
-            else:
-                date_str = "1959"
-
-        try:
-            record["year"] = int(date_str[:4])
-            cfts_record["year"] = int(date_str[:4])
-        except ValueError:
-            pass
+        if not r_title:
+            r_title = " ".join(
+                " ".join(
+                    doc.any_xpath('.//tei:titleStmt/tei:title[@type="desc"]/text()')
+                ).split()
+            )
+        if not r_title:
+            r_title = record["rec_id"].replace(".xml", "")
+        record["title"] = f"{r_title} · Seite {str(pages)}"
+        if record_year is not None:
+            record["year"] = record_year
 
         if len(body) > 0:
-            # get unique persons per page
-            ent_type = "person"
-            ent_name = "persName"
-            record["persons"] = get_entities(
-                ent_type=ent_type, ent_node=ent_type, ent_name=ent_name
-            )
-            cfts_record["persons"] = record["persons"]
-            # get unique places per page
-            ent_type = "place"
-            ent_name = "placeName"
-            record["places"] = get_entities(
-                ent_type=ent_type, ent_node=ent_type, ent_name=ent_name
-            )
-            cfts_record["places"] = record["places"]
-            # get unique orgs per page
-            ent_type = "org"
-            ent_name = "orgName"
-            record["orgs"] = get_entities(
-                ent_type=ent_type, ent_node=ent_type, ent_name=ent_name
-            )
-            cfts_record["orgs"] = record["orgs"]
-            # get unique bibls per page
-            ent_type = "lit_work"
-            ent_name = "title"
-            ent_node = "bibl"
-            record["works"] = get_entities(
-                ent_type=ent_type, ent_node=ent_node, ent_name=ent_name
-            )
-            cfts_record["works"] = record["works"]
             record["full_text"] = "\n".join(
                 " ".join("".join(p.itertext()).split()) for p in body
             )
+            if signature:
+                record["signature"] = signature
+            if kaemmerer:
+                record["kaemmerer"] = kaemmerer
+            record["beilage_present"] = beilage_present
+            if beilage_text:
+                trimmed_beilage = (
+                    beilage_text if len(beilage_text) <= 200 else f"{beilage_text[:197]}..."
+                )
+                record["beilage_text"] = trimmed_beilage
             if len(record["full_text"]) > 0:
                 records.append(record)
-                cfts_record["full_text"] = record["full_text"]
-                cfts_records.append(cfts_record)
+
+print(f"prepared {len(records)} records for import")
 
 make_index = client.collections[
     "OKAR"
-].documents.import_(records)
-print(make_index)
-print("done with indexing OKAR")
+].documents.import_(
+    records,
+    {
+        "action": "upsert",
+    },
+)
 
-make_index = CFTS_COLLECTION.documents.import_(cfts_records, {"action": "upsert"})
-print(make_index)
-print("done with cfts-index OKAR")
+failed = [row for row in make_index if '"success":false' in row]
+if failed:
+    print(f"{len(failed)} records failed to import")
+    print(failed[:5])
+else:
+    print(f"imported {len(records)} records")
+print("done with indexing OKAR")

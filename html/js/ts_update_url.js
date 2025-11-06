@@ -1,5 +1,7 @@
 var tsInput = document.querySelector("input[type='search']");
-tsInput.addEventListener("input", updateHeaderUrl);
+if (tsInput) {
+  tsInput.addEventListener("input", updateHeaderUrl);
+}
 
 function listenToPagination() {
   setTimeout(() => {
@@ -10,15 +12,17 @@ function listenToPagination() {
     });
   }, 100);
 }
-setTimeout(() => {
-  listenToPagination();
-}, 100);
+if (tsInput) {
+  setTimeout(() => {
+    listenToPagination();
+  }, 100);
+}
 
 function updateHeaderUrl() {
   setTimeout(() => {
 
     var urlToUpdate = document.querySelectorAll(".ais-Hits-item h5 a");
-    var tsInputVal = tsInput.value;
+    var tsInputVal = tsInput ? tsInput.value : "";
 
     urlToUpdate.forEach((el) => {
       var urlToUpdateHref = el.getAttribute("href");
