@@ -136,19 +136,19 @@
                     then xs:integer(@n)
                     else xs:integer(count(preceding::tei:pb)) + 1"/>
 
-        <xsl:variable name="base-name">
+        <xsl:variable name="facs_url">
             <xsl:choose>
                 <xsl:when test="string-length($graphic_url) &gt; 0">
-                    <xsl:value-of select="replace(replace($graphic_url, '^\d+_', ''), '(_\d+)?\.[^.]+$', '')"/>
+                    <!-- Use the linked graphic file name, strip leading numeric prefixes and normalise extension -->
+                    <xsl:value-of select="replace(replace($graphic_url, '^\d+_', ''), '\.[^.]+$', '.tif')"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:value-of select="replace($teiSource, '\.xml$', '')"/>
+                    <!-- Fall back to a best guess derived from the TEI source and page index -->
+                    <xsl:variable name="base-name" select="replace($teiSource, '\.xml$', '')"/>
+                    <xsl:value-of select="concat($base-name, '_', format-number($page-number, '00000'), '.tif')"/>
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-
-        <xsl:variable name="facs_url"
-            select="concat($base-name, '_', format-number($page-number, '00000'), '.tif')"/>
 
         <xsl:variable name="pb-type" select="if (@type) then @type else 'primary'"/>
         <xsl:variable name="witness-ref" select="if (@edRef) then (if (starts-with(@edRef, '#')) then @edRef else concat('#', @edRef)) else '#primary'"/>
