@@ -66,45 +66,29 @@ Single page transcript navigation with OpenSeadragon image sync.
     var pages = [];
 
     function normalizeImageSource(source, context) {
-        if (typeof source !== 'string' || !source) {
-            return source;
-        }
-
-        var pathParts = source.split('/');
-        var filename = pathParts.pop() || '';
-        if (!filename) {
-            return source;
-        }
-
-        var dotIndex = filename.lastIndexOf('.');
-        var namePart = dotIndex === -1 ? filename : filename.slice(0, dotIndex);
-        var extension = dotIndex === -1 ? '' : filename.slice(dotIndex);
-
-        var lastUnderscore = namePart.lastIndexOf('_');
-        var normalizedName;
-
-        if (lastUnderscore === -1) {
-            normalizedName = namePart.replace(/_/g, '-');
-        } else {
-            var prefix = namePart.slice(0, lastUnderscore);
-            var suffix = namePart.slice(lastUnderscore);
-            normalizedName = prefix.replace(/_/g, '-') + suffix;
-        }
-
         var recordId = context && context.recordId ? String(context.recordId).trim() : '';
+        var pageIndex = context && typeof context.pageIndex === 'number' ? context.pageIndex : null;
 
-        if (recordId) {
-            var originalStartsWithRecordId = namePart.indexOf(recordId) === 0;
-            var digitsOnly = /^\d+$/.test(normalizedName);
+        if (!recordId || pageIndex === null) {
+            return source;
+        }
 
-            if (!originalStartsWithRecordId && digitsOnly) {
-                var paddedDigits = normalizedName.padStart(Math.max(normalizedName.length, 5), '0');
-                normalizedName = recordId + '_' + paddedDigits;
+        var extension = '';
+        if (typeof source === 'string' && source) {
+            var parts = source.split('/');
+            var filename = parts.pop() || '';
+            var dotIndex = filename.lastIndexOf('.');
+            if (dotIndex !== -1) {
+                extension = filename.slice(dotIndex).toLowerCase();
             }
         }
 
-        pathParts.push(normalizedName + extension);
-        return pathParts.join('/');
+        if (!extension) {
+            extension = '.tif';
+        }
+
+        var padded = String(pageIndex).padStart(5, '0');
+        return recordId + '_' + padded + extension;
     }
 
     pbElements.forEach(function(pb, index) {
@@ -129,7 +113,7 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
 
         var source = pb.getAttribute('source') || '';
-    var normalizedSource = normalizeImageSource(source, { recordId: recordIdBase });
+        var normalizedSource = normalizeImageSource(source, { recordId: recordIdBase, pageIndex: index + 1 });
         if (normalizedSource !== source) {
             pb.dataset.originalSource = source;
             pb.setAttribute('source', normalizedSource);
@@ -247,7 +231,7 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
 
         var safeSource = encodeURIComponent(source);
-        return `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${safeRecordId}/files/images/${safeSource}/full/!400,400/0/default.jpg`;
+    return `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${safeRecordId}/files/images/${safeSource}/full/full/0/default.jpg`;
     }
 
     function loadOsdImage(source) {

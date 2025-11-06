@@ -2,6 +2,7 @@
 import glob
 import os
 import re
+from urllib.parse import quote
 
 from typesense.api_call import ObjectNotFound
 from acdh_cfts_pyutils import TYPESENSE_CLIENT as client
@@ -51,6 +52,23 @@ def resolve_year(doc):
     return None
 
 
+def derive_image_source(record_id, page_number, fallback_source):
+    record_id = (record_id or "").strip()
+    if not record_id or page_number is None:
+        return (fallback_source or "").strip()
+
+    extension = ""
+    if fallback_source:
+        _, ext = os.path.splitext(os.path.basename(str(fallback_source)))
+        extension = ext.lower()
+
+    if not extension:
+        extension = ".tif"
+
+    page_digits = str(page_number).zfill(5)
+    return f"{record_id}_{page_digits}{extension}"
+
+
 files = glob.glob("./data/editions/**/*.xml", recursive=True)
 
 
@@ -76,6 +94,8 @@ current_schema = {
         {"name": "kaemmerer", "type": "string[]", "facet": True, "optional": True},
         {"name": "beilage_present", "type": "bool", "facet": True, "optional": True},
         {"name": "beilage_text", "type": "string", "optional": True},
+        {"name": "image_source", "type": "string", "optional": True},
+        {"name": "thumbnail", "type": "string", "optional": True},
     ],
 }
 
@@ -88,6 +108,7 @@ nsmap = {"tei": "http://www.tei-c.org/ns/1.0"}
 
 for x in tqdm(files, total=len(files)):
     doc = TeiReader(xml=x)
+    record_id = os.path.splitext(os.path.split(x)[-1])[0]
     record_year = resolve_year(doc)
     shelfmarks = doc.any_xpath("//tei:msIdentifier/tei:idno[@type='shelfmark']/text()")
     signature = " ".join(" ".join(shelfmarks).split())
@@ -145,6 +166,32 @@ for x in tqdm(files, total=len(files)):
             record["full_text"] = "\n".join(
                 " ".join("".join(p.itertext()).split()) for p in body
             )
+
+            surface_id = v.lstrip("#")
+            graphic_candidates = doc.any_xpath(
+                f"//tei:facsimile/tei:surface[@xml:id='{surface_id}']//tei:graphic/@url"
+            )
+            thumbnail_source = ""
+            for candidate in graphic_candidates:
+                candidate = candidate.strip()
+                if not candidate:
+                    continue
+                if not candidate.lower().startswith("http"):
+                    thumbnail_source = candidate
+                    break
+            if not thumbnail_source and graphic_candidates:
+                thumbnail_source = graphic_candidates[0].strip()
+
+            if record_id and pages:
+                image_filename = derive_image_source(record_id, pages, thumbnail_source)
+                if image_filename:
+                    record["image_source"] = image_filename
+                    encoded_record = quote(record_id, safe="")
+                    encoded_source = quote(image_filename, safe="")
+                    record["thumbnail"] = (
+                        "https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/"
+                        f"{encoded_record}/files/images/{encoded_source}/full/!800,800/0/default.jpg"
+                    )
             if signature:
                 record["signature"] = signature
             if kaemmerer:
