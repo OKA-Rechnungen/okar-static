@@ -192,3 +192,93 @@ var editor = new LoadEditor({
     up: true,
   });
   
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var markParam = params.get('mark');
+    if (!markParam) {
+      return;
+    }
+
+    var terms = markParam
+      .split(/\s+/)
+      .map(function (term) {
+        return term.trim();
+      })
+      .filter(function (term) {
+        return term.length > 0;
+      });
+
+    if (terms.length === 0) {
+      return;
+    }
+
+    var container = document.querySelector('#transcript');
+    if (!container) {
+      return;
+    }
+
+    function escapeRegExp(value) {
+      return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    var pattern = new RegExp(
+      '(' +
+        terms
+          .map(function (term) {
+            return escapeRegExp(term);
+          })
+          .join('|') +
+        ')',
+      'gi'
+    );
+
+    var walker = document.createTreeWalker(
+      container,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: function (node) {
+          if (!node.parentNode || node.parentNode.closest('mark.search-highlight')) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          if (!node.nodeValue || !pattern.test(node.nodeValue)) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          pattern.lastIndex = 0;
+          return NodeFilter.FILTER_ACCEPT;
+        },
+      }
+    );
+
+    var current;
+    while ((current = walker.nextNode())) {
+      var originalText = current.nodeValue;
+      pattern.lastIndex = 0;
+      var fragment = document.createDocumentFragment();
+      var lastIndex = 0;
+      var match;
+
+      while ((match = pattern.exec(originalText)) !== null) {
+        if (match.index > lastIndex) {
+          fragment.appendChild(
+            document.createTextNode(originalText.slice(lastIndex, match.index))
+          );
+        }
+        var markNode = document.createElement('mark');
+        markNode.className = 'search-highlight';
+        markNode.textContent = match[0];
+        fragment.appendChild(markNode);
+        lastIndex = match.index + match[0].length;
+      }
+
+      if (lastIndex < originalText.length) {
+        fragment.appendChild(document.createTextNode(originalText.slice(lastIndex)));
+      }
+
+      current.parentNode.replaceChild(fragment, current);
+    }
+
+    var firstMatch = container.querySelector('mark.search-highlight');
+    if (firstMatch && typeof firstMatch.scrollIntoView === 'function') {
+      firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  })();
