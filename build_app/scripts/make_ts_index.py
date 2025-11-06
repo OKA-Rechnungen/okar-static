@@ -54,19 +54,23 @@ def resolve_year(doc):
 
 def derive_image_source(record_id, page_number, fallback_source):
     record_id = (record_id or "").strip()
-    if not record_id or page_number is None:
-        return (fallback_source or "").strip()
+    fallback_source = (fallback_source or "").strip()
+    extension = ".tif"
 
-    extension = ""
-    if fallback_source:
-        _, ext = os.path.splitext(os.path.basename(str(fallback_source)))
-        extension = ext.lower()
+    if record_id and fallback_source:
+        candidate = os.path.basename(fallback_source)
+        name_part, _ = os.path.splitext(candidate)
+        record_pos = name_part.find(record_id)
+        if record_pos != -1:
+            normalized = name_part[record_pos:]
+            if normalized:
+                return f"{normalized}{extension}"
 
-    if not extension:
-        extension = ".tif"
+    if record_id and page_number is not None:
+        page_digits = str(page_number).zfill(5)
+        return f"{record_id}_{page_digits}{extension}"
 
-    page_digits = str(page_number).zfill(5)
-    return f"{record_id}_{page_digits}{extension}"
+    return fallback_source
 
 
 files = glob.glob("./data/editions/**/*.xml", recursive=True)
@@ -190,7 +194,7 @@ for x in tqdm(files, total=len(files)):
                     encoded_source = quote(image_filename, safe="")
                     record["thumbnail"] = (
                         "https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/"
-                        f"{encoded_record}/files/images/{encoded_source}/full/!800,800/0/default.jpg"
+                        f"{encoded_record}/files/images/{encoded_source}/full/!400,400/0/default.jpg"
                     )
             if signature:
                 record["signature"] = signature
