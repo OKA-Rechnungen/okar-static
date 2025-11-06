@@ -110,7 +110,8 @@
                                 </div>
                                 <div id="text-resize" lang="de" class="col-md-6 col-lg-6 col-sm-12 text yes-index"> <!--- Maybe 6 (1/2 of the total) -->
                                     <div id="transcript">
-                                        <xsl:apply-templates/> <!-- Text transcription -->
+                                        <!-- Limit transcript output to the TEI body content -->
+                                        <xsl:apply-templates select="tei:TEI/tei:text/tei:body/node()"/>
                                     </div>
                                 </div>
                             </div>
