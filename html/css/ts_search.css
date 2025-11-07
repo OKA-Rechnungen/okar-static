@@ -54,6 +54,7 @@
     padding: 1.5rem;
     list-style: none;
     box-shadow: 0 0.35rem 0.8rem rgba(0, 0, 0, 0.06);
+    width: 100%; /* override theme width so grid columns control sizing */
 }
 
 .ais-Hits-item h5 {
@@ -97,6 +98,18 @@
     gap: 1.5rem;
     padding: 0;
     margin: 0;
+}
+
+@media (min-width: 768px) {
+    .ais-Hits-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1200px) {
+    .ais-Hits-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
 .ais-SearchBox-form {
