@@ -20,6 +20,25 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
 
 var searchState = { fuzzySearch: false };
 
+function getInitialQueryFromUrl() {
+  try {
+    var url = new URL(window.location.href);
+    var value = url.searchParams.get('q');
+    if (typeof value === 'string') {
+      return value.trim();
+    }
+  } catch (error) {
+    // Ignore URL parsing issues and fall back to empty query.
+  }
+  return '';
+}
+
+var initialQuery = getInitialQueryFromUrl();
+var initialUiState = {};
+if (initialQuery) {
+  initialUiState[project_collection_name] = { query: initialQuery };
+}
+
 function hasActiveRefinements(state) {
   var disjunctive = state.disjunctiveFacetsRefinements || {};
   var conjunctive = state.facetsRefinements || {};
@@ -86,6 +105,7 @@ var search = instantsearch({
       helper.search();
     }
   },
+  initialUiState: initialUiState,
 });
 
 search.addWidgets([
@@ -419,3 +439,10 @@ search.addWidgets([
 ]);
 
 search.start();
+
+if (initialQuery) {
+  var navbarSearchInput = document.getElementById('navbar-search');
+  if (navbarSearchInput && !navbarSearchInput.value) {
+    navbarSearchInput.value = initialQuery;
+  }
+}
