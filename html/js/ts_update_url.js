@@ -1,44 +1,57 @@
-var tsInput = document.querySelector("input[type='search']");
-if (tsInput) {
-  tsInput.addEventListener("input", updateHeaderUrl);
-}
+var tsInput = null;
 
-function listenToPagination() {
-  setTimeout(() => {
-    var tsPagination = document.querySelectorAll(".ais-Pagination-link");
-    [].forEach.call(tsPagination, function (opt) {
-      opt.removeEventListener("click", updateHeaderUrl);
-      opt.addEventListener("click", updateHeaderUrl);
-    });
-  }, 100);
-}
-if (tsInput) {
-  setTimeout(() => {
-    listenToPagination();
-  }, 100);
+function findInstantSearchInput() {
+  return document.querySelector('#searchbox input[type="search"], .ais-SearchBox-input');
 }
 
 function updateHeaderUrl() {
-  setTimeout(() => {
+  if (!tsInput) {
+    return;
+  }
 
-    var urlToUpdate = document.querySelectorAll(".ais-Hits-item h5 a");
-    var tsInputVal = tsInput ? tsInput.value : "";
+  setTimeout(function () {
+    var urlToUpdate = document.querySelectorAll('.ais-Hits-item h5 a');
+    var tsInputVal = tsInput ? tsInput.value : '';
+    var encodedMark = encodeURIComponent(tsInputVal || '');
 
-    urlToUpdate.forEach((el) => {
-      var urlToUpdateHref = el.getAttribute("href");
-      if (urlToUpdateHref.includes("&mark=")) {
-        var newUrl = urlToUpdateHref.replace(
-          /&mark=\.+$/,
-          `&mark=${tsInputVal}`
-        );
-        el.setAttribute("href", newUrl);
+    urlToUpdate.forEach(function (el) {
+      var urlToUpdateHref = el.getAttribute('href');
+      if (!urlToUpdateHref) {
+        return;
+      }
+      if (urlToUpdateHref.includes('mark=')) {
+        var newUrlMarked = urlToUpdateHref.replace(/([?&]mark=)[^&]*/g, '$1' + encodedMark);
+        el.setAttribute('href', newUrlMarked);
       } else {
-        var newUrl = `${urlToUpdateHref}&mark=${tsInputVal}`;
-        el.setAttribute("href", newUrl);
+        var separator = urlToUpdateHref.indexOf('?') === -1 ? '?' : '&';
+        var newUrl = urlToUpdateHref + separator + 'mark=' + encodedMark;
+        el.setAttribute('href', newUrl);
       }
     });
 
-    // listenToCheckbox();
     listenToPagination();
   }, 500);
 }
+
+function listenToPagination() {
+  setTimeout(function () {
+    var tsPagination = document.querySelectorAll('.ais-Pagination-link');
+    [].forEach.call(tsPagination, function (opt) {
+      opt.removeEventListener('click', updateHeaderUrl);
+      opt.addEventListener('click', updateHeaderUrl);
+    });
+  }, 100);
+}
+
+function initTsInput() {
+  tsInput = findInstantSearchInput();
+  if (!tsInput) {
+    setTimeout(initTsInput, 200);
+    return;
+  }
+
+  tsInput.addEventListener('input', updateHeaderUrl);
+  listenToPagination();
+}
+
+initTsInput();

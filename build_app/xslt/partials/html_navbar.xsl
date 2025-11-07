@@ -49,8 +49,11 @@
                                 </ul>
                             </li>
 -->
-                            <li class="nav-item">
-                                <a title="Suche" class="nav-link" href="search.html">Suche</a>
+                            <li class="nav-item navbar-search-item">
+                                <form class="navbar-search-form" method="get" action="search.html" role="search">
+                                    <label class="visually-hidden" for="navbar-search">Suche</label>
+                                    <input class="form-control navbar-search" id="navbar-search" name="q" type="search" placeholder="Suche" aria-label="Suche" autocomplete="off" />
+                                </form>
                             </li>
                         </ul>
                     </div>
