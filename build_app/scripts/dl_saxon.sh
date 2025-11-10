@@ -4,9 +4,10 @@ set -euo pipefail
 
 echo "downloading saxon"
 
-tmp_zip="$(mktemp saxonXXXX.zip)"
-curl -LsSf -o "${tmp_zip}" https://sourceforge.net/projects/saxon/files/Saxon-HE/9.9/SaxonHE9-9-1-7J.zip/download
+download_dir="saxon"
+mkdir -p "${download_dir}"
 
-rm -rf saxon
-unzip -q "${tmp_zip}" -d saxon
-rm -f "${tmp_zip}"
+curl -LsSf -o "${download_dir}/saxon9he.jar" \
+	https://repo1.maven.org/maven2/net/sf/saxon/Saxon-HE/9.9.1-7/Saxon-HE-9.9.1-7.jar
+
+echo "saxon9he.jar downloaded to ${download_dir}" >&2
