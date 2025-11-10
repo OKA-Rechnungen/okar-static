@@ -2,7 +2,7 @@
 import glob
 import os
 import re
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 from typesense.api_call import ObjectNotFound
 from acdh_cfts_pyutils import TYPESENSE_CLIENT as client
@@ -73,6 +73,14 @@ def derive_image_source(record_id, page_number, fallback_source):
     return fallback_source
 
 
+def extract_graphic_filename(value):
+    if not value:
+        return ""
+    parsed = urlparse(value)
+    target_path = parsed.path or value
+    return os.path.basename(target_path)
+
+
 files = glob.glob("./data/editions/**/*.xml", recursive=True)
 
 
@@ -85,7 +93,7 @@ current_schema = {
     "name": "OKAR",
     "fields": [
         {"name": "id", "type": "string"},
-        {"name": "rec_id", "type": "string"},
+    {"name": "rec_id", "type": "string", "facet": True},
         {"name": "title", "type": "string"},
         {"name": "full_text", "type": "string"},
         {
@@ -145,6 +153,10 @@ for x in tqdm(files, total=len(files)):
             ".//tei:body/tei:div/tei:ab[preceding-sibling::tei:pb[1]/@facs='{f}']"
         ).format(f=v)
         body = doc.any_xpath(p_group)
+
+        if len(body) == 0:
+            continue
+
         pages += 1
         record = {}
         record["id"] = os.path.split(x)[-1].replace(".xml", f".html?p={str(pages)}")
@@ -166,48 +178,58 @@ for x in tqdm(files, total=len(files)):
         if record_year is not None:
             record["year"] = record_year
 
-        if len(body) > 0:
-            record["full_text"] = "\n".join(
-                " ".join("".join(p.itertext()).split()) for p in body
-            )
+        record["full_text"] = "\n".join(
+            " ".join("".join(p.itertext()).split()) for p in body
+        )
 
-            surface_id = v.lstrip("#")
-            graphic_candidates = doc.any_xpath(
-                f"//tei:facsimile/tei:surface[@xml:id='{surface_id}']//tei:graphic/@url"
-            )
-            thumbnail_source = ""
+        surface_id = v.lstrip("#")
+        graphic_candidates = doc.any_xpath(
+            f"//tei:facsimile/tei:surface[@xml:id='{surface_id}']//tei:graphic/@url"
+        )
+        thumbnail_source = ""
+        for candidate in graphic_candidates:
+            candidate = candidate.strip()
+            if not candidate:
+                continue
+            if not candidate.lower().startswith("http"):
+                thumbnail_source = candidate
+                break
+        if not thumbnail_source and graphic_candidates:
+            thumbnail_source = graphic_candidates[0].strip()
+
+        image_filename = ""
+        if graphic_candidates:
             for candidate in graphic_candidates:
                 candidate = candidate.strip()
                 if not candidate:
                     continue
-                if not candidate.lower().startswith("http"):
-                    thumbnail_source = candidate
-                    break
-            if not thumbnail_source and graphic_candidates:
-                thumbnail_source = graphic_candidates[0].strip()
-
-            if record_id and pages:
-                image_filename = derive_image_source(record_id, pages, thumbnail_source)
+                image_filename = extract_graphic_filename(candidate)
                 if image_filename:
-                    record["image_source"] = image_filename
-                    encoded_record = quote(record_id, safe="")
-                    encoded_source = quote(image_filename, safe="")
-                    record["thumbnail"] = (
-                        "https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/"
-                        f"{encoded_record}/files/images/{encoded_source}/full/!400,400/0/default.jpg"
-                    )
-            if signature:
-                record["signature"] = signature
-            if kaemmerer:
-                record["kaemmerer"] = kaemmerer
-            record["beilage_present"] = beilage_present
-            if beilage_text:
-                trimmed_beilage = (
-                    beilage_text if len(beilage_text) <= 200 else f"{beilage_text[:197]}..."
-                )
-                record["beilage_text"] = trimmed_beilage
-            if len(record["full_text"]) > 0:
-                records.append(record)
+                    break
+
+        if not image_filename and record_id and pages:
+            image_filename = derive_image_source(record_id, pages, thumbnail_source)
+
+        if image_filename:
+            record["image_source"] = image_filename
+            encoded_record = quote(record_id, safe="")
+            encoded_source = quote(image_filename, safe="")
+            record["thumbnail"] = (
+                "https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/"
+                f"{encoded_record}/files/images/{encoded_source}/full/!400,400/0/default.jpg"
+            )
+        if signature:
+            record["signature"] = signature
+        if kaemmerer:
+            record["kaemmerer"] = kaemmerer
+        record["beilage_present"] = beilage_present
+        if beilage_text:
+            trimmed_beilage = (
+                beilage_text if len(beilage_text) <= 200 else f"{beilage_text[:197]}..."
+            )
+            record["beilage_text"] = trimmed_beilage
+        if len(record["full_text"]) > 0:
+            records.append(record)
 
 print(f"prepared {len(records)} records for import")
 
