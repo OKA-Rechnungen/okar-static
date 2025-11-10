@@ -81,6 +81,46 @@ def extract_graphic_filename(value):
     return os.path.basename(target_path)
 
 
+def normalize_image_filename(record_id, value, default_extension=".tif"):
+    value = (value or "").strip()
+    if not value:
+        return ""
+
+    base_name = extract_graphic_filename(value)
+    name_part, _ext = os.path.splitext(base_name)
+    extension = default_extension or _ext or ".tif"
+
+    record_id = (record_id or "").strip()
+    digits = None
+
+    if record_id:
+        idx = name_part.find(record_id)
+        if idx != -1:
+            suffix = name_part[idx + len(record_id):]
+            match = re.search(r"(\d+)$", suffix)
+            if match:
+                digits = match.group(1)
+
+    if digits is None:
+        match = re.search(r"(\d+)$", name_part)
+        if match:
+            digits = match.group(1)
+
+    if record_id and digits:
+        padded = f"{int(digits):05d}"
+        return f"{record_id}_{padded}{extension}"
+
+    if digits:
+        padded = f"{int(digits):05d}"
+        prefix = name_part[: -len(digits)]
+        return f"{prefix}{padded}{extension}"
+
+    if record_id:
+        return f"{record_id}{extension}"
+
+    return f"{name_part}{extension}"
+
+
 files = glob.glob("./data/editions/**/*.xml", recursive=True)
 
 
@@ -186,29 +226,26 @@ for x in tqdm(files, total=len(files)):
         graphic_candidates = doc.any_xpath(
             f"//tei:facsimile/tei:surface[@xml:id='{surface_id}']//tei:graphic/@url"
         )
-        thumbnail_source = ""
+        image_filename = ""
+        fallback_candidate = ""
         for candidate in graphic_candidates:
             candidate = candidate.strip()
             if not candidate:
                 continue
-            if not candidate.lower().startswith("http"):
-                thumbnail_source = candidate
-                break
-        if not thumbnail_source and graphic_candidates:
-            thumbnail_source = graphic_candidates[0].strip()
 
-        image_filename = ""
-        if graphic_candidates:
-            for candidate in graphic_candidates:
-                candidate = candidate.strip()
-                if not candidate:
-                    continue
-                image_filename = extract_graphic_filename(candidate)
-                if image_filename:
-                    break
+            normalized = normalize_image_filename(record_id, candidate)
+            if normalized:
+                image_filename = normalized
+                break
+
+            if not fallback_candidate and not candidate.lower().startswith("http"):
+                fallback_candidate = candidate
+
+        if not image_filename and fallback_candidate:
+            image_filename = normalize_image_filename(record_id, fallback_candidate)
 
         if not image_filename and record_id and pages:
-            image_filename = derive_image_source(record_id, pages, thumbnail_source)
+            image_filename = normalize_image_filename(record_id, derive_image_source(record_id, pages, fallback_candidate))
 
         if image_filename:
             record["image_source"] = image_filename
