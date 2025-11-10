@@ -128,14 +128,20 @@
         </html>
     </xsl:template>
 
+    <xsl:template match="tei:pb[@n castable as xs:integer and xs:integer(@n) le 0]" priority="1"/>
+
     <xsl:template match="tei:pb">
         <xsl:variable name="facs" select="substring-after(data(@facs), '#')"/>
         <xsl:variable name="graphic_url" select="(ancestor::tei:TEI//tei:surface[@xml:id=$facs]/tei:graphic/@url)[1]"/>
 
         <xsl:variable name="page-number" as="xs:integer"
-            select="if (@n castable as xs:integer)
-                    then xs:integer(@n)
-                    else xs:integer(count(preceding::tei:pb)) + 1"/>
+        select="if (@n castable as xs:integer and xs:integer(@n) &gt; 0)
+            then xs:integer(@n)
+            else xs:integer(count(preceding::tei:pb[
+            not(@n)
+            or (not(@n castable as xs:integer))
+            or ((@n castable as xs:integer) and xs:integer(@n) &gt; 0)
+            ])) + 1"/>
 
         <xsl:variable name="facs_url">
             <xsl:choose>
