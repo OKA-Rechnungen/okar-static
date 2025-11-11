@@ -9,6 +9,6 @@ echo '<div lang="de">' >> ${IMPRINT_XML}
 curl "https://imprint.acdh.oeaw.ac.at/${REDMINE_ID}?format=xhtml&locale=de" >> ${IMPRINT_XML}
 echo "</div>"  >> ${IMPRINT_XML}
 echo '<div lang="en">' >> ${IMPRINT_XML}
-curl https://imprint.acdh.oeaw.ac.at/${REDMINE_ID}en >> ${IMPRINT_XML}
+curl "https://imprint.acdh.oeaw.ac.at/${REDMINE_ID}?format=xhtml&locale=en" >> ${IMPRINT_XML}
 echo "</div>" >> ${IMPRINT_XML}
 echo "</root>" >> ${IMPRINT_XML}
