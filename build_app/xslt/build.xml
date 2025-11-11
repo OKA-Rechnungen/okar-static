@@ -19,7 +19,7 @@
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt style="${xslpath}/meta.xsl" basedir="${basedir}/data/meta" destdir="${target}" includes="*.xml">
+    <xslt style="${xslpath}/meta.xsl" basedir="${basedir}/data/meta" destdir="${target}" includes="*.xml" excludes="imprint.xml">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
@@ -31,7 +31,7 @@
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="${basedir}/data/imprint.xml" out="${target}/imprint.html" style="${xslpath}/imprint.xsl">
+    <xslt in="${basedir}/data/meta/imprint.xml" out="${target}/imprint.html" style="${xslpath}/imprint.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>

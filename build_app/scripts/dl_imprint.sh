@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REDMINE_ID="24844"
-IMPRINT_XML=./data/imprint.xml
+IMPRINT_XML=./data/meta/imprint.xml
 mkdir -p data
 echo '<?xml version="1.0" encoding="UTF-8"?>' > ${IMPRINT_XML}
 echo "<root>" >> ${IMPRINT_XML}

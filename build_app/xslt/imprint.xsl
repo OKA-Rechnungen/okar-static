@@ -27,11 +27,7 @@
                 <main class="flex-shrink-0 flex-grow-1">
                     <div class="container">
                         <h1><xsl:value-of select="$doc_title"/></h1>
-                        <xsl:for-each select=".//div">
-                            <xsl:copy>
-                                <xsl:copy-of select="."/>
-                            </xsl:copy>
-                        </xsl:for-each>                          
+                        <xsl:copy-of select="/*/div"/>
                     </div>
                 </main>
                 <xsl:call-template name="html_footer"/>
