@@ -28,7 +28,33 @@
                     <xsl:value-of select="@facs"/>
                 </xsl:attribute>
             </xsl:if>
-            <xsl:apply-templates/>
+
+            <xsl:choose>
+                <xsl:when test="tei:lb">
+                    <xsl:for-each-group select="node()" group-starting-with="tei:lb">
+                        <xsl:variable name="line-starter" select="current-group()[1]"/>
+                        <xsl:variable name="line-facs" select="if ($line-starter/self::tei:lb and $line-starter/@facs) then string($line-starter/@facs) else ''"/>
+                        <xsl:variable name="line-n" select="if ($line-starter/self::tei:lb and $line-starter/@n) then string($line-starter/@n) else ''"/>
+
+                        <span class="facsimile-line">
+                            <xsl:if test="string-length($line-facs) &gt; 0">
+                                <xsl:attribute name="data-facs">
+                                    <xsl:value-of select="$line-facs"/>
+                                </xsl:attribute>
+                            </xsl:if>
+                            <xsl:if test="string-length($line-n) &gt; 0">
+                                <xsl:attribute name="data-lb">
+                                    <xsl:value-of select="$line-n"/>
+                                </xsl:attribute>
+                            </xsl:if>
+                            <xsl:apply-templates select="current-group()[not(self::tei:lb)]"/>
+                        </span>
+                    </xsl:for-each-group>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:apply-templates/>
+                </xsl:otherwise>
+            </xsl:choose>
         </div>
     </xsl:template>
     <xsl:template match="tei:pb">
@@ -50,8 +76,19 @@
     <xsl:template match="tei:date">
         <span class="date"><xsl:apply-templates/></span>
     </xsl:template>
-    <xsl:template match="tei:lb">
-        <br/>
+    <xsl:template match="tei:lb[not(ancestor::tei:ab)]">
+        <xsl:element name="br">
+            <xsl:if test="@facs">
+                <xsl:attribute name="data-facs">
+                    <xsl:value-of select="@facs"/>
+                </xsl:attribute>
+            </xsl:if>
+            <xsl:if test="@n">
+                <xsl:attribute name="data-lb">
+                    <xsl:value-of select="@n"/>
+                </xsl:attribute>
+            </xsl:if>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="tei:note">

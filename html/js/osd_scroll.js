@@ -64,6 +64,419 @@ Single page transcript navigation with OpenSeadragon image sync.
     }
 
     var pages = [];
+    var facsimileDataPromise = null;
+    var facsimileData = null;
+    var highlightOverlayElement = null;
+    var activeHighlight = { regionId: null, region: null, target: null };
+    var highlightNeedsUpdate = false;
+    var currentSurfaceId = null;
+
+    function extractRegionIdFromElement(element) {
+        if (!element) {
+            return null;
+        }
+        var rawValue = element.getAttribute('data-facs') || '';
+        if (!rawValue) {
+            return null;
+        }
+        var tokens = rawValue.split(/\s+/).filter(function(token) {
+            return token.length > 0;
+        });
+        if (!tokens.length) {
+            return null;
+        }
+        var cleaned = tokens[0].replace(/^#/, '');
+        return cleaned || null;
+    }
+
+    function extractSurfaceIdFromWrapper(wrapper) {
+        if (!wrapper) {
+            return null;
+        }
+
+        var facsElement = wrapper.querySelector('[data-facs]');
+        if (facsElement) {
+            var regionId = extractRegionIdFromElement(facsElement);
+            if (regionId) {
+                var parts = regionId.split('_');
+                if (parts.length >= 2) {
+                    return parts[0] + '_' + parts[1];
+                }
+                var match = regionId.match(/^(facs_\d+)/);
+                if (match) {
+                    return match[1];
+                }
+            }
+        }
+
+        var pbAnchor = wrapper.querySelector('span.pb');
+        if (pbAnchor) {
+            var pageLabel = pbAnchor.getAttribute('data-page-number');
+            if (pageLabel && /^\d+$/.test(pageLabel)) {
+                return 'facs_' + pageLabel;
+            }
+        }
+
+        return null;
+    }
+
+    function setActiveHighlightTarget(element) {
+        if (activeHighlight.target === element) {
+            return;
+        }
+        if (activeHighlight.target) {
+            activeHighlight.target.classList.remove('facs-highlight-target');
+        }
+        activeHighlight.target = element || null;
+        if (element) {
+            element.classList.add('facs-highlight-target');
+        }
+    }
+
+    function removeOverlayElement() {
+        if (osdViewer && highlightOverlayElement) {
+            try {
+                osdViewer.removeOverlay(highlightOverlayElement);
+            } catch (error) {
+                // intended no-op
+            }
+        }
+    }
+
+    function toArray(nodeList) {
+        return Array.prototype.slice.call(nodeList || []);
+    }
+
+    function getXmlId(node) {
+        if (!node) {
+            return null;
+        }
+        return node.getAttribute('xml:id')
+            || node.getAttributeNS('http://www.w3.org/XML/1998/namespace', 'id')
+            || node.getAttribute('id')
+            || null;
+    }
+
+    function parseFacsimileDocument(xmlDoc) {
+        var surfaces = new Map();
+        var regions = new Map();
+        if (!xmlDoc) {
+            return { surfaces: surfaces, regions: regions };
+        }
+
+        var surfaceNodes = xmlDoc.querySelectorAll('surface');
+        if (!surfaceNodes || !surfaceNodes.length) {
+            surfaceNodes = xmlDoc.getElementsByTagNameNS('*', 'surface');
+        }
+
+        toArray(surfaceNodes).forEach(function(surfaceNode) {
+            var surfaceId = getXmlId(surfaceNode);
+            if (!surfaceId) {
+                return;
+            }
+
+            var ulx = parseFloat(surfaceNode.getAttribute('ulx')) || 0;
+            var uly = parseFloat(surfaceNode.getAttribute('uly')) || 0;
+            var lrx = parseFloat(surfaceNode.getAttribute('lrx'));
+            var lry = parseFloat(surfaceNode.getAttribute('lry'));
+
+            if (!isFinite(lrx) || !isFinite(lry)) {
+                return;
+            }
+
+            var width = lrx - ulx;
+            var height = lry - uly;
+            if (!(width > 0) || !(height > 0)) {
+                return;
+            }
+
+            surfaces.set(surfaceId, {
+                id: surfaceId,
+                width: width,
+                height: height,
+                originX: ulx,
+                originY: uly
+            });
+
+            var zoneNodes = surfaceNode.querySelectorAll('zone');
+            if (!zoneNodes || !zoneNodes.length) {
+                zoneNodes = surfaceNode.getElementsByTagNameNS('*', 'zone');
+            }
+
+            toArray(zoneNodes).forEach(function(zoneNode) {
+                var zoneId = getXmlId(zoneNode);
+                if (!zoneId) {
+                    return;
+                }
+
+                var points = [];
+                var pointsAttr = zoneNode.getAttribute('points');
+                if (pointsAttr) {
+                    pointsAttr.trim().split(/\s+/).forEach(function(pair) {
+                        var parts = pair.split(',');
+                        if (parts.length === 2) {
+                            var px = parseFloat(parts[0]);
+                            var py = parseFloat(parts[1]);
+                            if (isFinite(px) && isFinite(py)) {
+                                points.push({
+                                    x: px - ulx,
+                                    y: py - uly
+                                });
+                            }
+                        }
+                    });
+                }
+
+                if (!points.length) {
+                    var zoneUlx = parseFloat(zoneNode.getAttribute('ulx'));
+                    var zoneUly = parseFloat(zoneNode.getAttribute('uly'));
+                    var zoneLrx = parseFloat(zoneNode.getAttribute('lrx'));
+                    var zoneLry = parseFloat(zoneNode.getAttribute('lry'));
+
+                    if (isFinite(zoneUlx) && isFinite(zoneUly) && isFinite(zoneLrx) && isFinite(zoneLry)) {
+                        points.push({ x: zoneUlx - ulx, y: zoneUly - uly });
+                        points.push({ x: zoneLrx - ulx, y: zoneUly - uly });
+                        points.push({ x: zoneLrx - ulx, y: zoneLry - uly });
+                        points.push({ x: zoneUlx - ulx, y: zoneLry - uly });
+                    }
+                }
+
+                if (!points.length) {
+                    return;
+                }
+
+                var bounds = {
+                    minX: Infinity,
+                    minY: Infinity,
+                    maxX: -Infinity,
+                    maxY: -Infinity
+                };
+
+                points.forEach(function(point) {
+                    bounds.minX = Math.min(bounds.minX, point.x);
+                    bounds.minY = Math.min(bounds.minY, point.y);
+                    bounds.maxX = Math.max(bounds.maxX, point.x);
+                    bounds.maxY = Math.max(bounds.maxY, point.y);
+                });
+
+                bounds.width = bounds.maxX - bounds.minX;
+                bounds.height = bounds.maxY - bounds.minY;
+
+                if (!(bounds.width > 0) || !(bounds.height > 0)) {
+                    return;
+                }
+
+                regions.set(zoneId, {
+                    id: zoneId,
+                    surfaceId: surfaceId,
+                    bounds: bounds,
+                    points: points
+                });
+            });
+        });
+
+        return {
+            surfaces: surfaces,
+            regions: regions
+        };
+    }
+
+    function ensureFacsimileData() {
+        if (facsimileData) {
+            return Promise.resolve(facsimileData);
+        }
+        if (facsimileDataPromise) {
+            return facsimileDataPromise;
+        }
+        if (!recordIdBase) {
+            facsimileDataPromise = Promise.resolve(null);
+            return facsimileDataPromise;
+        }
+
+        var xmlPath = recordIdBase + '.xml';
+        facsimileDataPromise = fetch(xmlPath).then(function(response) {
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            return response.text();
+        }).then(function(xmlText) {
+            var parser = new DOMParser();
+            var xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+            if (!xmlDoc || xmlDoc.getElementsByTagName('parsererror').length) {
+                throw new Error('Invalid facsimile XML');
+            }
+            facsimileData = parseFacsimileDocument(xmlDoc);
+            return facsimileData;
+        }).catch(function(error) {
+            console.warn('Unable to load facsimile regions', error);
+            facsimileData = null;
+            return null;
+        });
+
+        return facsimileDataPromise;
+    }
+
+    function applyHighlightOverlay() {
+        if (!osdViewer || !activeHighlight.region) {
+            return;
+        }
+
+        if (currentSurfaceId && activeHighlight.region.surfaceId && currentSurfaceId !== activeHighlight.region.surfaceId) {
+            removeOverlayElement();
+            highlightNeedsUpdate = false;
+            return;
+        }
+
+        var tiledImage = osdViewer.world.getItemAt(0);
+        if (!tiledImage) {
+            highlightNeedsUpdate = true;
+            return;
+        }
+
+        if (!facsimileData || !facsimileData.surfaces) {
+            highlightNeedsUpdate = true;
+            return;
+        }
+
+        var surfaceInfo = facsimileData.surfaces.get(activeHighlight.region.surfaceId);
+        if (!surfaceInfo) {
+            highlightNeedsUpdate = false;
+            return;
+        }
+
+        var contentSize = tiledImage.getContentSize();
+        if (!contentSize || !contentSize.x || !contentSize.y) {
+            highlightNeedsUpdate = true;
+            return;
+        }
+
+        var scaleX = contentSize.x / surfaceInfo.width;
+        var scaleY = contentSize.y / surfaceInfo.height;
+
+        var viewportRect = osdViewer.viewport.imageToViewportRectangle(
+            activeHighlight.region.bounds.minX * scaleX,
+            activeHighlight.region.bounds.minY * scaleY,
+            activeHighlight.region.bounds.width * scaleX,
+            activeHighlight.region.bounds.height * scaleY
+        );
+
+        if (!highlightOverlayElement) {
+            highlightOverlayElement = document.createElement('div');
+            highlightOverlayElement.className = 'facsimile-highlight-overlay';
+        }
+
+        osdViewer.addOverlay({
+            element: highlightOverlayElement,
+            location: viewportRect,
+            placement: OpenSeadragon.Placement.TOP_LEFT
+        });
+
+        highlightNeedsUpdate = false;
+    }
+
+    function clearHighlight() {
+        activeHighlight.regionId = null;
+        activeHighlight.region = null;
+        highlightNeedsUpdate = false;
+        removeOverlayElement();
+        setActiveHighlightTarget(null);
+    }
+
+    function requestHighlight(regionId, targetElement) {
+        if (!regionId || !targetElement) {
+            return;
+        }
+
+        setActiveHighlightTarget(targetElement);
+        removeOverlayElement();
+        activeHighlight.regionId = regionId;
+        activeHighlight.region = null;
+        highlightNeedsUpdate = true;
+
+        ensureFacsimileData().then(function(store) {
+            if (activeHighlight.regionId !== regionId) {
+                return;
+            }
+            if (!store || !store.regions) {
+                return;
+            }
+            var region = store.regions.get(regionId);
+            if (!region) {
+                return;
+            }
+            if (currentSurfaceId && region.surfaceId && currentSurfaceId !== region.surfaceId) {
+                return;
+            }
+            facsimileData = store;
+            activeHighlight.region = region;
+            applyHighlightOverlay();
+            if (highlightNeedsUpdate) {
+                if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+                    window.requestAnimationFrame(applyHighlightOverlay);
+                } else if (typeof window !== 'undefined' && typeof window.setTimeout === 'function') {
+                    window.setTimeout(applyHighlightOverlay, 16);
+                }
+            }
+        });
+    }
+
+    function handleFacsimilePointerEnter(event) {
+        var target = event.currentTarget;
+        if (!target) {
+            return;
+        }
+
+        var regionId = target.dataset.facsRegionId || extractRegionIdFromElement(target);
+        if (!regionId) {
+            return;
+        }
+        target.dataset.facsRegionId = regionId;
+
+        if (activeHighlight.regionId === regionId && activeHighlight.target === target && activeHighlight.region) {
+            if (highlightNeedsUpdate) {
+                applyHighlightOverlay();
+            }
+            return;
+        }
+
+        requestHighlight(regionId, target);
+    }
+
+    function handleFacsimilePointerLeave(event) {
+        var target = event.currentTarget;
+        if (target && activeHighlight.target === target) {
+            clearHighlight();
+        }
+    }
+
+    function setupFacsimileTargets() {
+        if (!transcript) {
+            return;
+        }
+
+        var targets = transcript.querySelectorAll('[data-facs]');
+        if (!targets || !targets.length) {
+            return;
+        }
+
+        targets.forEach(function(target) {
+            if (target.dataset.facsHighlightBound === 'true') {
+                return;
+            }
+            var regionId = extractRegionIdFromElement(target);
+            if (!regionId) {
+                return;
+            }
+            target.dataset.facsRegionId = regionId;
+            target.dataset.facsHighlightBound = 'true';
+            target.addEventListener('pointerenter', handleFacsimilePointerEnter);
+            target.addEventListener('pointerleave', handleFacsimilePointerLeave);
+            target.addEventListener('pointercancel', handleFacsimilePointerLeave);
+            target.addEventListener('pointerdown', handleFacsimilePointerEnter);
+            target.addEventListener('focus', handleFacsimilePointerEnter, true);
+            target.addEventListener('blur', handleFacsimilePointerLeave, true);
+        });
+    }
 
     function buildTranscriptRow(wrapper) {
         if (!wrapper) {
@@ -185,12 +598,14 @@ Single page transcript navigation with OpenSeadragon image sync.
         pageWrapper.dataset.pageLabel = label;
 
         var transcriptRow = buildTranscriptRow(pageWrapper);
+        var surfaceId = extractSurfaceIdFromWrapper(pageWrapper);
 
         pages.push({
             wrapper: pageWrapper,
             imageSource: normalizedSource,
             label: label,
-            row: transcriptRow
+            row: transcriptRow,
+            surfaceId: surfaceId
         });
     });
 
@@ -201,6 +616,8 @@ Single page transcript navigation with OpenSeadragon image sync.
         page.wrapper.setAttribute('aria-hidden', 'true');
         contentRoot.appendChild(page.wrapper);
     });
+
+    setupFacsimileTargets();
 
     var navControls = {
         first: null,
@@ -287,6 +704,18 @@ Single page transcript navigation with OpenSeadragon image sync.
             prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.0.0/images/',
             sequenceMode: false,
             showNavigator: true
+        });
+
+        osdViewer.addHandler('open', function() {
+            if (!activeHighlight.region) {
+                return;
+            }
+            highlightNeedsUpdate = true;
+            if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+                window.requestAnimationFrame(applyHighlightOverlay);
+            } else {
+                applyHighlightOverlay();
+            }
         });
     }
 
@@ -511,6 +940,8 @@ Single page transcript navigation with OpenSeadragon image sync.
             }
         }
 
+        clearHighlight();
+
         pages[index].wrapper.style.display = 'block';
         pages[index].wrapper.setAttribute('aria-hidden', 'false');
         if (pages[index].row) {
@@ -518,6 +949,7 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
 
         currentPageIndex = index;
+        currentSurfaceId = pages[index].surfaceId || null;
 
         loadOsdImage(pages[index].imageSource);
         updateNavState();
