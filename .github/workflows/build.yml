@@ -46,6 +46,8 @@ jobs:
         run: build_app/scripts/fetch_data.sh
       - name: Build the app
         run: ant -f build_app/xslt/build.xml
+      - name: Rebuild Typesense index
+        run: build_app/scripts/make_ts_index.py
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
