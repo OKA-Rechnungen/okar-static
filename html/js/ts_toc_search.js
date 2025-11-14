@@ -365,22 +365,21 @@ search.addWidgets([
 
   instantsearch.widgets.panel({
     templates: { header: 'Beilage' },
-  })(instantsearch.widgets.refinementList)({
+  })(instantsearch.widgets.toggleRefinement)({
     container: '#refinement-list-beilage',
     attribute: 'beilage_present',
-    transformItems: function (items) {
-      return items.map(function (item) {
-        return Object.assign({}, item, {
-          label: formatBeilageValue(item.value),
-          value: item.value,
-        });
-      });
+    on: true,
+    templates: {
+      labelText: function () {
+        return 'Nur Einträge mit Beilage anzeigen';
+      },
     },
     cssClasses: {
-      list: 'list-unstyled',
-      label: 'form-check form-check-inline align-items-start',
+      root: 'form-check',
+      label: 'form-check-label d-flex align-items-center gap-2',
       checkbox: 'form-check-input',
-      labelText: 'form-check-label',
+      labelText: 'mb-0',
+      count: 'd-none',
     },
   }),
 
