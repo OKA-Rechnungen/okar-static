@@ -3,16 +3,13 @@ import glob
 import os
 import re
 from urllib.parse import quote, urlparse
-
 from typesense.api_call import ObjectNotFound
 from typing import Any
 from acdh_cfts_pyutils import TYPESENSE_CLIENT
-
-
-client: Any = TYPESENSE_CLIENT
 from acdh_tei_pyutils.tei import TeiReader
 from tqdm import tqdm
 
+client: Any = TYPESENSE_CLIENT
 
 YEAR_CANDIDATE_ATTRS = (
     "//tei:origin/tei:origDate/@when",
@@ -56,7 +53,6 @@ def resolve_year(doc):
     return None
 
 
-
 def extract_graphic_filename(value):
     if not value:
         return ""
@@ -93,15 +89,16 @@ def main():
     current_schema = {
         "name": "OKAR",
         "fields": [
-            {"name": "id", "type": "string"},
-            {"name": "rec_id", "type": "string", "facet": True},
-            {"name": "title", "type": "string"},
+            {"name": "id", "type": "string", "sort": True},
+            {"name": "rec_id", "type": "string", "facet": True, "sort": True},
+            {"name": "title", "type": "string", "sort": True},
             {"name": "full_text", "type": "string"},
             {
                 "name": "year",
                 "type": "int32",
                 "optional": True,
                 "facet": True,
+                "sort": True,
             },
             {"name": "signature", "type": "string", "facet": True, "optional": True},
             {"name": "kaemmerer", "type": "string[]", "facet": True, "optional": True},
