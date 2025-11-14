@@ -159,13 +159,17 @@ def main():
             record["rec_id"] = os.path.split(x)[-1]
             r_title = " ".join(
                 " ".join(
-                    doc.any_xpath('.//tei:titleStmt/tei:title[@level="a"]/text()')
+                    doc.any_xpath(
+                        './/tei:titleStmt/tei:title[@level="a" and @type="desc"]/text()'
+                    )
                 ).split()
             )
             if not r_title:
                 r_title = " ".join(
                     " ".join(
-                        doc.any_xpath('.//tei:titleStmt/tei:title[@type="desc"]/text()')
+                        doc.any_xpath(
+                            './/tei:titleStmt/tei:title[@level="a" and (@type="main" or not(@type))]/text()'
+                        )
                     ).split()
                 )
             if not r_title:
