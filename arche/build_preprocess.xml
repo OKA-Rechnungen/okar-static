@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="../.." name="tei2html">
+    <property name="tei" value="${basedir}/data/editions"/>
+    <property name="editions" value="${basedir}/arche/editions"/>
+    <property name="preprocess" value="${basedir}/scripts/ant/preprocess.xsl"/>
+
+    <mkdir dir="${editions}"/>
+
+    <!-- project traktat -->
+
+    <xslt style="${preprocess}"  basedir="${tei}" destdir="${editions}" includes="*.xml">
+        <mapper type="glob" from="*.xml" to="*.xml"/>
+        <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+        <classpath location="${basedir}/saxon/saxon9he.jar"/>
+    </xslt>
+
+</project>
