@@ -36,7 +36,7 @@
         <acdh:hasUrl>https://okar.acdh.oeaw.ac.at</acdh:hasUrl>
 	<acdh:hasCreatedStartDate>2025-10-01</acdh:hasCreatedStartDate>
         <acdh:hasCreatedEndDate>2025-03-31</acdh:hasCreatedEndDate>
-        <acdh:hasOaiSet rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeoaisets/openaire" />
+        <acdh:hasOaiSet rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeoaisets/openaire_data" />
         <acdh:hasCustomCitation>@dataset{klugseder_2025,
 		title = {Oberkammeramtsrechnungsbücher der Stadt Wien},
 		publisher = {ARCHE},
