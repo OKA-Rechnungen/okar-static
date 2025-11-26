@@ -58,7 +58,7 @@
                     <acdh:hasContributor rdf:resource="https://id.acdh.oeaw.ac.at/fsanzlazaro"/>
                     <acdh:hasMetadataCreator rdf:resource="https://id.acdh.oeaw.ac.at/fsanzlazaro"/>
                     <xsl:copy-of select="$constants"/>
-                    <xsl:copy-of select="$constantsMeta"/>
+                    <!-- <xsl:copy-of select="$constantsMeta"/> -->
                     <xsl:for-each select=".//acdh:*">
                         <xsl:copy-of select="."/>
                     </xsl:for-each>
@@ -70,7 +70,7 @@
                     <xsl:attribute name="rdf:about">
                         <xsl:value-of select="@rdf:about"/>
                     </xsl:attribute>
-                    <acdh:hasAccessRestriction rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeaccessrestrictions/public"/>
+                    <!-- <acdh:hasAccessRestriction rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeaccessrestrictions/public"/> -->
                     <xsl:copy-of select="$constants"/>
                     <!-- <xsl:copy-of select="$constantsImg"/> -->
                     <xsl:for-each select=".//acdh:*">
@@ -93,11 +93,11 @@
                 <xsl:variable name="startYear" select="if ($origDateNotBefore and matches($origDateNotBefore, '^-?\d{4}')) then replace($origDateNotBefore, '^(-?\d{4}).*$', '$1') else ''"/>
                 <xsl:variable name="endYear" select="if ($origDateNotAfter and matches($origDateNotAfter, '^-?\d{4}')) then replace($origDateNotAfter, '^(-?\d{4}).*$', '$1') else ''"/>
                 <xsl:variable name="coverageIdentifierYear" select="if (string-length($origDateYear) &gt; 0) then $origDateYear else if (string-length($startYear) &gt; 0 and string-length($endYear) &gt; 0 and $startYear = $endYear) then $startYear else if (string-length($startYear) &gt; 0) then $startYear else $endYear"/>
-                <xsl:variable name="coverageIdentifierUri" select="if (string-length($coverageIdentifierYear) &gt; 0 and $coverageIdentifierYear castable as xs:integer and xs:integer($coverageIdentifierYear) &gt;= 1500) then 'http://n2t.net/ark:/99152/p0qhb66' else 'http://n2t.net/ark:/99152/p0qhb66'"/>
+                <xsl:variable name="coverageIdentifierUri" select="if (string-length($coverageIdentifierYear) &gt; 0 and $coverageIdentifierYear castable as xs:integer and xs:integer($coverageIdentifierYear) &gt;= 1500) then 'https://n2t.net/ark:/99152/p0qhb66' else 'https://n2t.net/ark:/99152/p0qhb66'"/>
                 <xsl:variable name="coverageElements">
                     <xsl:choose>
                         <xsl:when test="$origDateYear">
-                            <acdh:hasTemporalCoverage>
+                            <acdh:hasTemporalCoverage xml:lang="und">
                                 <xsl:value-of select="$origDateYear"/>
                             </acdh:hasTemporalCoverage>
                         </xsl:when>
@@ -123,7 +123,7 @@
                 <xsl:variable name="coverageIdentifierElements">
                     <xsl:if test="string-length($coverageIdentifierYear) &gt; 0">
                         <acdh:hasTemporalCoverageIdentifier>
-                            <xsl:attribute name="rdf:resource" select="$coverageIdentifierUri"/>
+				<xsl:value-of select="$coverageIdentifierUri"/>
                         </acdh:hasTemporalCoverageIdentifier>
                     </xsl:if>
                 </xsl:variable>
@@ -178,7 +178,7 @@
                         <acdh:hasDescription xml:lang="de">
                             <xsl:value-of select="concat('Digitalisierte Seiten des Bandes ', $volumeLabel)"/>
                         </acdh:hasDescription>
-                        <acdh:hasSpacialCoverage rdf:resource="https://id.acdh.oeaw.ac.at/vienna" />
+                        <acdh:hasSpatialCoverage rdf:resource="https://id.acdh.oeaw.ac.at/vienna" /> 
                         <xsl:copy-of select="$coverageElements/*"/>
                         <xsl:copy-of select="$coverageIdentifierElements/*"/>
                         <xsl:copy-of select="$descriptionElements/*"/>
@@ -209,17 +209,19 @@
                         <acdh:Resource rdf:about="{$effectiveId}">
                             <acdh:hasPid>create</acdh:hasPid>
                             <acdh:isPartOf rdf:resource="{$volumeCol}"/>
-                            <acdh:hasAccessRestriction rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeaccessrestrictions/public"/>
+                            <!-- <acdh:hasAccessRestriction rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeaccessrestrictions/public"/> -->
                             <acdh:hasLicense rdf:resource="https://vocabs.acdh.oeaw.ac.at/archelicenses/cc-by-4-0"/>
                             <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/image"/>
+        		    <acdh:hasTag xml:lang="en">TEXT</acdh:hasTag>
+                            <acdh:hasFormat>image/tiff</acdh:hasFormat>
                             <acdh:hasTitle xml:lang="de">
                                 <xsl:value-of select="concat($volumeLabel, ' – ', $graphicUrl)"/>
                             </acdh:hasTitle>
-                            <acdh:hasUrl>
+                            <!-- <acdh:hasUrl>
                                 <xsl:value-of select="$graphicUrl"/>
-                            </acdh:hasUrl>
+                            </acdh:hasUrl> -->
                             <xsl:if test="string-length($extentValue) &gt; 0">
-                                <acdh:hasExtent>
+                                <acdh:hasExtent xml:lang="und">
                                     <xsl:value-of select="$extentValue"/>
                                 </acdh:hasExtent>
                             </xsl:if>
@@ -235,7 +237,6 @@
                 <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/image"/>
                 <acdh:hasFormat>image/+xml</acdh:hasFormat>
                 <acdh:isTitleImageOf rdf:resource="https://id.acdh.oeaw.ac.at/okar"/>
-                <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/image"/>
                 <xsl:copy-of select="$constants"/>
                 <xsl:copy-of select="$constantsMeta"/>
             </acdh:Resource>
@@ -243,7 +244,7 @@
                 <acdh:hasTitle xml:lang="de">XML/TEI Schema ODD für „Oberkammeramtsrechnungsbücher der Stadt Wien“</acdh:hasTitle>
                 <acdh:hasDescription xml:lang="de">XML/TEI Schema ODD für „Oberkammeramtsrechnungsbücher der Stadt Wien“</acdh:hasDescription>
                 <!-- <acdh:hasPid>create</acdh:hasPid> -->
-                <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/text/tei"/>
+                <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/other"/>
                 <acdh:isMetadataFor rdf:resource="https://id.acdh.oeaw.ac.at/okar/editions"/>
                 <xsl:copy-of select="$constants"/>
                 <xsl:copy-of select="$constantsMeta"/>
@@ -252,7 +253,7 @@
                 <acdh:hasTitle xml:lang="de">TEI/XML Schema RNG für „Oberkammeramtsrechnungsbücher der Stadt Wien“</acdh:hasTitle>
                 <acdh:hasDescription xml:lang="de">XML/TEI Schema RNG für „Oberkammeramtsrechnungsbücher der Stadt Wien“</acdh:hasDescription>
                 <!-- <acdh:hasPid>create</acdh:hasPid> -->
-                <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/text/tei"/>
+                <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/other"/>
                 <acdh:isMetadataFor rdf:resource="https://id.acdh.oeaw.ac.at/okar/editions"/>
                 <xsl:copy-of select="$constants"/>
                 <xsl:copy-of select="$constantsMeta"/>
