@@ -76,6 +76,7 @@
                     <xsl:for-each select=".//acdh:*">
                         <xsl:copy-of select="."/>
                     </xsl:for-each>
+<acdh:hasOaiSet rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeoaisets/kulturpool" />     
                 </acdh:Collection>
             </xsl:for-each>
 
@@ -188,27 +189,39 @@
                         <xsl:copy-of select="$constantsImg"/>
                     </acdh:Collection>
 
-                    <xsl:for-each-group select="$graphics" group-by="@url">
-                        <xsl:variable name="graphicUrl" select="string(current-grouping-key())"/>
-                        <xsl:variable name="effectiveId" select="concat($volumeCol, '/', encode-for-uri($graphicUrl))"/>
-                        <xsl:variable name="width" select="string(current-group()[1]/@width)"/>
-                        <xsl:variable name="height" select="string(current-group()[1]/@height)"/>
-                        <xsl:variable name="extentValue">
-                            <xsl:choose>
-                                <xsl:when test="$width and $height">
-                                    <xsl:value-of select="concat($width, ' × ', $height)"/>
-                                </xsl:when>
-                                <xsl:when test="$width">
-                                    <xsl:value-of select="$width"/>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="$height"/>
-                                </xsl:otherwise>
-                            </xsl:choose>
-                        </xsl:variable>
-                        <acdh:Resource rdf:about="{$effectiveId}">
+                    <xsl:variable name="graphicsList" select="$graphics"/>
+<xsl:for-each select="$graphicsList">
+    <xsl:variable name="graphicUrl" select="string(@url)"/>
+    <xsl:variable name="effectiveId" select="concat($volumeCol, '/', encode-for-uri($graphicUrl))"/>
+    <xsl:variable name="width" select="string(@width)"/>
+    <xsl:variable name="height" select="string(@height)"/>
+    <xsl:variable name="extentValue">
+        <xsl:choose>
+            <xsl:when test="$width and $height">
+                <xsl:value-of select="concat($width, ' × ', $height)"/>
+            </xsl:when>
+            <xsl:when test="$width">
+                <xsl:value-of select="$width"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$height"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    <xsl:variable name="nextGraphic">
+        <xsl:choose>
+            <xsl:when test="position() &lt; last()">
+                <xsl:value-of select="concat($volumeCol, '/', encode-for-uri($graphicsList[position()+1]/@url))"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$volumeCol"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    <acdh:Resource rdf:about="{$effectiveId}">
                             <acdh:hasPid>create</acdh:hasPid>
                             <acdh:isPartOf rdf:resource="{$volumeCol}"/>
+                            <acdh:hasNextItem rdf:resource="{$nextGraphic}"/>
                             <!-- <acdh:hasAccessRestriction rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeaccessrestrictions/public"/> -->
                             <acdh:hasLicense rdf:resource="https://vocabs.acdh.oeaw.ac.at/archelicenses/cc-by-4-0"/>
                             <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/image"/>
@@ -228,7 +241,7 @@
                             <xsl:copy-of select="$constants"/>
                             <xsl:copy-of select="$constantsImg"/>
                         </acdh:Resource>
-                    </xsl:for-each-group>
+                    </xsl:for-each>
                 </xsl:if>
             </xsl:for-each>
             <acdh:Resource rdf:about="https://id.acdh.oeaw.ac.at/okar/logo_okar.svg">
