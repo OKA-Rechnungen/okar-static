@@ -298,7 +298,7 @@
             <acdh:hasNextItem rdf:resource="{if ($nextNode) then $nextGraphicUri else $nextVolumeFirstGraphic}"/>
         </xsl:if>
         <!-- <acdh:hasAccessRestriction rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeaccessrestrictions/public"/> -->
-        <acdh:hasLicense rdf:resource="https://vocabs.acdh.oeaw.ac.at/archelicenses/cc-by-4-0"/>
+        <!-- <acdh:hasLicense rdf:resource="https://vocabs.acdh.oeaw.ac.at/archelicenses/cc-by-4-0"/> -->
         <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/image"/>
         <acdh:hasTag xml:lang="en">TEXT</acdh:hasTag>
         <acdh:hasFormat>image/tiff</acdh:hasFormat>
