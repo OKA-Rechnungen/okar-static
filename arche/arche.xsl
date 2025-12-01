@@ -323,7 +323,7 @@
                 <acdh:hasTitle xml:lang="de">Logo von „Oberkammeramtsrechnungsbücher der Stadt Wien“</acdh:hasTitle>
                 <!--<acdh:hasPid>create</acdh:hasPid> -->
                 <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/image"/>
-                <acdh:hasFormat>image/+xml</acdh:hasFormat>
+                <acdh:hasFormat>image/svg+xml</acdh:hasFormat>
                 <acdh:isTitleImageOf rdf:resource="https://id.acdh.oeaw.ac.at/okar"/>
                 <acdh:hasNextItem rdf:resource="https://id.acdh.oeaw.ac.at/okar/vms.odd"/>
                 <xsl:copy-of select="$constants"/>
