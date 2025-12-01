@@ -8,11 +8,11 @@
       <acdh:hasContact rdf:resource="https://id.acdh.oeaw.ac.at/rklugseder"/>
       <acdh:hasMetadataCreator rdf:resource="https://id.acdh.oeaw.ac.at/fsanzlazaro"/>
       <acdh:hasDepositor rdf:resource="https://id.acdh.oeaw.ac.at/rklugseder"/>
+      <acdh:hasEditor rdf:resource="https://d-nb.info/gnd/2060831-7"/>
       <acdh:hasEditor rdf:resource="https://id.acdh.oeaw.ac.at/rklugseder"/>
       <acdh:hasContributor rdf:resource="https://id.acdh.oeaw.ac.at/junterholzner"/>
       <acdh:hasContributor rdf:resource="https://id.acdh.oeaw.ac.at/fsanzlazaro"/>
       <acdh:hasContributor rdf:resource="https://id.acdh.oeaw.ac.at/dschopper"/>
-      <acdh:hasContributor rdf:resource="https://d-nb.info/gnd/2060831-7"/>
       <acdh:hasCoverageStartDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1424-01-01</acdh:hasCoverageStartDate>
       <acdh:hasCoverageEndDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1767-12-31</acdh:hasCoverageEndDate>
       <acdh:hasSubject xml:lang="de">Digitale Edition</acdh:hasSubject>
@@ -25,6 +25,8 @@
       <acdh:hasFunder rdf:resource="https://id.acdh.oeaw.ac.at/europeanunion"/>
       <acdh:hasFunder rdf:resource="https://id.acdh.oeaw.ac.at/bmkkoeds"/>
       <acdh:hasLicensor rdf:resource="https://id.acdh.oeaw.ac.at/acdh"/>
+      <acdh:hasLicensor rdf:resource="https://d-nb.info/gnd/2060831-7"/>
+      <acdh:hasOwner rdf:resource="https://d-nb.info/gnd/2060831-7"/>
       <!-- <acdh:hasAccessRestriction rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeaccessrestrictions/public"/> -->
       <acdh:hasOwner rdf:resource="https://id.acdh.oeaw.ac.at/acdh"/>
       <acdh:hasRightsHolder rdf:resource="https://id.acdh.oeaw.ac.at/oeaw"/>
@@ -37,14 +39,13 @@
       <acdh:hasCreatedEndDate>2026-03-31</acdh:hasCreatedEndDate>
       <acdh:hasOaiSet rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeoaisets/openaire_data"/>
       <acdh:hasCurator rdf:resource="https://id.acdh.oeaw.ac.at/fsanzlazaro"/>
-      <!-- <acdh:hasCustomCitation>@dataset{klugseder_2025,
+      <acdh:hasCustomCitation>@dataset{wstla_okar_2025,
 		title = {Oberkammeramtsrechnungsbücher der Stadt Wien},
 		publisher = {ARCHE},
 		date = {2025-12-31},
-		langid = {ngerman},
-		editor = {Klugseder, Robert AND Unterholzner, Johanna},
+		editor = {{Wiener Stadt- und Landesarchiv} AND Klugseder, Robert},
 		keywords = {Wien, Oberkammeramt, Rechnungsbücher},
-	}</acdh:hasCustomCitation> -->
+	}</acdh:hasCustomCitation>
    </acdh:TopCollection>
    <acdh:Person xmlns:acdh="https://vocabs.acdh.oeaw.ac.at/schema#"
                 rdf:about="https://id.acdh.oeaw.ac.at/junterholzner">
@@ -70,6 +71,7 @@
       <acdh:hasCurator rdf:resource="https://id.acdh.oeaw.ac.at/fsanzlazaro"/>
       <acdh:hasOaiSet rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeoaisets/openaire_data"/>
       <acdh:hasEditor rdf:resource="https://id.acdh.oeaw.ac.at/rklugseder"/>
+      <acdh:hasEditor rdf:resource="https://id.acdh.oeaw.ac.at/junterholzner"/>
       <acdh:hasPid>create</acdh:hasPid>
       <acdh:hasTitle xml:lang="de">XML-TEI-Editionen</acdh:hasTitle>
       <acdh:hasDescription xml:lang="de">XML-TEI-Editionen der Oberkammeramtsrechnungsbücher der Stadt Wien</acdh:hasDescription>
@@ -103,6 +105,9 @@
       <acdh:hasPid>create</acdh:hasPid>
       <acdh:hasTitle xml:lang="de">Gescannte Bände</acdh:hasTitle>
       <acdh:hasEditor rdf:resource="https://d-nb.info/gnd/2060831-7"/>
+      <acdh:hasLicensor rdf:resource="https://d-nb.info/gnd/2060831-7"/>
+      <acdh:hasOwner rdf:resource="https://d-nb.info/gnd/2060831-7"/>
+      <acdh:hasLicense rdf:resource="https://vocabs.acdh.oeaw.ac.at/archelicenses/cc-by-nc-nd-4-0"/>
       <acdh:hasTag xml:lang="und">TEXT</acdh:hasTag>
       <acdh:hasDescription xml:lang="de">Gescannte Bände der Oberkammeramtsrechnungsbücher der Stadt Wien</acdh:hasDescription>
       <acdh:hasLifeCycleStatus rdf:resource="https://vocabs.acdh.oeaw.ac.at/archelifecyclestatus/completed"/>
