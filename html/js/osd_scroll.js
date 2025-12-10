@@ -478,15 +478,17 @@ Single page transcript navigation with OpenSeadragon image sync.
         });
     }
 
-    function buildTranscriptRow(wrapper) {
+    function buildTranscriptRow(wrapper, abBlocks) {
         if (!wrapper) {
             return null;
         }
 
-        var children = Array.prototype.slice.call(wrapper.children || []);
-        var abBlocks = children.filter(function(node) {
-            return node.nodeType === 1 && node.classList.contains('ab');
-        });
+        if (!abBlocks || !abBlocks.length) {
+            var children = Array.prototype.slice.call(wrapper.children || []);
+            abBlocks = children.filter(function(node) {
+                return node.nodeType === 1 && node.classList.contains('ab');
+            });
+        }
 
         if (!abBlocks.length) {
             return null;
@@ -497,15 +499,34 @@ Single page transcript navigation with OpenSeadragon image sync.
         row.style.display = 'none';
 
         var visibleCount = abBlocks.length;
-        var multiColumn = visibleCount === 2;
-        var columnClass = multiColumn ? 'col-12 col-lg-6 transcript-column' : 'col-12 transcript-column';
 
-        abBlocks.forEach(function(abBlock) {
-            var column = document.createElement('div');
-            column.className = columnClass;
-            column.appendChild(abBlock);
-            row.appendChild(column);
-        });
+        if (visibleCount === 1) {
+            var singleAb = abBlocks[0];
+
+            var leftColumn = document.createElement('div');
+            leftColumn.className = 'col-12 col-lg-6 transcript-column transcript-column-left';
+
+            var rightColumn = document.createElement('div');
+            rightColumn.className = 'col-12 col-lg-6 transcript-column transcript-column-right';
+
+            // Default: place single-ab pages in the second (right) column.
+            rightColumn.appendChild(singleAb);
+
+            row.appendChild(leftColumn);
+            row.appendChild(rightColumn);
+
+            row.dataset.singleAbColumns = 'true';
+        } else {
+            var multiColumn = visibleCount === 2;
+            var columnClass = multiColumn ? 'col-12 col-lg-6 transcript-column' : 'col-12 transcript-column';
+
+            abBlocks.forEach(function(abBlock) {
+                var column = document.createElement('div');
+                column.className = columnClass;
+                column.appendChild(abBlock);
+                row.appendChild(column);
+            });
+        }
 
         var anchor = wrapper.querySelector('span.pb');
         if (anchor && anchor.nextSibling) {
@@ -515,6 +536,134 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
 
         return row;
+    }
+
+    function computeAbLayoutInfoForPage(page) {
+        if (!page || !page.wrapper || !facsimileData || !facsimileData.regions || !facsimileData.surfaces) {
+            return null;
+        }
+
+        var facsElements = page.wrapper.querySelectorAll('[data-facs]');
+        if (!facsElements || !facsElements.length) {
+            return null;
+        }
+
+        var seen = Object.create(null);
+        var regionsForPage = [];
+        var pageSurfaceId = page.surfaceId || null;
+
+        facsElements.forEach(function(element) {
+            var regionId = element.dataset.facsRegionId || extractRegionIdFromElement(element);
+            if (!regionId || seen[regionId]) {
+                return;
+            }
+            seen[regionId] = true;
+
+            if (!facsimileData.regions) {
+                return;
+            }
+
+            var region = facsimileData.regions.get(regionId);
+            if (!region) {
+                return;
+            }
+
+            if (pageSurfaceId && region.surfaceId && region.surfaceId !== pageSurfaceId) {
+                return;
+            }
+
+            regionsForPage.push(region);
+        });
+
+        if (!regionsForPage.length) {
+            return null;
+        }
+
+        var totalWeightedCenter = 0;
+        var totalWeight = 0;
+        var referenceSurfaceWidth = null;
+
+        regionsForPage.forEach(function(region) {
+            var bounds = region.bounds;
+            if (!bounds || !(bounds.width > 0) || !(bounds.height > 0)) {
+                return;
+            }
+
+            var surface = facsimileData.surfaces.get(region.surfaceId);
+            if (!surface) {
+                return;
+            }
+
+            if (referenceSurfaceWidth === null) {
+                referenceSurfaceWidth = surface.width;
+            }
+
+            var centerX = (bounds.minX + bounds.maxX) / 2;
+            var area = bounds.width * bounds.height;
+            totalWeightedCenter += centerX * area;
+            totalWeight += area;
+        });
+
+        if (!totalWeight || !referenceSurfaceWidth) {
+            return null;
+        }
+
+        var meanCenterX = totalWeightedCenter / totalWeight;
+        var preferredColumn = meanCenterX < referenceSurfaceWidth / 2 ? 'left' : 'right';
+
+        return {
+            meanCenterX: meanCenterX,
+            surfaceWidth: referenceSurfaceWidth,
+            preferredColumn: preferredColumn
+        };
+    }
+
+    function setSingleAbColumnPosition(page, position) {
+        if (!page || !page.row) {
+            return;
+        }
+
+        var row = page.row;
+        if (row.dataset.singleAbColumns !== 'true') {
+            return;
+        }
+
+        var leftColumn = row.querySelector('.transcript-column-left');
+        var rightColumn = row.querySelector('.transcript-column-right');
+        if (!leftColumn || !rightColumn) {
+            return;
+        }
+
+        var abBlock = row.querySelector('.ab');
+        if (!abBlock) {
+            return;
+        }
+
+        var targetColumn = position === 'left' ? leftColumn : rightColumn;
+        if (targetColumn.contains(abBlock)) {
+            return;
+        }
+
+        if (abBlock.parentNode && abBlock.parentNode !== targetColumn) {
+            abBlock.parentNode.removeChild(abBlock);
+        }
+        targetColumn.appendChild(abBlock);
+    }
+
+    function adjustSingleAbColumnPlacement() {
+        if (!facsimileData || !facsimileData.surfaces || !facsimileData.regions) {
+            return;
+        }
+
+        pages.forEach(function(page) {
+            if (!page || !page.isSingleAb || !page.row) {
+                return;
+            }
+
+            var layoutInfo = computeAbLayoutInfoForPage(page);
+            var preferred = (layoutInfo && layoutInfo.preferredColumn) ? layoutInfo.preferredColumn : 'right';
+            setSingleAbColumnPosition(page, preferred);
+        });
     }
 
     function resolvePageIndexFromElement(element) {
@@ -587,6 +736,8 @@ Single page transcript navigation with OpenSeadragon image sync.
             node = nextNode;
         }
 
+        var abBlocks = Array.prototype.slice.call(pageWrapper.querySelectorAll('.ab'));
+
         var source = pb.getAttribute('source') || '';
         var normalizedSource = normalizeImageSource(source, { recordId: recordIdBase, pageIndex: index + 1 });
         if (normalizedSource !== source) {
@@ -597,7 +748,7 @@ Single page transcript navigation with OpenSeadragon image sync.
 
         pageWrapper.dataset.pageLabel = label;
 
-        var transcriptRow = buildTranscriptRow(pageWrapper);
+        var transcriptRow = buildTranscriptRow(pageWrapper, abBlocks);
         var surfaceId = extractSurfaceIdFromWrapper(pageWrapper);
 
         pages.push({
@@ -605,7 +756,8 @@ Single page transcript navigation with OpenSeadragon image sync.
             imageSource: normalizedSource,
             label: label,
             row: transcriptRow,
-            surfaceId: surfaceId
+            surfaceId: surfaceId,
+            isSingleAb: abBlocks.length === 1
         });
     });
 
@@ -618,6 +770,14 @@ Single page transcript navigation with OpenSeadragon image sync.
     });
 
     setupFacsimileTargets();
+
+    ensureFacsimileData().then(function(store) {
+        if (!store) {
+            return;
+        }
+        facsimileData = store;
+        adjustSingleAbColumnPlacement();
+    });
 
     var navControls = {
         first: null,
