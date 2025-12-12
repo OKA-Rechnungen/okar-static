@@ -937,79 +937,14 @@ Single page transcript navigation with OpenSeadragon image sync.
     var currentPageIndex = -1;
 
     function buildVisiblePageItems(totalPages, currentIndex) {
-        var maxButtons = 10;
-        if (totalPages <= maxButtons) {
-            return Array.from({ length: totalPages }, function(_, i) { return i; });
-        }
-
         var effectiveIndex = currentIndex >= 0 ? currentIndex : 0;
-        var tailCount = Math.min(2, totalPages);
-        var blockSize = Math.max(maxButtons - tailCount, 0);
-        if (blockSize === 0) {
-            return Array.from({ length: totalPages }, function(_, i) { return i; });
-        }
-
-        var ranges = [];
-
-        if (effectiveIndex <= 4) {
-            var blockEnd = Math.min(blockSize - 1, totalPages - 1);
-            ranges.push({ start: 0, end: blockEnd });
-            var tailStart = Math.max(totalPages - tailCount, blockEnd + 1);
-            if (tailStart <= totalPages - 1) {
-                ranges.push({ start: tailStart, end: totalPages - 1 });
-            }
-        } else if (effectiveIndex >= totalPages - 5) {
-            var headEnd = Math.min(1, totalPages - 1);
-            if (headEnd >= 0) {
-                ranges.push({ start: 0, end: headEnd });
-            }
-            var blockStart = Math.max(totalPages - blockSize, 0);
-            ranges.push({ start: blockStart, end: totalPages - 1 });
-        } else {
-            var tailStartMiddle = Math.max(totalPages - tailCount, 0);
-            var start = effectiveIndex - (blockSize - 2);
-            if (start < 0) {
-                start = 0;
-            }
-            var end = start + blockSize - 1;
-            if (end >= tailStartMiddle) {
-                end = tailStartMiddle - 1;
-                start = Math.max(0, end - blockSize + 1);
-            }
-            ranges.push({ start: start, end: end });
-            if (tailStartMiddle <= totalPages - 1) {
-                ranges.push({ start: tailStartMiddle, end: totalPages - 1 });
-            }
-        }
-
-        ranges = ranges.filter(function(range) { return range.start <= range.end; });
-        ranges.sort(function(a, b) { return a.start - b.start; });
-
-        var merged = [];
-        ranges.forEach(function(range) {
-            if (!merged.length) {
-                merged.push({ start: range.start, end: range.end });
-                return;
-            }
-            var last = merged[merged.length - 1];
-            if (range.start <= last.end + 1) {
-                last.end = Math.max(last.end, range.end);
-            } else {
-                merged.push({ start: range.start, end: range.end });
-            }
-        });
+        var start = Math.max(0, effectiveIndex - 3);
+        var end = Math.min(totalPages - 1, effectiveIndex + 3);
 
         var items = [];
-        var prevEnd = null;
-        merged.forEach(function(range) {
-            if (prevEnd !== null && range.start > prevEnd + 1) {
-                items.push('ellipsis');
-            }
-            for (var i = range.start; i <= range.end; i++) {
-                items.push(i);
-            }
-            prevEnd = range.end;
-        });
+        for (var i = start; i <= end; i++) {
+            items.push(i);
+        }
 
         return items;
     }
