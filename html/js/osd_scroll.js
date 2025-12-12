@@ -786,12 +786,16 @@ Single page transcript navigation with OpenSeadragon image sync.
         next: null,
         last: null,
         end: null,
+        pageInput: null,
+        pageInputWrapper: null,
+        pageTotalLabel: null,
         numberButtons: [],
         numberContainer: null
     };
 
     var navContainer = null;
     var navWrapper = null;
+    var pageInputStyleInjected = false;
 
     function createNavButton(label, onClick) {
         var button = document.createElement('button');
@@ -821,17 +825,17 @@ Single page transcript navigation with OpenSeadragon image sync.
 
         navInsertTarget.insertBefore(navContainer, transcript);
 
-        navControls.start = createNavButton('⏮', function() {
+        navControls.start = createNavButton('⏮︎', function() {
             showPageByIndex(0);
         });
         navWrapper.appendChild(navControls.start);
 
-        navControls.first = createNavButton('⏪', function() {
+        navControls.first = createNavButton('⏪︎', function() {
             showPageByIndex(currentPageIndex - 10);
         });
         navWrapper.appendChild(navControls.first);
 
-        navControls.prev = createNavButton('◀', function() {
+        navControls.prev = createNavButton('◀︎', function() {
             showPageByIndex(currentPageIndex - 1);
         });
         navWrapper.appendChild(navControls.prev);
@@ -839,6 +843,61 @@ Single page transcript navigation with OpenSeadragon image sync.
         navControls.numberContainer = document.createElement('div');
         navControls.numberContainer.className = 'page-number-container d-flex flex-wrap align-items-center gap-2';
         navWrapper.appendChild(navControls.numberContainer);
+
+        var pageInputWrapper = document.createElement('div');
+        pageInputWrapper.className = 'd-flex align-items-center gap-1';
+
+        var pageInputLabel = document.createElement('label');
+        pageInputLabel.className = 'visually-hidden';
+        pageInputLabel.setAttribute('for', 'okar-page-jump');
+        pageInputLabel.textContent = 'Seite eingeben';
+        pageInputWrapper.appendChild(pageInputLabel);
+
+        navControls.pageInput = document.createElement('input');
+        navControls.pageInput.type = 'number';
+        navControls.pageInput.min = '1';
+        navControls.pageInput.max = String(pages.length);
+        navControls.pageInput.value = String(currentPageIndex + 1);
+        navControls.pageInput.id = 'okar-page-jump';
+        navControls.pageInput.className = 'form-control form-control-sm';
+        navControls.pageInput.style.width = '3.25rem';
+        navControls.pageInput.setAttribute('aria-label', 'Seite wählen');
+        navControls.pageInput.inputMode = 'numeric';
+        navControls.pageInput.step = '1';
+
+        if (!pageInputStyleInjected) {
+            var styleEl = document.createElement('style');
+            styleEl.textContent = '.page-input-no-spin { -moz-appearance: textfield; appearance: textfield; } .page-input-no-spin::-webkit-outer-spin-button, .page-input-no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }';
+            document.head.appendChild(styleEl);
+            pageInputStyleInjected = true;
+        }
+        navControls.pageInput.classList.add('page-input-no-spin');
+
+        var handlePageInput = function() {
+            var value = parseInt(navControls.pageInput.value, 10);
+            if (Number.isNaN(value)) {
+                navControls.pageInput.value = String(currentPageIndex + 1);
+                return;
+            }
+            value = Math.min(Math.max(value, 1), pages.length);
+            showPageByNumber(value);
+        };
+
+        navControls.pageInput.addEventListener('change', handlePageInput);
+        navControls.pageInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                handlePageInput();
+            }
+        });
+
+        pageInputWrapper.appendChild(navControls.pageInput);
+
+        navControls.pageTotalLabel = document.createElement('span');
+        navControls.pageTotalLabel.className = 'text-muted small';
+        navControls.pageTotalLabel.textContent = '/ ' + pages.length;
+        pageInputWrapper.appendChild(navControls.pageTotalLabel);
+
+        navControls.pageInputWrapper = pageInputWrapper;
 
         navControls.numberButtons = pages.map(function(page, idx) {
             var numberButton = createNavButton(String(idx + 1), function() {
@@ -849,17 +908,17 @@ Single page transcript navigation with OpenSeadragon image sync.
             return numberButton;
         });
 
-        navControls.next = createNavButton('▶', function() {
+        navControls.next = createNavButton('▶︎', function() {
             showPageByIndex(currentPageIndex + 1);
         });
         navWrapper.appendChild(navControls.next);
 
-        navControls.last = createNavButton('⏩', function() {
+        navControls.last = createNavButton('⏩︎', function() {
             showPageByIndex(currentPageIndex + 10);
         });
         navWrapper.appendChild(navControls.last);
 
-        navControls.end = createNavButton('⏭', function() {
+        navControls.end = createNavButton('⏭︎', function() {
             showPageByIndex(pages.length - 1);
         });
         navWrapper.appendChild(navControls.end);
@@ -976,6 +1035,8 @@ Single page transcript navigation with OpenSeadragon image sync.
                 ellipsis.className = 'pagination-ellipsis text-muted';
                 ellipsis.textContent = '…';
                 container.appendChild(ellipsis);
+            } else if (item === currentPageIndex && navControls.pageInputWrapper) {
+                container.appendChild(navControls.pageInputWrapper);
             } else {
                 var button = navControls.numberButtons[item];
                 if (button) {
@@ -1029,6 +1090,15 @@ Single page transcript navigation with OpenSeadragon image sync.
             var endVisible = visibleItems.indexOf(pages.length - 1) !== -1;
             navControls.end.style.display = endVisible ? 'none' : '';
             navControls.end.disabled = endVisible;
+        }
+
+        if (navControls.pageInput) {
+            navControls.pageInput.max = String(pages.length);
+            navControls.pageInput.value = String(currentPageIndex + 1);
+        }
+
+        if (navControls.pageTotalLabel) {
+            navControls.pageTotalLabel.textContent = '/ ' + pages.length;
         }
 
         navControls.numberButtons.forEach(function(btn, idx) {
