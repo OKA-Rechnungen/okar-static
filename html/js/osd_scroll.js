@@ -780,10 +780,12 @@ Single page transcript navigation with OpenSeadragon image sync.
     });
 
     var navControls = {
+        start: null,
         first: null,
         prev: null,
         next: null,
         last: null,
+        end: null,
         numberButtons: [],
         numberContainer: null
     };
@@ -819,12 +821,17 @@ Single page transcript navigation with OpenSeadragon image sync.
 
         navInsertTarget.insertBefore(navContainer, transcript);
 
-        navControls.first = createNavButton('<<', function() {
+        navControls.start = createNavButton('⏮', function() {
             showPageByIndex(0);
+        });
+        navWrapper.appendChild(navControls.start);
+
+        navControls.first = createNavButton('⏪', function() {
+            showPageByIndex(currentPageIndex - 10);
         });
         navWrapper.appendChild(navControls.first);
 
-        navControls.prev = createNavButton('<', function() {
+        navControls.prev = createNavButton('◀', function() {
             showPageByIndex(currentPageIndex - 1);
         });
         navWrapper.appendChild(navControls.prev);
@@ -842,15 +849,20 @@ Single page transcript navigation with OpenSeadragon image sync.
             return numberButton;
         });
 
-        navControls.next = createNavButton('>', function() {
+        navControls.next = createNavButton('▶', function() {
             showPageByIndex(currentPageIndex + 1);
         });
         navWrapper.appendChild(navControls.next);
 
-        navControls.last = createNavButton('>>', function() {
-            showPageByIndex(pages.length - 1);
+        navControls.last = createNavButton('⏩', function() {
+            showPageByIndex(currentPageIndex + 10);
         });
         navWrapper.appendChild(navControls.last);
+
+        navControls.end = createNavButton('⏭', function() {
+            showPageByIndex(pages.length - 1);
+        });
+        navWrapper.appendChild(navControls.end);
     } else {
         navControls.numberButtons = [];
     }
@@ -980,23 +992,43 @@ Single page transcript navigation with OpenSeadragon image sync.
 
         renderNumberButtons();
 
+        var visibleItems = buildVisiblePageItems(pages.length, currentPageIndex);
         var atStart = currentPageIndex === 0;
         var atEnd = currentPageIndex === pages.length - 1;
 
+        if (navControls.start) {
+            var startVisible = visibleItems.indexOf(0) !== -1;
+            navControls.start.style.display = startVisible ? 'none' : '';
+            navControls.start.disabled = startVisible;
+        }
+
         if (navControls.first) {
-            navControls.first.disabled = atStart;
+            var hasTenBack = currentPageIndex >= 10;
+            navControls.first.style.display = hasTenBack ? '' : 'none';
+            navControls.first.disabled = !hasTenBack;
         }
 
         if (navControls.prev) {
+            navControls.prev.style.display = atStart ? 'none' : '';
             navControls.prev.disabled = atStart;
         }
 
         if (navControls.next) {
+            navControls.next.style.display = atEnd ? 'none' : '';
             navControls.next.disabled = atEnd;
         }
 
         if (navControls.last) {
-            navControls.last.disabled = atEnd;
+            var remainingAhead = pages.length - currentPageIndex - 1;
+            var hasTenAhead = remainingAhead >= 10;
+            navControls.last.style.display = hasTenAhead ? '' : 'none';
+            navControls.last.disabled = !hasTenAhead;
+        }
+
+        if (navControls.end) {
+            var endVisible = visibleItems.indexOf(pages.length - 1) !== -1;
+            navControls.end.style.display = endVisible ? 'none' : '';
+            navControls.end.disabled = endVisible;
         }
 
         navControls.numberButtons.forEach(function(btn, idx) {
