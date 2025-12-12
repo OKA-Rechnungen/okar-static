@@ -780,16 +780,22 @@ Single page transcript navigation with OpenSeadragon image sync.
     });
 
     var navControls = {
+        start: null,
         first: null,
         prev: null,
         next: null,
         last: null,
+        end: null,
+        pageInput: null,
+        pageInputWrapper: null,
+        pageTotalLabel: null,
         numberButtons: [],
         numberContainer: null
     };
 
     var navContainer = null;
     var navWrapper = null;
+    var pageInputStyleInjected = false;
 
     function createNavButton(label, onClick) {
         var button = document.createElement('button');
@@ -819,12 +825,17 @@ Single page transcript navigation with OpenSeadragon image sync.
 
         navInsertTarget.insertBefore(navContainer, transcript);
 
-        navControls.first = createNavButton('<<', function() {
+        navControls.start = createNavButton('⏮︎', function() {
             showPageByIndex(0);
+        });
+        navWrapper.appendChild(navControls.start);
+
+        navControls.first = createNavButton('⏪︎', function() {
+            showPageByIndex(currentPageIndex - 10);
         });
         navWrapper.appendChild(navControls.first);
 
-        navControls.prev = createNavButton('<', function() {
+        navControls.prev = createNavButton('◀︎', function() {
             showPageByIndex(currentPageIndex - 1);
         });
         navWrapper.appendChild(navControls.prev);
@@ -832,6 +843,61 @@ Single page transcript navigation with OpenSeadragon image sync.
         navControls.numberContainer = document.createElement('div');
         navControls.numberContainer.className = 'page-number-container d-flex flex-wrap align-items-center gap-2';
         navWrapper.appendChild(navControls.numberContainer);
+
+        var pageInputWrapper = document.createElement('div');
+        pageInputWrapper.className = 'd-flex align-items-center gap-1';
+
+        var pageInputLabel = document.createElement('label');
+        pageInputLabel.className = 'visually-hidden';
+        pageInputLabel.setAttribute('for', 'okar-page-jump');
+        pageInputLabel.textContent = 'Seite eingeben';
+        pageInputWrapper.appendChild(pageInputLabel);
+
+        navControls.pageInput = document.createElement('input');
+        navControls.pageInput.type = 'number';
+        navControls.pageInput.min = '1';
+        navControls.pageInput.max = String(pages.length);
+        navControls.pageInput.value = String(currentPageIndex + 1);
+        navControls.pageInput.id = 'okar-page-jump';
+        navControls.pageInput.className = 'form-control form-control-sm';
+        navControls.pageInput.style.width = '3.25rem';
+        navControls.pageInput.setAttribute('aria-label', 'Seite wählen');
+        navControls.pageInput.inputMode = 'numeric';
+        navControls.pageInput.step = '1';
+
+        if (!pageInputStyleInjected) {
+            var styleEl = document.createElement('style');
+            styleEl.textContent = '.page-input-no-spin { -moz-appearance: textfield; appearance: textfield; } .page-input-no-spin::-webkit-outer-spin-button, .page-input-no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }';
+            document.head.appendChild(styleEl);
+            pageInputStyleInjected = true;
+        }
+        navControls.pageInput.classList.add('page-input-no-spin');
+
+        var handlePageInput = function() {
+            var value = parseInt(navControls.pageInput.value, 10);
+            if (Number.isNaN(value)) {
+                navControls.pageInput.value = String(currentPageIndex + 1);
+                return;
+            }
+            value = Math.min(Math.max(value, 1), pages.length);
+            showPageByNumber(value);
+        };
+
+        navControls.pageInput.addEventListener('change', handlePageInput);
+        navControls.pageInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                handlePageInput();
+            }
+        });
+
+        pageInputWrapper.appendChild(navControls.pageInput);
+
+        navControls.pageTotalLabel = document.createElement('span');
+        navControls.pageTotalLabel.className = 'text-muted small';
+        navControls.pageTotalLabel.textContent = '/ ' + pages.length;
+        pageInputWrapper.appendChild(navControls.pageTotalLabel);
+
+        navControls.pageInputWrapper = pageInputWrapper;
 
         navControls.numberButtons = pages.map(function(page, idx) {
             var numberButton = createNavButton(String(idx + 1), function() {
@@ -842,15 +908,20 @@ Single page transcript navigation with OpenSeadragon image sync.
             return numberButton;
         });
 
-        navControls.next = createNavButton('>', function() {
+        navControls.next = createNavButton('▶︎', function() {
             showPageByIndex(currentPageIndex + 1);
         });
         navWrapper.appendChild(navControls.next);
 
-        navControls.last = createNavButton('>>', function() {
-            showPageByIndex(pages.length - 1);
+        navControls.last = createNavButton('⏩︎', function() {
+            showPageByIndex(currentPageIndex + 10);
         });
         navWrapper.appendChild(navControls.last);
+
+        navControls.end = createNavButton('⏭︎', function() {
+            showPageByIndex(pages.length - 1);
+        });
+        navWrapper.appendChild(navControls.end);
     } else {
         navControls.numberButtons = [];
     }
@@ -937,79 +1008,14 @@ Single page transcript navigation with OpenSeadragon image sync.
     var currentPageIndex = -1;
 
     function buildVisiblePageItems(totalPages, currentIndex) {
-        var maxButtons = 10;
-        if (totalPages <= maxButtons) {
-            return Array.from({ length: totalPages }, function(_, i) { return i; });
-        }
-
         var effectiveIndex = currentIndex >= 0 ? currentIndex : 0;
-        var tailCount = Math.min(2, totalPages);
-        var blockSize = Math.max(maxButtons - tailCount, 0);
-        if (blockSize === 0) {
-            return Array.from({ length: totalPages }, function(_, i) { return i; });
-        }
-
-        var ranges = [];
-
-        if (effectiveIndex <= 4) {
-            var blockEnd = Math.min(blockSize - 1, totalPages - 1);
-            ranges.push({ start: 0, end: blockEnd });
-            var tailStart = Math.max(totalPages - tailCount, blockEnd + 1);
-            if (tailStart <= totalPages - 1) {
-                ranges.push({ start: tailStart, end: totalPages - 1 });
-            }
-        } else if (effectiveIndex >= totalPages - 5) {
-            var headEnd = Math.min(1, totalPages - 1);
-            if (headEnd >= 0) {
-                ranges.push({ start: 0, end: headEnd });
-            }
-            var blockStart = Math.max(totalPages - blockSize, 0);
-            ranges.push({ start: blockStart, end: totalPages - 1 });
-        } else {
-            var tailStartMiddle = Math.max(totalPages - tailCount, 0);
-            var start = effectiveIndex - (blockSize - 2);
-            if (start < 0) {
-                start = 0;
-            }
-            var end = start + blockSize - 1;
-            if (end >= tailStartMiddle) {
-                end = tailStartMiddle - 1;
-                start = Math.max(0, end - blockSize + 1);
-            }
-            ranges.push({ start: start, end: end });
-            if (tailStartMiddle <= totalPages - 1) {
-                ranges.push({ start: tailStartMiddle, end: totalPages - 1 });
-            }
-        }
-
-        ranges = ranges.filter(function(range) { return range.start <= range.end; });
-        ranges.sort(function(a, b) { return a.start - b.start; });
-
-        var merged = [];
-        ranges.forEach(function(range) {
-            if (!merged.length) {
-                merged.push({ start: range.start, end: range.end });
-                return;
-            }
-            var last = merged[merged.length - 1];
-            if (range.start <= last.end + 1) {
-                last.end = Math.max(last.end, range.end);
-            } else {
-                merged.push({ start: range.start, end: range.end });
-            }
-        });
+        var start = Math.max(0, effectiveIndex - 3);
+        var end = Math.min(totalPages - 1, effectiveIndex + 3);
 
         var items = [];
-        var prevEnd = null;
-        merged.forEach(function(range) {
-            if (prevEnd !== null && range.start > prevEnd + 1) {
-                items.push('ellipsis');
-            }
-            for (var i = range.start; i <= range.end; i++) {
-                items.push(i);
-            }
-            prevEnd = range.end;
-        });
+        for (var i = start; i <= end; i++) {
+            items.push(i);
+        }
 
         return items;
     }
@@ -1029,6 +1035,8 @@ Single page transcript navigation with OpenSeadragon image sync.
                 ellipsis.className = 'pagination-ellipsis text-muted';
                 ellipsis.textContent = '…';
                 container.appendChild(ellipsis);
+            } else if (item === currentPageIndex && navControls.pageInputWrapper) {
+                container.appendChild(navControls.pageInputWrapper);
             } else {
                 var button = navControls.numberButtons[item];
                 if (button) {
@@ -1045,23 +1053,52 @@ Single page transcript navigation with OpenSeadragon image sync.
 
         renderNumberButtons();
 
+        var visibleItems = buildVisiblePageItems(pages.length, currentPageIndex);
         var atStart = currentPageIndex === 0;
         var atEnd = currentPageIndex === pages.length - 1;
 
+        if (navControls.start) {
+            var startVisible = visibleItems.indexOf(0) !== -1;
+            navControls.start.style.display = startVisible ? 'none' : '';
+            navControls.start.disabled = startVisible;
+        }
+
         if (navControls.first) {
-            navControls.first.disabled = atStart;
+            var hasTenBack = currentPageIndex >= 10;
+            navControls.first.style.display = hasTenBack ? '' : 'none';
+            navControls.first.disabled = !hasTenBack;
         }
 
         if (navControls.prev) {
+            navControls.prev.style.display = atStart ? 'none' : '';
             navControls.prev.disabled = atStart;
         }
 
         if (navControls.next) {
+            navControls.next.style.display = atEnd ? 'none' : '';
             navControls.next.disabled = atEnd;
         }
 
         if (navControls.last) {
-            navControls.last.disabled = atEnd;
+            var remainingAhead = pages.length - currentPageIndex - 1;
+            var hasTenAhead = remainingAhead >= 10;
+            navControls.last.style.display = hasTenAhead ? '' : 'none';
+            navControls.last.disabled = !hasTenAhead;
+        }
+
+        if (navControls.end) {
+            var endVisible = visibleItems.indexOf(pages.length - 1) !== -1;
+            navControls.end.style.display = endVisible ? 'none' : '';
+            navControls.end.disabled = endVisible;
+        }
+
+        if (navControls.pageInput) {
+            navControls.pageInput.max = String(pages.length);
+            navControls.pageInput.value = String(currentPageIndex + 1);
+        }
+
+        if (navControls.pageTotalLabel) {
+            navControls.pageTotalLabel.textContent = '/ ' + pages.length;
         }
 
         navControls.numberButtons.forEach(function(btn, idx) {
