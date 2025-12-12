@@ -73,7 +73,7 @@
                                                 <xsl:attribute name="href">
                                                     <xsl:value-of select="$prev"/>
                                                 </xsl:attribute>
-                                                <i class="fa-solid fa-caret-left left" title="zurück"/>
+                                                <span class="left" title="zurück" aria-hidden="true">&#x25C0;&#xFE0E;</span>
                                             </a>
                                         </h3>
                                     </xsl:if>
@@ -92,7 +92,7 @@
                                                 <xsl:attribute name="href">
                                                     <xsl:value-of select="$next"/>
                                                 </xsl:attribute>
-                                                <i class="fa-solid fa-caret-right right" title="weiter"/>
+                                                <span class="right" title="weiter" aria-hidden="true">&#x25B6;&#xFE0E;</span>
                                             </a>
                                         </h3>
                                     </xsl:if>
