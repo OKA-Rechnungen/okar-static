@@ -993,23 +993,44 @@ Single page transcript navigation with OpenSeadragon image sync.
     }
 
     var navInsertTarget = null;
+    var navInsertBefore = null;
 
     if (textContainer && textContainer.contains(transcript)) {
-        navInsertTarget = textContainer;
+        // Place navigation above the entire transcript/facsimile row.
+        var transcriptColumn = textContainer; // col-6 that holds transcript
+        var transcriptRow = transcriptColumn ? transcriptColumn.parentNode : null; // row transcript active
+        var transcriptRowContainer = transcriptRow ? transcriptRow.parentNode : null; // wp-transcript
+
+        if (transcriptRowContainer && transcriptRow) {
+            navInsertTarget = transcriptRowContainer;
+            navInsertBefore = transcriptRow; // insert before the row so it spans full width
+        } else if (transcriptRow) {
+            navInsertTarget = transcriptRow;
+            navInsertBefore = transcriptColumn;
+        } else {
+            navInsertTarget = textContainer;
+            navInsertBefore = transcript;
+        }
     } else if (transcript.parentNode) {
         navInsertTarget = transcript.parentNode;
+        navInsertBefore = transcript;
     }
 
     if (navInsertTarget) {
         navContainer = document.createElement('nav');
-        navContainer.className = 'page-navigation d-flex flex-wrap align-items-center gap-2 mb-3';
+        // Center across the full transcript width, even when two columns are shown.
+        navContainer.className = 'page-navigation d-flex flex-wrap align-items-center justify-content-center gap-2 mb-3 w-100 text-center';
         navContainer.setAttribute('aria-label', 'Seiten-Navigation');
 
         navWrapper = document.createElement('div');
-        navWrapper.className = 'd-flex flex-wrap align-items-center gap-2';
+        navWrapper.className = 'd-flex flex-wrap align-items-center justify-content-center gap-2';
         navContainer.appendChild(navWrapper);
 
-        navInsertTarget.insertBefore(navContainer, transcript);
+        if (navInsertBefore) {
+            navInsertTarget.insertBefore(navContainer, navInsertBefore);
+        } else {
+            navInsertTarget.insertBefore(navContainer, transcript);
+        }
 
         navControls.start = createNavButton('⏮︎', function() {
             showPageByIndex(0);
@@ -1120,7 +1141,7 @@ Single page transcript navigation with OpenSeadragon image sync.
             id: 'container_facs_1',
             prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.0.0/images/',
             sequenceMode: false,
-            showNavigator: true,
+            showNavigator: false,
             crossOriginPolicy: 'Anonymous',
             ajaxWithCredentials: false
         });

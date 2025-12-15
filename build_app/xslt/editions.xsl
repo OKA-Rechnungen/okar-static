@@ -81,9 +81,50 @@
                                 <div class="col-4 docinfo" style="text-align:center">
                                     <h3 align="center">
                                         <a href="{$teiSource}">
-                                            <i class="fa-solid fa-file-code center" title="TEI/XML"/>
+                                            <i class="fa-solid fa-file-code center" title="TEI/XML"></i>
                                         </a>
                                     </h3>
+                                    <xsl:variable name="msDesc" select="//tei:sourceDesc/tei:msDesc"/>
+                                    <xsl:variable name="msId" select="$msDesc/tei:msIdentifier"/>
+                                    <xsl:variable name="msContents" select="$msDesc/tei:msContents"/>
+                                    <xsl:variable name="shelfmark" select="$msId/tei:idno[@type='shelfmark'][1]"/>
+                                    <xsl:variable name="repoName" select="($msId/tei:repository/tei:orgName[@xml:lang='de'], $msId/tei:repository/tei:orgName[1], $msId/tei:institution/tei:orgName[@xml:lang='de'], $msId/tei:institution/tei:orgName[1])[1]"/>
+                                    <xsl:variable name="collection" select="$msId/tei:collection[1]"/>
+                                    <xsl:variable name="origDate" select="$msContents//tei:origDate[1]"/>
+                                    <xsl:variable name="origDateText">
+                                        <xsl:choose>
+                                            <xsl:when test="$origDate/@when">
+                                                <xsl:value-of select="$origDate/@when"/>
+                                            </xsl:when>
+                                            <xsl:when test="$origDate/@from and $origDate/@to">
+                                                <xsl:value-of select="concat($origDate/@from, ' - ', $origDate/@to)"/>
+                                            </xsl:when>
+                                            <xsl:otherwise>
+                                                <xsl:value-of select="normalize-space($origDate)"/>
+                                            </xsl:otherwise>
+                                        </xsl:choose>
+                                    </xsl:variable>
+                                    <xsl:variable name="contentNote" select="normalize-space(($msContents/tei:summary[normalize-space()], $msContents/tei:p[normalize-space(string-join(.//text(), ' '))][1])[1])"/>
+
+                                    <xsl:if test="$shelfmark or string($repoName) or string($collection) or string($origDateText) or string($contentNote)">
+                                        <div class="metadata small">
+                                            <xsl:if test="$shelfmark">
+                                                <div><span class="fw-bold">Signatur:</span> <xsl:value-of select="$shelfmark"/></div>
+                                            </xsl:if>
+                                            <xsl:if test="string($repoName)">
+                                                <div><span class="fw-bold">Archiv:</span> <xsl:value-of select="$repoName"/></div>
+                                            </xsl:if>
+                                            <xsl:if test="string($collection)">
+                                                <div><span class="fw-bold">Sammlung:</span> <xsl:value-of select="$collection"/></div>
+                                            </xsl:if>
+                                            <xsl:if test="string($origDateText)">
+                                                <div><span class="fw-bold">Datierung:</span> <xsl:value-of select="$origDateText"/></div>
+                                            </xsl:if>
+                                            <xsl:if test="string($contentNote)">
+                                                <div><span class="fw-bold">Inhalt:</span> <xsl:value-of select="$contentNote"/></div>
+                                            </xsl:if>
+                                        </div>
+                                    </xsl:if>
                                 </div>
                                 <div class="col-4" style="text-align:left">
                                     <xsl:if test="ends-with($next, '.html')">
