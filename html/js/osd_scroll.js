@@ -63,13 +63,53 @@ Single page transcript navigation with OpenSeadragon image sync.
         walker = introNext;
     }
 
+    var DEBUG_LAG_LOG = false;
+
+    function logDebug(message, meta) {
+        if (!DEBUG_LAG_LOG || typeof console === 'undefined') {
+            return;
+        }
+        var payload = meta ? Object.assign({ t: Date.now() }, meta) : { t: Date.now() };
+        console.debug('[osd_scroll]', message, payload);
+    }
+
     var pages = [];
     var facsimileDataPromise = null;
     var facsimileData = null;
     var highlightOverlayElement = null;
+    var regionOverlayElements = [];
     var activeHighlight = { regionId: null, region: null, target: null };
+    var lastTranscriptRegionHighlightId = null;
     var highlightNeedsUpdate = false;
     var currentSurfaceId = null;
+    var regionLagMarks = Object.create(null);
+    var lastOverlayHoverRegionId = null;
+    var lastOverlayHoverTs = 0;
+    var clearHighlightTimer = null;
+
+    function isLineRegion(regionId) {
+        if (typeof regionId !== 'string') {
+            return false;
+        }
+        if (regionId.indexOf('_tl_') !== -1) {
+            return true;
+        }
+        return regionId.toLowerCase().indexOf('line') !== -1;
+    }
+
+    function isLineTarget(element) {
+        return !!(element && element.classList && element.classList.contains('facsimile-line'));
+    }
+
+    function markLag(regionId, key) {
+        if (!regionId) {
+            return;
+        }
+        if (!regionLagMarks[regionId]) {
+            regionLagMarks[regionId] = {};
+        }
+        regionLagMarks[regionId][key] = Date.now();
+    }
 
     function extractRegionIdFromElement(element) {
         if (!element) {
@@ -294,6 +334,7 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
 
         var xmlPath = recordIdBase + '.xml';
+        logDebug('ensureFacsimileData: fetch start', { xmlPath: xmlPath });
         facsimileDataPromise = fetch(xmlPath).then(function(response) {
             if (!response.ok) {
                 throw new Error('HTTP ' + response.status);
@@ -306,10 +347,15 @@ Single page transcript navigation with OpenSeadragon image sync.
                 throw new Error('Invalid facsimile XML');
             }
             facsimileData = parseFacsimileDocument(xmlDoc);
+            logDebug('ensureFacsimileData: parsed', {
+                surfaces: facsimileData.surfaces.size,
+                regions: facsimileData.regions.size
+            });
             return facsimileData;
         }).catch(function(error) {
             console.warn('Unable to load facsimile regions', error);
             facsimileData = null;
+            logDebug('ensureFacsimileData: error', { error: String(error) });
             return null;
         });
 
@@ -322,6 +368,11 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
 
         if (currentSurfaceId && activeHighlight.region.surfaceId && currentSurfaceId !== activeHighlight.region.surfaceId) {
+            logDebug('applyHighlightOverlay: skip surface mismatch', {
+                regionId: activeHighlight.region.id,
+                currentSurfaceId: currentSurfaceId,
+                regionSurfaceId: activeHighlight.region.surfaceId
+            });
             removeOverlayElement();
             highlightNeedsUpdate = false;
             return;
@@ -329,23 +380,27 @@ Single page transcript navigation with OpenSeadragon image sync.
 
         var tiledImage = osdViewer.world.getItemAt(0);
         if (!tiledImage) {
+            logDebug('applyHighlightOverlay: no tiled image', { regionId: activeHighlight.region.id });
             highlightNeedsUpdate = true;
             return;
         }
 
         if (!facsimileData || !facsimileData.surfaces) {
+            logDebug('applyHighlightOverlay: missing facsimile data', { regionId: activeHighlight.region.id });
             highlightNeedsUpdate = true;
             return;
         }
 
         var surfaceInfo = facsimileData.surfaces.get(activeHighlight.region.surfaceId);
         if (!surfaceInfo) {
+            logDebug('applyHighlightOverlay: missing surface info', { regionId: activeHighlight.region.id, surfaceId: activeHighlight.region.surfaceId });
             highlightNeedsUpdate = false;
             return;
         }
 
         var contentSize = tiledImage.getContentSize();
         if (!contentSize || !contentSize.x || !contentSize.y) {
+            logDebug('applyHighlightOverlay: missing content size', { regionId: activeHighlight.region.id });
             highlightNeedsUpdate = true;
             return;
         }
@@ -363,7 +418,10 @@ Single page transcript navigation with OpenSeadragon image sync.
         if (!highlightOverlayElement) {
             highlightOverlayElement = document.createElement('div');
             highlightOverlayElement.className = 'facsimile-highlight-overlay';
+            highlightOverlayElement.style.pointerEvents = 'none';
         }
+
+        var perfStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
 
         osdViewer.addOverlay({
             element: highlightOverlayElement,
@@ -371,6 +429,25 @@ Single page transcript navigation with OpenSeadragon image sync.
             placement: OpenSeadragon.Placement.TOP_LEFT
         });
 
+        var perfEnd = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        var addOverlayMs = perfEnd - perfStart;
+
+        var overlaysTotal = regionOverlayElements ? regionOverlayElements.length : 0;
+
+        var lagMarks = regionLagMarks[activeHighlight.region.id] || {};
+        var sinceRequest = lagMarks.requestStart ? Date.now() - lagMarks.requestStart : null;
+        var sinceHover = lagMarks.hover ? Date.now() - lagMarks.hover : null;
+
+        logDebug('applyHighlightOverlay', {
+            regionId: activeHighlight.region.id,
+            surfaceId: activeHighlight.region.surfaceId,
+            rect: {
+                x: activeHighlight.region.bounds.minX,
+                y: activeHighlight.region.bounds.minY,
+                w: activeHighlight.region.bounds.width,
+                h: activeHighlight.region.bounds.height
+            }
+        });
         highlightNeedsUpdate = false;
     }
 
@@ -380,35 +457,73 @@ Single page transcript navigation with OpenSeadragon image sync.
         highlightNeedsUpdate = false;
         removeOverlayElement();
         setActiveHighlightTarget(null);
+        clearTranscriptRegionHighlight();
+    }
+
+    function scheduleClearHighlight(delayMs) {
+        if (clearHighlightTimer) {
+            window.clearTimeout(clearHighlightTimer);
+            clearHighlightTimer = null;
+        }
+        clearHighlightTimer = window.setTimeout(function() {
+            clearHighlight();
+            clearHighlightTimer = null;
+        }, delayMs);
     }
 
     function requestHighlight(regionId, targetElement) {
-        if (!regionId || !targetElement) {
+        if (!regionId) {
+            return;
+        }
+        if (!isLineRegion(regionId) && !(targetElement && isLineTarget(targetElement))) {
+            logDebug('requestHighlight: skip non-line region', { regionId: regionId });
             return;
         }
 
-        setActiveHighlightTarget(targetElement);
-        removeOverlayElement();
-        activeHighlight.regionId = regionId;
-        activeHighlight.region = null;
-        highlightNeedsUpdate = true;
+        var sameTarget = targetElement && activeHighlight.target === targetElement;
+        var sameRegionReady = activeHighlight.regionId === regionId && activeHighlight.region;
+
+        if (sameRegionReady && (sameTarget || !targetElement) && !highlightNeedsUpdate) {
+            logDebug('requestHighlight: skip (same region/target)', { regionId: regionId });
+            return;
+        }
+
+        if (targetElement) {
+            setActiveHighlightTarget(targetElement);
+        }
+
+        if (!sameRegionReady) {
+            removeOverlayElement();
+            activeHighlight.regionId = regionId;
+            activeHighlight.region = null;
+            highlightNeedsUpdate = true;
+            markLag(regionId, 'requestStart');
+            var hoverLag = regionLagMarks[regionId] && regionLagMarks[regionId].hover ? Date.now() - regionLagMarks[regionId].hover : null;
+            logDebug('requestHighlight: start', { regionId: regionId, surfaceId: currentSurfaceId });
+        }
 
         ensureFacsimileData().then(function(store) {
             if (activeHighlight.regionId !== regionId) {
+                logDebug('requestHighlight: abandon (active changed)', { regionId: regionId });
                 return;
             }
             if (!store || !store.regions) {
+                logDebug('requestHighlight: missing store/regions', { regionId: regionId });
                 return;
             }
             var region = store.regions.get(regionId);
             if (!region) {
+                logDebug('requestHighlight: region not found', { regionId: regionId });
                 return;
             }
             if (currentSurfaceId && region.surfaceId && currentSurfaceId !== region.surfaceId) {
+                logDebug('requestHighlight: surface mismatch', { regionId: regionId, currentSurfaceId: currentSurfaceId, regionSurfaceId: region.surfaceId });
                 return;
             }
             facsimileData = store;
             activeHighlight.region = region;
+            var requestLag = regionLagMarks[regionId] && regionLagMarks[regionId].requestStart ? Date.now() - regionLagMarks[regionId].requestStart : null;
+            logDebug('requestHighlight: region ready', { regionId: regionId, surfaceId: region.surfaceId });
             applyHighlightOverlay();
             if (highlightNeedsUpdate) {
                 if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
@@ -430,12 +545,29 @@ Single page transcript navigation with OpenSeadragon image sync.
         if (!regionId) {
             return;
         }
+        if (!isLineRegion(regionId) && !isLineTarget(target)) {
+            logDebug('hover transcript target: skip non-line region', { regionId: regionId });
+            return;
+        }
+        markLag(regionId, 'hover');
+        logDebug('hover transcript target', { regionId: regionId });
         target.dataset.facsRegionId = regionId;
 
+        if (clearHighlightTimer) {
+            window.clearTimeout(clearHighlightTimer);
+            clearHighlightTimer = null;
+        }
+
         if (activeHighlight.regionId === regionId && activeHighlight.target === target && activeHighlight.region) {
+            logDebug('hover transcript target: already active', { regionId: regionId });
             if (highlightNeedsUpdate) {
                 applyHighlightOverlay();
             }
+            return;
+        }
+
+        if (activeHighlight.regionId === regionId && activeHighlight.region && !highlightNeedsUpdate) {
+            logDebug('hover transcript target: already active (other target)', { regionId: regionId });
             return;
         }
 
@@ -445,7 +577,7 @@ Single page transcript navigation with OpenSeadragon image sync.
     function handleFacsimilePointerLeave(event) {
         var target = event.currentTarget;
         if (target && activeHighlight.target === target) {
-            clearHighlight();
+            scheduleClearHighlight(3000);
         }
     }
 
@@ -459,6 +591,8 @@ Single page transcript navigation with OpenSeadragon image sync.
             return;
         }
 
+        var facsTargetsByRegion = new Map();
+
         targets.forEach(function(target) {
             if (target.dataset.facsHighlightBound === 'true') {
                 return;
@@ -469,6 +603,10 @@ Single page transcript navigation with OpenSeadragon image sync.
             }
             target.dataset.facsRegionId = regionId;
             target.dataset.facsHighlightBound = 'true';
+            if (!facsTargetsByRegion.has(regionId)) {
+                facsTargetsByRegion.set(regionId, []);
+            }
+            facsTargetsByRegion.get(regionId).push(target);
             target.addEventListener('pointerenter', handleFacsimilePointerEnter);
             target.addEventListener('pointerleave', handleFacsimilePointerLeave);
             target.addEventListener('pointercancel', handleFacsimilePointerLeave);
@@ -476,6 +614,53 @@ Single page transcript navigation with OpenSeadragon image sync.
             target.addEventListener('focus', handleFacsimilePointerEnter, true);
             target.addEventListener('blur', handleFacsimilePointerLeave, true);
         });
+
+        window.okarTranscript = window.okarTranscript || {};
+        window.okarTranscript.facsTargetsByRegion = facsTargetsByRegion;
+    }
+
+    function clearTranscriptRegionHighlight() {
+        if (!lastTranscriptRegionHighlightId || !window.okarTranscript || !window.okarTranscript.facsTargetsByRegion) {
+            return;
+        }
+        var prevTargets = window.okarTranscript.facsTargetsByRegion.get(lastTranscriptRegionHighlightId);
+        if (prevTargets && prevTargets.length) {
+            prevTargets.forEach(function(target) {
+                target.classList.remove('facs-highlight-target');
+            });
+        }
+        lastTranscriptRegionHighlightId = null;
+    }
+
+    function highlightTranscriptForRegion(regionId) {
+        if (!regionId || !window.okarTranscript || !window.okarTranscript.facsTargetsByRegion) {
+            return;
+        }
+        if (regionId === lastTranscriptRegionHighlightId) {
+            return;
+        }
+        clearTranscriptRegionHighlight();
+        var targets = window.okarTranscript.facsTargetsByRegion.get(regionId);
+        if (!targets || !targets.length) {
+            return;
+        }
+        if (!isLineRegion(regionId)) {
+            logDebug('highlightTranscriptForRegion: skip non-line region', { regionId: regionId });
+            return;
+        }
+        var spanTargets = targets.filter(function(target) {
+            var tag = (target.tagName || '').toLowerCase();
+            return tag === 'span';
+        });
+        if (!spanTargets.length) {
+            logDebug('highlightTranscriptForRegion: no spans, skip highlight', { regionId: regionId, totalTargets: targets.length });
+            return;
+        }
+        logDebug('highlightTranscriptForRegion: apply spans only', { regionId: regionId, spans: spanTargets.length, totalTargets: targets.length });
+        spanTargets.forEach(function(target) {
+            target.classList.add('facs-highlight-target');
+        });
+        lastTranscriptRegionHighlightId = regionId;
     }
 
     function buildTranscriptRow(wrapper, abBlocks) {
@@ -777,6 +962,7 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
         facsimileData = store;
         adjustSingleAbColumnPlacement();
+        rebuildRegionOverlays();
     });
 
     var navControls = {
@@ -934,10 +1120,16 @@ Single page transcript navigation with OpenSeadragon image sync.
             id: 'container_facs_1',
             prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.0.0/images/',
             sequenceMode: false,
-            showNavigator: true
+            showNavigator: true,
+            crossOriginPolicy: 'Anonymous',
+            ajaxWithCredentials: false
         });
 
         osdViewer.addHandler('open', function() {
+            ensureFacsimileData().then(function() {
+                rebuildRegionOverlays();
+            });
+
             if (!activeHighlight.region) {
                 return;
             }
@@ -948,6 +1140,125 @@ Single page transcript navigation with OpenSeadragon image sync.
                 applyHighlightOverlay();
             }
         });
+    }
+
+    function clearRegionOverlays() {
+        if (!osdViewer || !regionOverlayElements.length) {
+            regionOverlayElements = [];
+            return;
+        }
+
+        regionOverlayElements.forEach(function(overlayEl) {
+            try {
+                osdViewer.removeOverlay(overlayEl);
+            } catch (error) {
+                // no-op
+            }
+        });
+        regionOverlayElements = [];
+    }
+
+    function handleRegionOverlayEnter(event) {
+        var el = event.currentTarget;
+        if (!el) {
+            return;
+        }
+        var regionId = el.dataset.regionId;
+        if (!regionId) {
+            return;
+        }
+        if (!isLineRegion(regionId)) {
+            logDebug('hover facsimile overlay: skip non-line region', { regionId: regionId });
+            return;
+        }
+        markLag(regionId, 'hover');
+        logDebug('hover facsimile overlay', { regionId: regionId });
+        if (clearHighlightTimer) {
+            window.clearTimeout(clearHighlightTimer);
+            clearHighlightTimer = null;
+        }
+        lastOverlayHoverRegionId = regionId;
+        lastOverlayHoverTs = Date.now();
+        highlightTranscriptForRegion(regionId);
+        if (activeHighlight.regionId === regionId && activeHighlight.region && !highlightNeedsUpdate) {
+            logDebug('hover facsimile overlay: already active', { regionId: regionId });
+            return;
+        }
+        if (activeHighlight.regionId === regionId && activeHighlight.region) {
+            if (highlightNeedsUpdate) {
+                applyHighlightOverlay();
+            }
+            return;
+        }
+        requestHighlight(regionId, null);
+    }
+
+    function handleRegionOverlayLeave(event) {
+        var el = event && event.currentTarget;
+        var regionId = el && el.dataset ? el.dataset.regionId : null;
+        if (regionId && regionId !== activeHighlight.regionId) {
+            return;
+        }
+        scheduleClearHighlight(3000);
+    }
+
+    function rebuildRegionOverlays() {
+        clearRegionOverlays();
+
+        if (!osdViewer || !facsimileData || !facsimileData.regions || !currentSurfaceId) {
+            return;
+        }
+
+        var tiledImage = osdViewer.world.getItemAt(0);
+        if (!tiledImage) {
+            return;
+        }
+
+        var surfaceInfo = facsimileData.surfaces && facsimileData.surfaces.get(currentSurfaceId);
+        if (!surfaceInfo) {
+            return;
+        }
+
+        var contentSize = tiledImage.getContentSize();
+        if (!contentSize || !contentSize.x || !contentSize.y) {
+            return;
+        }
+
+        var scaleX = contentSize.x / surfaceInfo.width;
+        var scaleY = contentSize.y / surfaceInfo.height;
+
+        var created = 0;
+
+        facsimileData.regions.forEach(function(region) {
+            if (!region || region.surfaceId !== currentSurfaceId || !region.bounds) {
+                return;
+            }
+
+            var viewportRect = osdViewer.viewport.imageToViewportRectangle(
+                region.bounds.minX * scaleX,
+                region.bounds.minY * scaleY,
+                region.bounds.width * scaleX,
+                region.bounds.height * scaleY
+            );
+
+            var overlay = document.createElement('div');
+            overlay.className = 'facsimile-region-overlay';
+            overlay.dataset.regionId = region.id;
+            overlay.addEventListener('pointerenter', handleRegionOverlayEnter);
+            overlay.addEventListener('pointerleave', handleRegionOverlayLeave);
+            overlay.addEventListener('pointercancel', handleRegionOverlayLeave);
+
+            osdViewer.addOverlay({
+                element: overlay,
+                location: viewportRect,
+                placement: OpenSeadragon.Placement.TOP_LEFT
+            });
+
+            regionOverlayElements.push(overlay);
+            created += 1;
+        });
+
+        logDebug('rebuildRegionOverlays', { surfaceId: currentSurfaceId, overlays: created });
     }
 
     function buildIiifUrl(source) {
@@ -1148,7 +1459,12 @@ Single page transcript navigation with OpenSeadragon image sync.
         currentPageIndex = index;
         currentSurfaceId = pages[index].surfaceId || null;
 
+        logDebug('showPageByIndex', { index: index, surfaceId: currentSurfaceId, imageSource: pages[index].imageSource });
+
         loadOsdImage(pages[index].imageSource);
+        ensureFacsimileData().then(function() {
+            rebuildRegionOverlays();
+        });
         updateNavState();
 
         if (!options || options.updateHistory !== false) {

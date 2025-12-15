@@ -113,3 +113,10 @@ div#map {
     text-decoration: none;
     color: inherit;
 }
+
+/* Hoverable facsimile regions (for reverse highlight) */
+.facsimile-region-overlay {
+    background-color: rgba(255, 214, 102, 0.18);
+    border: 1px solid rgba(255, 183, 0, 0.6);
+    pointer-events: auto;
+}
