@@ -128,10 +128,15 @@
                                     <xsl:variable name="origDateText">
                                         <xsl:choose>
                                             <xsl:when test="$origDate/@when">
-                                                <xsl:value-of select="$origDate/@when"/>
+                                                <xsl:variable name="when" select="string($origDate/@when)"/>
+                                                <xsl:value-of select="if (matches($when, '^\d{4}')) then substring($when, 1, 4) else normalize-space($when)"/>
                                             </xsl:when>
                                             <xsl:when test="$origDate/@from and $origDate/@to">
-                                                <xsl:value-of select="concat($origDate/@from, ' - ', $origDate/@to)"/>
+                                                <xsl:variable name="from" select="string($origDate/@from)"/>
+                                                <xsl:variable name="to" select="string($origDate/@to)"/>
+                                                <xsl:variable name="fromYear" select="if (matches($from, '^\d{4}')) then substring($from, 1, 4) else normalize-space($from)"/>
+                                                <xsl:variable name="toYear" select="if (matches($to, '^\d{4}')) then substring($to, 1, 4) else normalize-space($to)"/>
+                                                    <xsl:value-of select="concat($fromYear, '–', $toYear)"/>
                                             </xsl:when>
                                             <xsl:otherwise>
                                                 <xsl:value-of select="normalize-space($origDate)"/>
@@ -143,19 +148,19 @@
                                     <xsl:if test="$shelfmark or string($repoName) or string($collection) or string($origDateText) or string($contentNote)">
                                         <div class="metadata small">
                                             <xsl:if test="$shelfmark">
-                                                <div><span class="fw-bold">Signatur:</span> <xsl:value-of select="$shelfmark"/></div>
+                                                <div><span class="fw-bold">Signatur:</span> <xsl:text> </xsl:text><xsl:value-of select="$shelfmark"/></div>
                                             </xsl:if>
                                             <xsl:if test="string($repoName)">
-                                                <div><span class="fw-bold">Archiv:</span> <xsl:value-of select="$repoName"/></div>
+                                                <div><span class="fw-bold">Archiv:</span> <xsl:text> </xsl:text><xsl:value-of select="$repoName"/></div>
                                             </xsl:if>
                                             <xsl:if test="string($collection)">
-                                                <div><span class="fw-bold">Sammlung:</span> <xsl:value-of select="$collection"/></div>
+                                                <div><span class="fw-bold">Sammlung:</span> <xsl:text> </xsl:text><xsl:value-of select="$collection"/></div>
                                             </xsl:if>
                                             <xsl:if test="string($origDateText)">
-                                                <div><span class="fw-bold">Datierung:</span> <xsl:value-of select="$origDateText"/></div>
+                                                <div><span class="fw-bold">Datierung:</span> <xsl:text> </xsl:text><xsl:value-of select="$origDateText"/></div>
                                             </xsl:if>
                                             <xsl:if test="string($contentNote)">
-                                                <div><span class="fw-bold">Inhalt:</span> <xsl:value-of select="$contentNote"/></div>
+                                                <div><span class="fw-bold">Inhalt:</span> <xsl:text> </xsl:text><xsl:value-of select="$contentNote"/></div>
                                             </xsl:if>
                                         </div>
                                     </xsl:if>
