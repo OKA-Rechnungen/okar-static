@@ -15,6 +15,35 @@
      <xsl:import href="./partials/tei-facsimile.xsl"/>
     <xsl:import href="./partials/aot-options.xsl"/>
 
+    <xsl:function name="local:compute-page-number" as="xs:integer?">
+        <xsl:param name="pb" as="element(tei:pb)?"/>
+        <xsl:choose>
+            <xsl:when test="not($pb)">
+                <xsl:sequence select="()"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:variable name="n-raw" select="$pb/@n"/>
+                <xsl:sequence select="
+                    if ($n-raw castable as xs:integer and xs:integer($n-raw) gt 0) then xs:integer($n-raw)
+                    else xs:integer(count($pb/preceding::tei:pb[
+                        not(@n)
+                        or (not(@n castable as xs:integer))
+                        or ((@n castable as xs:integer) and xs:integer(@n) gt 0)
+                    ])) + 1
+                "/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+
+    <xsl:function name="local:page-number-for-node" as="xs:integer?">
+        <xsl:param name="context" as="node()?"/>
+        <xsl:variable name="target-pb" select="
+            if ($context instance of element(tei:pb)) then $context
+            else $context/following::tei:pb[1]
+        "/>
+        <xsl:sequence select="local:compute-page-number($target-pb)"/>
+    </xsl:function>
+
     <xsl:variable name="prev">
         <xsl:value-of select="replace(tokenize(data(tei:TEI/@prev), '/')[last()], '.xml', '.html')"/>
     </xsl:variable>
@@ -65,6 +94,11 @@
                             <h2 align="center">
                                 <xsl:value-of select="$doc_title"/>
                             </h2>
+                            <div class="d-flex justify-content-end mb-2">
+                                <button id="milestone-nav-btn" type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#milestoneModal">
+                                    Gliederung
+                                </button>
+                            </div>
                             <div class="row" id="fa_links">
                                 <div class="col-4"  style="text-align:right">
                                     <xsl:if test="ends-with($prev,'.html')">
@@ -160,6 +194,20 @@
                         </div>
                     </div>
                 </main>
+                <div class="modal fade" id="milestoneModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="milestoneModalLabel">Inhaltliche Gliederung</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="milestone-nav-list" class="list-group"></div>
+                                <div id="milestone-empty-state" class="text-muted small" style="display:none;">Keine Gliederungseinträge gefunden.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <xsl:call-template name="html_footer"/>
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/5.0.1/openseadragon.min.js"/>
                 <script type="text/javascript" src="js/osd_scroll.js"></script>
@@ -204,5 +252,31 @@
         <span class="pb {$pb-type}" source="{$facs_url}" wit="{$witness-ref}" data-pb-type="{$pb-type}" data-page-number="{string($page-number)}"/>
     </xsl:template>
     <xsl:template match="tei:facsimile" />
+
+    <xsl:template match="tei:milestone">
+        <xsl:variable name="unit" select="string(@unit)"/>
+        <xsl:variable name="type" select="string(@type)"/>
+        <xsl:variable name="subtype" select="string(@subtype)"/>
+        <xsl:variable name="n" select="string(@n)"/>
+        <xsl:variable name="target-pb" as="element(tei:pb)?">
+            <xsl:choose>
+                <xsl:when test="lower-case($type) = 'summary'">
+                    <xsl:sequence select="preceding::tei:pb[1]"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:sequence select="following::tei:pb[1]"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:variable name="page-number" select="local:compute-page-number($target-pb)"/>
+        <span class="milestone-anchor visually-hidden" aria-hidden="true"
+            data-unit="{$unit}" data-type="{$type}" data-subtype="{$subtype}" data-n="{$n}">
+            <xsl:if test="$page-number">
+                <xsl:attribute name="data-page-number">
+                    <xsl:value-of select="$page-number"/>
+                </xsl:attribute>
+            </xsl:if>
+        </span>
+    </xsl:template>
 
 </xsl:stylesheet>
