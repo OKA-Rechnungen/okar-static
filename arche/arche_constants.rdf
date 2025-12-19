@@ -26,6 +26,7 @@
         <acdh:hasNamingScheme xml:lang="de">Bilddateien sind als „WSTLA-OKA-B1-1-[001-289]-[1-2]_[001-999].tif” und XML-TEI-Dateien sind als „WSTLA-OKA-B1-1-[001-289]-[1-2].xml” benannt.</acdh:hasNamingScheme>
         <acdh:hasLifeCycleStatus rdf:resource="https://vocabs.acdh.oeaw.ac.at/archelifecyclestatus/completed"/>
         <acdh:hasFunder rdf:resource="https://id.acdh.oeaw.ac.at/bmwkms" />
+        <acdh:hasArrangement xml:lang="de">OKAR enthält die Sammlungen „Originalbilder“ und „Bearbeitete Bilder“ mit Untersammlungen von Bildern für jeden Band. Die Sammlung „XML-Editionen“ enthält XML-TEI-Editionen der Bände und die Sammlung „Ergänzende Materialien“ enthält diverse Dateien.</acdh:hasArrangement>
         <acdh:hasFunderLogo>https://shared.acdh.oeaw.ac.at/arche-funder-logos/BMWKMS_Logo_srgb.png</acdh:hasFunderLogo>
         <acdh:hasFunder rdf:resource="https://id.acdh.oeaw.ac.at/europeanunion" />
         <acdh:hasFunderLogo>https://shared.acdh.oeaw.ac.at/arche-funder-logos/EU_nextgen.png</acdh:hasFunderLogo>
@@ -51,6 +52,7 @@
             <acdh:hasPid>create</acdh:hasPid>
             <acdh:hasTitle xml:lang="de">Originalbilder</acdh:hasTitle>
             <acdh:hasEditor rdf:resource="https://d-nb.info/gnd/2060831-7" />
+            <acdh:hasArrangement xml:lang="de">„Originalbilder“ enthält eine Sammlung für jeden Band</acdh:hasArrangement>
             <!-- <acdh:hasLicensor rdf:resource="https://d-nb.info/gnd/2060831-7" />
             <acdh:hasOwner rdf:resource="https://d-nb.info/gnd/2060831-7" />
             <acdh:hasLicense rdf:resource="https://vocabs.acdh.oeaw.ac.at/archelicenses/cc-by-nc-nd-4-0" /> -->
@@ -65,6 +67,7 @@
         </acdh:Collection>
         <acdh:Collection rdf:about="https://id.acdh.oeaw.ac.at/okar/derivates">
             <acdh:hasPid>create</acdh:hasPid>
+            <acdh:hasArrangement xml:lang="de">„Bearbeitete Bilder“ enthält eine Sammlung für jeden Band</acdh:hasArrangement>
             <acdh:hasTitle xml:lang="de">Bearbeitete Bilder</acdh:hasTitle>
             <!-- <acdh:hasEditor rdf:resource="https://d-nb.info/gnd/2060831-7" />
             <acdh:hasLicensor rdf:resource="https://d-nb.info/gnd/2060831-7" />
