@@ -22,7 +22,7 @@
             <xsl:value-of select="concat($TopColId, '/editions')"/>
         </xsl:variable>
         <xsl:variable name="Facsimiles">
-            <xsl:value-of select="concat($TopColId, '/facsimiles')"/>
+            <xsl:value-of select="concat($TopColId, '/masters')"/>
         </xsl:variable>
          <xsl:variable name="Derivates">
             <xsl:value-of select="concat($TopColId, '/derivates')"/>
@@ -256,10 +256,20 @@
                     <xsl:variable name="nextVolumeCol">
                         <xsl:choose>
                             <xsl:when test="$nextTEIWithFacsimile">
-                                <xsl:value-of select="concat($Facsimiles, '/', replace(replace(document-uri($nextTEIWithFacsimile), '^.*[\\/]', ''), '\\.xml$', ''))"/>
+                                <xsl:value-of select="concat($Facsimiles, '/', replace(replace(document-uri($nextTEIWithFacsimile), '^.*[\\/]', ''), '\\.[xX][mM][lL]$', ''))"/>
                             </xsl:when>
                             <xsl:otherwise>
                                 <xsl:value-of select="$Facsimiles"/>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:variable>
+                    <xsl:variable name="nextVolumeColBis">
+                        <xsl:choose>
+                            <xsl:when test="$nextTEIWithFacsimile">
+                                <xsl:value-of select="concat($Derivates, '/', replace(replace(document-uri($nextTEIWithFacsimile), '^.*[\\/]', ''), '\\.[xX][mM][lL]$', ''))"/>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="$Derivates"/>
                             </xsl:otherwise>
                         </xsl:choose>
                     </xsl:variable>
@@ -268,10 +278,20 @@
                             <xsl:value-of select="concat($Facsimiles, '/', encode-for-uri(replace(replace($nextTEIWithFacsimile//tei:facsimile/tei:surface/tei:graphic[1]/@url, '^.*[\\/]', ''), '^[\\./]+', '')))"/>
                         </xsl:if>
                     </xsl:variable>
+                    <xsl:variable name="nextVolumeFirstGraphicBis">
+                        <xsl:if test="$nextTEIWithFacsimile">
+                            <xsl:value-of select="concat($Derivates, '/', encode-for-uri(replace(replace($nextTEIWithFacsimile//tei:facsimile/tei:surface/tei:graphic[1]/@url, '^.*[\\/]', ''), '^[\\./]+', '')))"/>
+                        </xsl:if>
+                    </xsl:variable>
                     <!-- Find first image in this facsimile subcollection -->
                     <xsl:variable name="firstGraphic">
                         <xsl:if test="count($graphics) &gt; 0">
                                 <xsl:value-of select="concat($Facsimiles, '/', encode-for-uri(replace(replace($graphics[1]/@url, '^.*[\\/]', ''), '^[\./]+', '')))"/>
+                        </xsl:if>
+                    </xsl:variable>
+                    <xsl:variable name="firstGraphicBis">
+                        <xsl:if test="count($graphics) &gt; 0">
+                            <xsl:value-of select="concat($Derivates, '/', encode-for-uri(replace(replace($graphics[1]/@url, '^.*[\\/]', ''), '^[\./]+', '')))"/>
                         </xsl:if>
                     </xsl:variable>
                     <acdh:Collection rdf:about="{$volumeCol}">
@@ -350,14 +370,14 @@
                         <acdh:isPartOf rdf:resource="{$Derivates}"/>
                         <!-- hasNextItem to first image if present, else to next volume col -->
                         <xsl:choose>
-                            <xsl:when test="normalize-space($firstGraphic)">
-                                <acdh:hasNextItem rdf:resource="{$firstGraphic}"/>
+                            <xsl:when test="normalize-space($firstGraphicBis)">
+                                <acdh:hasNextItem rdf:resource="{$firstGraphicBis}"/>
                             </xsl:when>
-                            <xsl:when test="string-length($nextVolumeFirstGraphic) &gt; 0">
-                                <acdh:hasNextItem rdf:resource="{$nextVolumeFirstGraphic}"/>
+                            <xsl:when test="string-length($nextVolumeFirstGraphicBis) &gt; 0">
+                                <acdh:hasNextItem rdf:resource="{$nextVolumeFirstGraphicBis}"/>
                             </xsl:when>
                             <xsl:otherwise>
-                                <acdh:hasNextItem rdf:resource="{$nextVolumeCol}"/>
+                                <acdh:hasNextItem rdf:resource="{$nextVolumeColBis}"/>
                             </xsl:otherwise>
                         </xsl:choose>
                         <xsl:copy-of select="$constants"/>
