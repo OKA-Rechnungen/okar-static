@@ -12,6 +12,7 @@
         <xsl:variable name="constantsEdition" select="acdh:ACDH/acdh:EditionObject/*"/>
         <xsl:variable name="constantsImg" select="acdh:ACDH/acdh:ImgObject/*"/>
         <xsl:variable name="constantsDer" select="acdh:ACDH/acdh:DerivateObject/*"/>
+        <xsl:variable name="allTEIs" select="collection('../data/editions?select=*.xml')//tei:TEI"/>
         <xsl:variable name="TopColId">
             <xsl:value-of select="string(.//acdh:TopCollection/@rdf:about)"/>
         </xsl:variable>
@@ -47,7 +48,8 @@
                     <xsl:attribute name="rdf:about">
                         <xsl:value-of select="@rdf:about"/>
                     </xsl:attribute>
-                    <acdh:hasNextItem rdf:resource="{concat($TopColId, '/', (collection('../data/editions?select=*.xml')//tei:TEI)[1]/@xml:id)}"/>
+                    <acdh:hasNextItem rdf:resource="{concat($TopColId, '/', $allTEIs[1]/@xml:id)}"/>
+                    <acdh:hasNextItem rdf:resource="{$Meta}"/>
                     <xsl:copy-of select="$constants"/>
                     <!-- <xsl:copy-of select="$constantsEdition"/> -->
                     <xsl:for-each select=".//acdh:*">
@@ -63,7 +65,8 @@
                     </xsl:attribute>
                     <acdh:hasContributor rdf:resource="https://id.acdh.oeaw.ac.at/fsanzlazaro"/>
                     <acdh:hasMetadataCreator rdf:resource="https://id.acdh.oeaw.ac.at/fsanzlazaro"/>
-                    <acdh:hasNextItem rdf:resource="https://id.acdh.oeaw.ac.at/okar/logo_okar.svg"/>
+                    <acdh:hasNextItem rdf:resource="https://id.acdh.oeaw.ac.at/okar/logo_okar.png"/>
+                    <acdh:hasNextItem rdf:resource="{$Facsimiles}"/>
                     <xsl:copy-of select="$constants"/>
                     <!-- <xsl:copy-of select="$constantsMeta"/> -->
                     <xsl:for-each select=".//acdh:*">
@@ -81,13 +84,33 @@
                     <xsl:copy-of select="$constants"/>
                     <!-- <xsl:copy-of select="$constantsImg"/> -->
                     <!-- Add hasNextItem to first facsimile subcollection if present -->
-                    <xsl:variable name="firstTEI" select="(collection('../data/editions?select=*.xml')//tei:TEI[.//tei:facsimile/tei:surface/tei:graphic])[1]"/>
+                    <xsl:variable name="firstTEI" select="($allTEIs[.//tei:facsimile/tei:surface/tei:graphic])[1]"/>
                     <xsl:if test="$firstTEI">
-                        <xsl:variable name="firstFacsName" select="replace(replace(document-uri($firstTEI), '^.*[\\/]', ''), '\\.xml$', '')"/>
-                        <xsl:if test="string-length(normalize-space($firstFacsName))">
-                            <acdh:hasNextItem rdf:resource="{concat($Facsimiles, '/', $firstFacsName)}"/>
+                        <xsl:variable name="rawXmlId" select="normalize-space(string($firstTEI/@xml:id))"/>
+                        <xsl:variable name="rawDocName" select="replace(replace(document-uri($firstTEI), '^.*[\\/]', ''), '\\.[xX][mM][lL]$', '')"/>
+                        <xsl:variable name="volumeId">
+                            <xsl:choose>
+                                <xsl:when test="string-length($rawXmlId) &gt; 0">
+                                    <xsl:variable name="lowerId" select="lower-case($rawXmlId)"/>
+                                    <xsl:choose>
+                                        <xsl:when test="ends-with($lowerId, '.xml')">
+                                            <xsl:value-of select="substring($rawXmlId, 1, string-length($rawXmlId) - 4)"/>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:value-of select="$rawXmlId"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:value-of select="$rawDocName"/>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:variable>
+                        <xsl:if test="string-length(normalize-space($volumeId))">
+                            <acdh:hasNextItem rdf:resource="{concat($Facsimiles, '/', replace($volumeId, '\\.[xX][mM][lL]$', ''))}"/>
                         </xsl:if>
                     </xsl:if>
+                    <acdh:hasNextItem rdf:resource="{$Derivates}"/>
                     <xsl:for-each select=".//acdh:*">
                         <xsl:copy-of select="."/>
                     </xsl:for-each>
@@ -102,12 +125,31 @@
                     <!-- <acdh:hasAccessRestriction rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeaccessrestrictions/public"/> -->
                     <xsl:copy-of select="$constants"/>
                     <!-- <xsl:copy-of select="$constantsImg"/> -->
-                    <!-- Add hasNextItem to first facsimile subcollection if present -->
-                    <xsl:variable name="firstTEI" select="(collection('../data/editions?select=*.xml')//tei:TEI[.//tei:facsimile/tei:surface/tei:graphic])[1]"/>
+                    <!-- Add hasNextItem to first derivate subcollection if present -->
+                    <xsl:variable name="firstTEI" select="($allTEIs[.//tei:facsimile/tei:surface/tei:graphic])[1]"/>
                     <xsl:if test="$firstTEI">
-                        <xsl:variable name="firstFacsName" select="replace(replace(document-uri($firstTEI), '^.*[\\/]', ''), '\\.xml$', '')"/>
-                        <xsl:if test="string-length(normalize-space($firstFacsName))">
-                            <acdh:hasNextItem rdf:resource="{concat($Derivates, '/', $firstFacsName)}"/>
+                        <xsl:variable name="rawXmlId" select="normalize-space(string($firstTEI/@xml:id))"/>
+                        <xsl:variable name="rawDocName" select="replace(replace(document-uri($firstTEI), '^.*[\\/]', ''), '\\.[xX][mM][lL]$', '')"/>
+                        <xsl:variable name="volumeId">
+                            <xsl:choose>
+                                <xsl:when test="string-length($rawXmlId) &gt; 0">
+                                    <xsl:variable name="lowerId" select="lower-case($rawXmlId)"/>
+                                    <xsl:choose>
+                                        <xsl:when test="ends-with($lowerId, '.xml')">
+                                            <xsl:value-of select="substring($rawXmlId, 1, string-length($rawXmlId) - 4)"/>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:value-of select="$rawXmlId"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:value-of select="$rawDocName"/>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:variable>
+                        <xsl:if test="string-length(normalize-space($volumeId))">
+                            <acdh:hasNextItem rdf:resource="{concat($Derivates, '/', replace($volumeId, '\\.[xX][mM][lL]$', ''))}"/>
                         </xsl:if>
                     </xsl:if>
                     <xsl:for-each select=".//acdh:*">
@@ -116,8 +158,10 @@
                 </acdh:Collection>
             </xsl:for-each>
 
-            <xsl:for-each select="collection('../data/editions?select=*.xml')//tei:TEI">
+            <xsl:for-each select="$allTEIs">
                 <xsl:variable name="id" select="concat(string($TopColId), '/', string(@xml:id))"/>
+                <xsl:variable name="teiPos" select="position()"/>
+                <xsl:variable name="nextTEI" select="$allTEIs[$teiPos + 1]"/>
                 <xsl:variable name="origDate" select="(.//tei:msContents/tei:p/tei:origDate)[1]"/>
                 <xsl:variable name="origDateWhen" select="normalize-space(string($origDate/@when))"/>
                 <xsl:variable name="origDateNotBefore" select="normalize-space(string($origDate/@notBefore))"/>
@@ -239,39 +283,44 @@
                     <xsl:copy-of select="$identifierElements/*"/>
                     <xsl:copy-of select="$constants"/>
                     <xsl:copy-of select="$constantsEdition"/>
-                    <xsl:variable name="teiPos" select="position()"/>
-                    <xsl:variable name="nextTEI" select="(collection('../data/editions?select=*.xml')//tei:TEI)[$teiPos + 1]"/>
-                    <xsl:choose>
-                        <xsl:when test="$nextTEI">
-                            <acdh:hasNextItem rdf:resource="{concat($TopColId, '/', $nextTEI/@xml:id)}"/>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <acdh:hasNextItem rdf:resource="https://id.acdh.oeaw.ac.at/okar/logo_okar.svg"/>
-                        </xsl:otherwise>
-                    </xsl:choose>
+                    <xsl:if test="$nextTEI">
+                        <acdh:hasNextItem rdf:resource="{concat($TopColId, '/', $nextTEI/@xml:id)}"/>
+                    </xsl:if>
                 </acdh:Resource>
 
                 <xsl:if test="exists($graphics)">
-                    <xsl:variable name="nextTEIWithFacsimile" select="../following-sibling::tei:TEI[.//tei:facsimile/tei:surface/tei:graphic][1]"/>
+                    <xsl:variable name="nextTEIWithFacsimile" select="($allTEIs[position() &gt; $teiPos][.//tei:facsimile/tei:surface/tei:graphic])[1]"/>
+                    <xsl:variable name="nextVolumeId">
+                        <xsl:if test="$nextTEIWithFacsimile">
+                            <xsl:variable name="rawXmlId" select="normalize-space(string($nextTEIWithFacsimile/@xml:id))"/>
+                            <xsl:variable name="rawDocName" select="replace(replace(document-uri($nextTEIWithFacsimile), '^.*[\\/]', ''), '\\.[xX][mM][lL]$', '')"/>
+                            <xsl:choose>
+                                <xsl:when test="string-length($rawXmlId) &gt; 0">
+                                    <xsl:variable name="lowerId" select="lower-case($rawXmlId)"/>
+                                    <xsl:choose>
+                                        <xsl:when test="ends-with($lowerId, '.xml')">
+                                            <xsl:value-of select="substring($rawXmlId, 1, string-length($rawXmlId) - 4)"/>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:value-of select="$rawXmlId"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:value-of select="$rawDocName"/>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:if>
+                    </xsl:variable>
                     <xsl:variable name="nextVolumeCol">
-                        <xsl:choose>
-                            <xsl:when test="$nextTEIWithFacsimile">
-                                <xsl:value-of select="concat($Facsimiles, '/', replace(replace(document-uri($nextTEIWithFacsimile), '^.*[\\/]', ''), '\\.[xX][mM][lL]$', ''))"/>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <xsl:value-of select="$Facsimiles"/>
-                            </xsl:otherwise>
-                        </xsl:choose>
+                        <xsl:if test="$nextTEIWithFacsimile and normalize-space($nextVolumeId)">
+                            <xsl:value-of select="concat($Facsimiles, '/', replace($nextVolumeId, '\\.[xX][mM][lL]$', ''))"/>
+                        </xsl:if>
                     </xsl:variable>
                     <xsl:variable name="nextVolumeColBis">
-                        <xsl:choose>
-                            <xsl:when test="$nextTEIWithFacsimile">
-                                <xsl:value-of select="concat($Derivates, '/', replace(replace(document-uri($nextTEIWithFacsimile), '^.*[\\/]', ''), '\\.[xX][mM][lL]$', ''))"/>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <xsl:value-of select="$Derivates"/>
-                            </xsl:otherwise>
-                        </xsl:choose>
+                        <xsl:if test="$nextTEIWithFacsimile and normalize-space($nextVolumeId)">
+                            <xsl:value-of select="concat($Derivates, '/', replace($nextVolumeId, '\\.[xX][mM][lL]$', ''))"/>
+                        </xsl:if>
                     </xsl:variable>
                     <xsl:variable name="nextVolumeFirstGraphic">
                         <xsl:if test="$nextTEIWithFacsimile">
@@ -283,6 +332,8 @@
                             <xsl:value-of select="concat($Derivates, '/', encode-for-uri(replace(replace($nextTEIWithFacsimile//tei:facsimile/tei:surface/tei:graphic[1]/@url, '^.*[\\/]', ''), '^[\\./]+', '')))"/>
                         </xsl:if>
                     </xsl:variable>
+                    <xsl:variable name="afterThisVolumeMasters" select="if ($nextTEIWithFacsimile) then normalize-space($nextVolumeCol) else $Derivates"/>
+                    <xsl:variable name="afterThisVolumeDerivates" select="if ($nextTEIWithFacsimile) then normalize-space($nextVolumeColBis) else 'https://id.acdh.oeaw.ac.at/okar/logo_okar.png'"/>
                     <!-- Find first image in this facsimile subcollection -->
                     <xsl:variable name="firstGraphic">
                         <xsl:if test="count($graphics) &gt; 0">
@@ -298,7 +349,7 @@
                             <!-- DEBUG: removed -->
                         <acdh:hasPid>create</acdh:hasPid>
                         <acdh:hasTitle xml:lang="de">
-                            <xsl:value-of select="concat($volumeLabel, ' – Faksimiles')"/>
+                            <xsl:value-of select="concat($volumeLabel, ' – Originalbilder')"/>
                         </acdh:hasTitle>
                         <xsl:variable name="collectionDescription">
                             <xsl:choose>
@@ -318,18 +369,12 @@
                         <xsl:copy-of select="$coverageIdentifierElements/*"/>
                         <xsl:copy-of select="$identifierElements/*"/>
                         <acdh:isPartOf rdf:resource="{$Facsimiles}"/>
-                        <!-- hasNextItem to first image if present, else to next volume col -->
-                        <xsl:choose>
-                            <xsl:when test="normalize-space($firstGraphic)">
-                                <acdh:hasNextItem rdf:resource="{$firstGraphic}"/>
-                            </xsl:when>
-                            <xsl:when test="string-length($nextVolumeFirstGraphic) &gt; 0">
-                                <acdh:hasNextItem rdf:resource="{$nextVolumeFirstGraphic}"/>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <acdh:hasNextItem rdf:resource="{$nextVolumeCol}"/>
-                            </xsl:otherwise>
-                        </xsl:choose>
+                        <xsl:if test="normalize-space($firstGraphic)">
+                            <acdh:hasNextItem rdf:resource="{$firstGraphic}"/>
+                        </xsl:if>
+                        <xsl:if test="$nextTEIWithFacsimile and normalize-space($nextVolumeCol)">
+                            <acdh:hasNextItem rdf:resource="{$nextVolumeCol}"/>
+                        </xsl:if>
                         <xsl:copy-of select="$constants"/>
                         <xsl:copy-of select="$constantsImg"/>
                     </acdh:Collection>
@@ -338,18 +383,8 @@
                             <!-- DEBUG: removed -->
                         <acdh:hasPid>create</acdh:hasPid>
                         <acdh:hasTitle xml:lang="de">
-                            <xsl:value-of select="concat($volumeLabel, ' – Faksimiles')"/>
+                            <xsl:value-of select="concat($volumeLabel, ' – Bearbeitete Bilder')"/>
                         </acdh:hasTitle>
-                        <xsl:variable name="collectionDescription">
-                            <xsl:choose>
-                                <xsl:when test="$origDateDescription and string-length(normalize-space($origDateDescription))">
-                                    <xsl:value-of select="concat('Digitalisierte Seiten des Bandes ', $volumeLabel, ' – ', $origDateDescription)"/>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="concat('Digitalisierte Seiten des Bandes ', $volumeLabel)"/>
-                                </xsl:otherwise>
-                            </xsl:choose>
-                        </xsl:variable>
                         <xsl:variable name="collectionDescription">
                             <xsl:choose>
                                 <xsl:when test="$origDateDescription and string-length(normalize-space($origDateDescription))">
@@ -368,18 +403,12 @@
                         <xsl:copy-of select="$coverageIdentifierElements/*"/>
                         <xsl:copy-of select="$identifierElements/*"/>
                         <acdh:isPartOf rdf:resource="{$Derivates}"/>
-                        <!-- hasNextItem to first image if present, else to next volume col -->
-                        <xsl:choose>
-                            <xsl:when test="normalize-space($firstGraphicBis)">
-                                <acdh:hasNextItem rdf:resource="{$firstGraphicBis}"/>
-                            </xsl:when>
-                            <xsl:when test="string-length($nextVolumeFirstGraphicBis) &gt; 0">
-                                <acdh:hasNextItem rdf:resource="{$nextVolumeFirstGraphicBis}"/>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <acdh:hasNextItem rdf:resource="{$nextVolumeColBis}"/>
-                            </xsl:otherwise>
-                        </xsl:choose>
+                        <xsl:if test="normalize-space($firstGraphicBis)">
+                            <acdh:hasNextItem rdf:resource="{$firstGraphicBis}"/>
+                        </xsl:if>
+                        <xsl:if test="$nextTEIWithFacsimile and normalize-space($nextVolumeColBis)">
+                            <acdh:hasNextItem rdf:resource="{$nextVolumeColBis}"/>
+                        </xsl:if>
                         <xsl:copy-of select="$constants"/>
                         <xsl:copy-of select="$constantsDer"/>
                     </acdh:Collection>
@@ -410,11 +439,10 @@
                         <xsl:variable name="nextNode" select="$graphics[$pos + 1]"/>
                         <xsl:variable name="nextGraphicUri" select="if ($nextNode) then concat($Facsimiles, '/', encode-for-uri(replace(replace($nextNode/@url, '^.*[\\/]', ''), '^[\\./]+', ''))) else ''"/>
                         <xsl:variable name="nextGraphicUriBis" select="if ($nextNode) then concat($Derivates, '/', encode-for-uri(replace(replace($nextNode/@url, '^.*[\\/]', ''), '^[\\./]+', ''))) else ''"/>
-                        <xsl:variable name="nextVolumeFirstGraphic" select="''"/>
                         <acdh:Resource rdf:about="{$effectiveId}">
                             <acdh:hasPid>create</acdh:hasPid>
-                            <xsl:if test="$nextNode or string-length($nextVolumeFirstGraphic) &gt; 0">
-                                <acdh:hasNextItem rdf:resource="{if ($nextNode) then $nextGraphicUri else $nextVolumeFirstGraphic}"/>
+                            <xsl:if test="$nextNode">
+                                <acdh:hasNextItem rdf:resource="{$nextGraphicUri}"/>
                             </xsl:if>
                             <!-- <acdh:hasAccessRestriction rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeaccessrestrictions/public"/> -->
                             <!-- <acdh:hasLicense rdf:resource="https://vocabs.acdh.oeaw.ac.at/archelicenses/cc-by-4-0"/> -->
@@ -438,8 +466,8 @@
                         </acdh:Resource>
                         <acdh:Resource rdf:about="{$effectiveIdbis}">
                             <acdh:hasPid>create</acdh:hasPid>
-                            <xsl:if test="$nextNode or string-length($nextVolumeFirstGraphic) &gt; 0">
-                                <acdh:hasNextItem rdf:resource="{if ($nextNode) then $nextGraphicUriBis else $nextVolumeFirstGraphic}"/>
+                            <xsl:if test="$nextNode">
+                                <acdh:hasNextItem rdf:resource="{$nextGraphicUriBis}"/>
                             </xsl:if>
                             <!-- <acdh:hasAccessRestriction rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeaccessrestrictions/public"/> -->
                             <!-- <acdh:hasLicense rdf:resource="https://vocabs.acdh.oeaw.ac.at/archelicenses/cc-by-4-0"/> -->
@@ -470,26 +498,27 @@
                 <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/image"/>
                 <acdh:hasFormat>image/png</acdh:hasFormat>
                 <acdh:isTitleImageOf rdf:resource="https://id.acdh.oeaw.ac.at/okar"/>
-                <acdh:hasNextItem rdf:resource="https://id.acdh.oeaw.ac.at/okar/vms.odd"/>
+                <acdh:hasNextItem rdf:resource="https://id.acdh.oeaw.ac.at/okar/schema.odd"/>
                 <xsl:copy-of select="$constants"/>
                 <xsl:copy-of select="$constantsMeta"/>
             </acdh:Resource>
-            <acdh:Metadata rdf:about="https://id.acdh.oeaw.ac.at/okar/vms.odd">
+            <acdh:Metadata rdf:about="https://id.acdh.oeaw.ac.at/okar/schema.odd">
                 <acdh:hasTitle xml:lang="de">XML/TEI Schema ODD für „Oberkammeramtsrechnungsbücher der Stadt Wien“</acdh:hasTitle>
                 <acdh:hasDescription xml:lang="de">XML/TEI Schema ODD für „Oberkammeramtsrechnungsbücher der Stadt Wien“</acdh:hasDescription>
                 <!-- <acdh:hasPid>create</acdh:hasPid> -->
                 <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/other"/>
                 <acdh:isMetadataFor rdf:resource="https://id.acdh.oeaw.ac.at/okar/editions"/>
-                <acdh:hasNextItem rdf:resource="https://id.acdh.oeaw.ac.at/okar/vms.rng"/>
+                <acdh:hasNextItem rdf:resource="https://id.acdh.oeaw.ac.at/okar/schema.rng"/>
                 <xsl:copy-of select="$constants"/>
                 <xsl:copy-of select="$constantsMeta"/>
             </acdh:Metadata>
-            <acdh:Metadata rdf:about="https://id.acdh.oeaw.ac.at/okar/vms.rng">
+            <acdh:Metadata rdf:about="https://id.acdh.oeaw.ac.at/okar/schema.rng">
                 <acdh:hasTitle xml:lang="de">TEI/XML Schema RNG für „Oberkammeramtsrechnungsbücher der Stadt Wien“</acdh:hasTitle>
                 <acdh:hasDescription xml:lang="de">XML/TEI Schema RNG für „Oberkammeramtsrechnungsbücher der Stadt Wien“</acdh:hasDescription>
                 <!-- <acdh:hasPid>create</acdh:hasPid> -->
                 <acdh:hasCategory rdf:resource="https://vocabs.acdh.oeaw.ac.at/archecategory/other"/>
                 <acdh:isMetadataFor rdf:resource="https://id.acdh.oeaw.ac.at/okar/editions"/>
+                <!-- <acdh:hasNextItem rdf:resource="{$Facsimiles}"/> -->
                 <xsl:copy-of select="$constants"/>
                 <xsl:copy-of select="$constantsMeta"/>
             </acdh:Metadata>
