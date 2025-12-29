@@ -351,6 +351,7 @@
                         <acdh:hasTitle xml:lang="de">
                             <xsl:value-of select="concat($volumeLabel, ' – Originalbilder')"/>
                         </acdh:hasTitle>
+                        <acdh:hasOaiSet rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeoaisets/kulturpool"/>
                         <xsl:variable name="collectionDescription">
                             <xsl:choose>
                                 <xsl:when test="$origDateDescription and string-length(normalize-space($origDateDescription))">
@@ -385,6 +386,7 @@
                         <acdh:hasTitle xml:lang="de">
                             <xsl:value-of select="concat($volumeLabel, ' – Bearbeitete Bilder')"/>
                         </acdh:hasTitle>
+                        <acdh:hasOaiSet rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeoaisets/kulturpool"/>
                         <xsl:variable name="collectionDescription">
                             <xsl:choose>
                                 <xsl:when test="$origDateDescription and string-length(normalize-space($origDateDescription))">
