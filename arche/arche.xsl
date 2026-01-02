@@ -320,18 +320,21 @@
                             <xsl:value-of select="concat($volumeColBis, '/', encode-for-uri(replace(replace($graphicsSorted[1]/@url, '^.*[\\/]', ''), '^[\./]+', '')))"/>
                         </xsl:if>
                     </xsl:variable>
-                    <!-- For ARCHE's next-item validation we keep a single linear chain.
-                        Collections must point to their first child; we bridge volumes via the last image.
-                        Do NOT loop last→first: that makes the first volume pointed-to twice (by the parent collection and by the last item). -->
+                    <!-- Keep hasNextItem only within volume subcollections and their members.
+                        Bridge volumes via the last image; loop the last volume back to the first volume
+                        so the chain is closed without requiring hasNextItem on the top-level collections. -->
                     <xsl:variable name="nextVolumeForMasters" select="if (normalize-space($nextVolumeCol)) then normalize-space($nextVolumeCol) else ''"/>
                     <xsl:variable name="nextVolumeForDerivates" select="if (normalize-space($nextVolumeColBis)) then normalize-space($nextVolumeColBis) else ''"/>
+                    <xsl:variable name="subcollectionTitleBase" as="xs:string"
+                        select="if (normalize-space($coverageIdentifierYear) and normalize-space($shelfmark))
+                                then concat('Kammeramtsrechnung ', normalize-space($coverageIdentifierYear), ' (', normalize-space($shelfmark), ')')
+                                else normalize-space($volumeLabel)"/>
                     <acdh:Collection rdf:about="{$volumeCol}">
                             <!-- DEBUG: removed -->
                         <acdh:hasPid>create</acdh:hasPid>
                         <acdh:hasTitle xml:lang="de">
-                            <xsl:value-of select="concat($volumeLabel, ' – Originalbilder')"/>
+                            <xsl:value-of select="concat($subcollectionTitleBase, ' – Originalbilder')"/>
                         </acdh:hasTitle>
-                        <acdh:hasOaiSet rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeoaisets/kulturpool"/>
                         <xsl:variable name="collectionDescription">
                             <xsl:choose>
                                 <xsl:when test="$origDateDescription and string-length(normalize-space($origDateDescription))">
@@ -353,9 +356,6 @@
                         <xsl:if test="$isTargetVolume and normalize-space($firstGraphic)">
                             <acdh:hasNextItem rdf:resource="{$firstGraphic}"/>
                         </xsl:if>
-                        <xsl:if test="$isTargetVolume and normalize-space($nextVolumeForMasters)">
-                            <acdh:hasNextItem rdf:resource="{$nextVolumeForMasters}"/>
-                        </xsl:if>
                         <xsl:copy-of select="$constants"/>
                         <xsl:copy-of select="$constantsImg"/>
                     </acdh:Collection>
@@ -364,7 +364,7 @@
                             <!-- DEBUG: removed -->
                         <acdh:hasPid>create</acdh:hasPid>
                         <acdh:hasTitle xml:lang="de">
-                            <xsl:value-of select="concat($volumeLabel, ' – Bearbeitete Bilder')"/>
+                            <xsl:value-of select="concat($subcollectionTitleBase, ' – Bearbeitete Bilder')"/>
                         </acdh:hasTitle>
                         <acdh:hasOaiSet rdf:resource="https://vocabs.acdh.oeaw.ac.at/archeoaisets/kulturpool"/>
                         <xsl:variable name="collectionDescription">
@@ -388,9 +388,6 @@
                         <xsl:if test="$isTargetVolume and normalize-space($firstGraphicBis)">
                             <acdh:hasNextItem rdf:resource="{$firstGraphicBis}"/>
                         </xsl:if>
-                        <xsl:if test="$isTargetVolume and normalize-space($nextVolumeForDerivates)">
-                            <acdh:hasNextItem rdf:resource="{$nextVolumeForDerivates}"/>
-                        </xsl:if>
                         <xsl:copy-of select="$constants"/>
                         <xsl:copy-of select="$constantsDer"/>
                     </acdh:Collection>
@@ -399,6 +396,27 @@
                     <xsl:for-each select="$graphicsSorted">
                         <xsl:variable name="graphicUrl" select="string(@url)"/>
                         <xsl:variable name="graphicFilename" select="replace(replace($graphicUrl, '^.*[\\/]', ''), '^[\\./]+', '')"/>
+                        <xsl:variable name="imageNumberRaw">
+                            <xsl:choose>
+                                <xsl:when test="matches($graphicFilename, '_(\d+)\.[^\.]+$')">
+                                    <xsl:value-of select="replace($graphicFilename, '^.*_(\d+)\.[^\.]+$', '$1')"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:value-of select="replace($graphicFilename, '\.[^\.]+$', '')"/>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:variable>
+                        <xsl:variable name="imageNumber">
+                            <xsl:choose>
+                                <xsl:when test="$imageNumberRaw castable as xs:integer">
+                                    <xsl:value-of select="string(xs:integer($imageNumberRaw))"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:variable name="trimmed" select="replace($imageNumberRaw, '^0+', '')"/>
+                                    <xsl:value-of select="if (string-length($trimmed) &gt; 0) then $trimmed else '0'"/>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:variable>
                         <xsl:variable name="effectiveId" select="concat($volumeCol, '/', encode-for-uri($graphicFilename))"/>
                         <xsl:variable name="effectiveIdbis" select="concat($volumeColBis, '/', encode-for-uri($graphicFilename))"/>
                         <xsl:variable name="width" select="string(@width)"/>
@@ -435,7 +453,7 @@
                             <acdh:hasTag xml:lang="en">TEXT</acdh:hasTag>
                             <acdh:hasFormat>image/tiff</acdh:hasFormat>
                             <acdh:hasTitle xml:lang="de">
-                                <xsl:value-of select="concat($volumeLabel, ' – ', $graphicUrl)"/>
+                                <xsl:value-of select="concat($volumeLabel, ' – ', $imageNumber, ' (Originalbild)')"/>
                             </acdh:hasTitle>
                             <!-- <acdh:hasUrl>
                                 <xsl:value-of select="$graphicUrl"/>
@@ -462,7 +480,7 @@
                             <acdh:hasTag xml:lang="en">TEXT</acdh:hasTag>
                             <acdh:hasFormat>image/tiff</acdh:hasFormat>
                             <acdh:hasTitle xml:lang="de">
-                                <xsl:value-of select="concat($volumeLabel, ' – ', $graphicUrl)"/>
+                                <xsl:value-of select="concat($volumeLabel, ' – ', $imageNumber)"/>
                             </acdh:hasTitle>
                             <!-- <acdh:hasUrl>
                                 <xsl:value-of select="$graphicUrl"/>
