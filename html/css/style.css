@@ -1,3 +1,715 @@
+/* ==========================================================
+   OKAR Layout Styles (matching Armesünderblätter layout)
+   ========================================================== */
+
+:root {
+    --editor-font-family: serif;
+    --editor-font-color: grey;
+    --variant-marker-color: #868277;
+    --catch-offset-right: -75%;
+
+    /* OKAR retains its own colorway – these are layout-neutral defaults */
+    --okar-background-colour-0: #f8f9fa;
+    --okar-background-colour-1: #e9ecef;
+    --okar-background-colour-2: #dee2e6;
+    --okar-background-colour-3: #495057;
+    --okar-background-colour-4: #343a40;
+
+    --okar-button-bg: var(--bs-primary, #0d6efd);
+    --okar-button-bg-hover: #0b5ed7;
+    --okar-link-colour: #0d6efd;
+    --okar-link-visited-colour: #6c757d;
+    --okar-border-color: #6c757d;
+
+    /* Shared sizes for square/icon buttons (burger/close/action) */
+    --okar-square-btn-size: 4.5rem;
+    --okar-square-btn-icon-size: 2.625rem;
+
+    --bs-body-font-family: var(--editor-font-family);
+    --site-offcanvas-width: clamp(280px, 34vw, 400px);
+    --site-top-action-height: clamp(2.6rem, 4vw, 3.5rem);
+}
+
+body {
+    font-family: var(--bs-body-font-family);
+}
+
+/* ==========================================================
+   Site Header (fixed burger button)
+   ========================================================== */
+.site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: auto;
+    z-index: 20000;
+    padding: 0;
+    margin: 0;
+}
+
+body.page-search .site-header,
+#searchPage #searchContainer .site-header {
+    left: var(--site-offcanvas-width);
+}
+
+.site-header-inner {
+    display: flex;
+    align-items: center;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* ==========================================================
+   Button variants (bga, bgb, bgc)
+   ========================================================== */
+.bga {
+    --button-bg: var(--okar-button-bg);
+    --button-bg-hover: var(--okar-button-bg-hover);
+}
+
+.bgb {
+    --button-bg: var(--okar-button-bg);
+    --button-bg-hover: var(--okar-button-bg-hover);
+}
+
+.bgc {
+    --button-bg: var(--okar-button-bg);
+    --button-bg-hover: var(--okar-button-bg-hover);
+}
+
+/* ==========================================================
+   Square / icon buttons (burger, close, action)
+   ========================================================== */
+.site-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--okar-square-btn-size);
+    height: var(--okar-square-btn-size);
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none;
+    background-image: none !important;
+    color: var(--bs-white) !important;
+    background-color: var(--okar-button-bg) !important;
+    font-size: var(--okar-square-btn-icon-size);
+    line-height: 1;
+}
+
+.site-button-bis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--okar-square-btn-size);
+    height: calc(var(--okar-square-btn-size) * 2);
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none;
+    font-family: var(--bs-font-sans-serif) !important;
+    background-image: none !important;
+    color: var(--okar-button-bg-hover) !important;
+    background-color: var(--okar-background-colour-0) !important;
+    font-size: small;
+    text-decoration: none !important;
+    line-height: 1;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    white-space: nowrap;
+}
+
+.site-button:focus-visible {
+    outline: 2px solid var(--bs-white);
+    outline-offset: 2px;
+}
+
+.site-button:hover,
+.site-button:active,
+.site-button:focus {
+    background-color: var(--okar-button-bg-hover) !important;
+    color: var(--bs-white) !important;
+    box-shadow: none !important;
+}
+
+/* Semitrans utility */
+.semitrans {
+    color: var(--bs-white) !important;
+    background-color: rgba(13, 110, 253, 0.8) !important;
+}
+
+.semitrans .bi {
+    color: rgba(255, 255, 255, 1) !important;
+}
+
+.semitrans:hover,
+.semitrans:focus,
+.semitrans:focus-visible,
+.semitrans:active {
+    background-color: rgba(13, 110, 253, 1) !important;
+}
+
+/* ==========================================================
+   Offcanvas close button positioning
+   ========================================================== */
+.site-close,
+button.btn-close.site-close {
+    display: none !important;
+}
+
+.site-bottom-button {
+    font-size: 1.8rem;
+    line-height: 1;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+}
+
+.site-offcanvas.show [data-bs-dismiss="offcanvas"],
+.offcanvas.show [data-bs-dismiss="offcanvas"] {
+    display: inline-flex !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 100% !important;
+    margin: 0 !important;
+    z-index: 20001 !important;
+    transition: left 480ms cubic-bezier(.22, 1, .36, 1), opacity 220ms ease-in-out;
+}
+
+.site-offcanvas.show.hiding [data-bs-dismiss="offcanvas"],
+.offcanvas.show.hiding [data-bs-dismiss="offcanvas"] {
+    display: none !important;
+}
+
+.site-offcanvas.showing [data-bs-dismiss="offcanvas"],
+.offcanvas.showing [data-bs-dismiss="offcanvas"] {
+    display: inline-flex !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 100% !important;
+    margin: 0 !important;
+    z-index: 20001 !important;
+    transition: left 480ms cubic-bezier(.22, 1, .36, 1), opacity 220ms ease-in-out;
+}
+
+.site-offcanvas.hiding [data-bs-dismiss="offcanvas"],
+.offcanvas.hiding [data-bs-dismiss="offcanvas"] {
+    display: none !important;
+}
+
+.site-offcanvas.show [data-bs-dismiss="offcanvas"] .bi,
+.offcanvas.show [data-bs-dismiss="offcanvas"] .bi {
+    color: var(--bs-white) !important;
+}
+
+/* Hide burger when offcanvas is showing */
+.site-burger[aria-expanded="true"],
+body:has(.offcanvas.show:not(.hiding), .offcanvas.showing) .site-burger,
+.site-header .site-button[aria-expanded="true"],
+body:has(.offcanvas.show:not(.hiding), .offcanvas.showing) .site-header .site-button[data-bs-toggle="offcanvas"] {
+    display: none !important;
+}
+
+/* ==========================================================
+   Offcanvas menu styling
+   ========================================================== */
+.site-offcanvas {
+    width: var(--site-offcanvas-width);
+    background-color: var(--okar-background-colour-4) !important;
+    color: var(--bs-white) !important;
+    overflow: visible !important;
+    transition: width 480ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.site-offcanvas .offcanvas-body,
+body.landing .landing-offcanvas .offcanvas-body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.site-offcanvas .offcanvas-body::-webkit-scrollbar,
+body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+.site-menu {
+    padding-left: 4rem;
+}
+
+.site-menu-section {
+    font-variant: small-caps;
+    font-size: 2rem;
+    letter-spacing: 0.02em;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+    margin-left: -2rem;
+}
+
+.site-menu-link,
+.site-menu-link:hover,
+.site-menu-link:focus,
+.site-menu-link:visited {
+    display: block;
+    padding: 0.25rem 0;
+    text-decoration: none;
+    color: white !important;
+    background-color: transparent;
+    font-size: 1.5rem;
+}
+
+.site-menu .site-menu-link--leaf {
+    position: relative;
+}
+
+.site-menu .site-menu-link--leaf .site-menu-bullet {
+    position: absolute;
+    left: -2rem;
+    top: 50%;
+    transform: translate3d(0, -50%, 0);
+    transition: transform 320ms ease;
+    pointer-events: none;
+    display: inline-flex;
+    width: 1.5rem;
+    justify-content: center;
+}
+
+.site-menu .site-menu-link--leaf:hover .site-menu-bullet,
+.site-menu .site-menu-link--leaf:focus .site-menu-bullet {
+    transform: translate3d(.5rem, -50%, 0);
+}
+
+/* ==========================================================
+   Site Top (banner area)
+   ========================================================== */
+.site-top {
+    background-color: var(--okar-button-bg);
+    padding: 5rem 0 0;
+}
+
+.site-top-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 2rem;
+    align-items: center;
+    padding-left: 5rem;
+    padding-right: 2rem;
+    width: 100%;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (min-width: 576px) {
+    .site-top-grid { max-width: 540px; }
+}
+@media (min-width: 768px) {
+    .site-top-grid { max-width: 720px; }
+}
+@media (min-width: 992px) {
+    .site-top-grid { max-width: 960px; }
+}
+@media (min-width: 1200px) {
+    .site-top-grid { max-width: 1140px; }
+}
+@media (min-width: 1400px) {
+    .site-top-grid { max-width: 1320px; }
+}
+
+.site-top-title-link {
+    display: inline-block;
+    color: inherit;
+    text-decoration: none;
+}
+
+.site-top-title {
+    margin: 0;
+    color: var(--bs-white);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    font-size: clamp(2.6rem, 5vw, 4rem);
+}
+
+.site-top-title > span {
+    display: block;
+}
+
+.site-top-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+}
+
+.section-button,
+.section-button:visited {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--site-top-action-height);
+    padding: 0 1.50em;
+    border: 0 !important;
+    background-color: var(--button-bg) !important;
+    font-size: 1.25rem;
+    color: var(--bs-white) !important;
+    text-decoration: none;
+    border-radius: 9999px;
+}
+
+.section-button:hover {
+    background-color: var(--button-bg-hover) !important;
+}
+
+.site-top-project-button:hover,
+.site-top-project-button:focus {
+    text-decoration: none;
+}
+
+.site-top-image {
+    width: auto;
+    height: auto;
+    max-width: min(840px, 100%);
+    border: 0;
+    background-color: transparent;
+    object-fit: contain;
+    display: inline-block;
+    vertical-align: middle;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .site-top-right {
+        position: static;
+    }
+    .site-top-image {
+        position: static;
+        transform: none;
+        pointer-events: auto;
+        max-width: 100%;
+        height: auto;
+        display: inline-block;
+    }
+}
+
+.site-top-strip {
+    margin: 2rem 0 0;
+    height: 168px;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    background-color: var(--okar-button-bg);
+    position: relative;
+}
+
+.site-top-strip .site-bottom-button {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.site-top-strip.bild {
+    background-image: url('../images/banner.png');
+    background-repeat: repeat-x;
+    background-size: auto 100%;
+}
+
+/* ==========================================================
+   Landing page sections
+   ========================================================== */
+.landing-section {
+    padding: 2.25rem 0;
+}
+
+.landing-section--light {
+    background-color: var(--okar-background-colour-0);
+}
+
+.landing-section--banner {
+    background-color: var(--okar-button-bg);
+    padding: 0;
+}
+
+.landing-section-inner {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.landing-section-title {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.landing-section-text {
+    max-width: 80ch;
+}
+
+.landing-cta {
+    margin-top: 1.25rem;
+}
+
+/* ==========================================================
+   Landing carousel / thumbnails
+   ========================================================== */
+body.landing .landing-thumbs {
+    padding: 1rem 0;
+}
+
+body.landing .landing-thumbs.landing-thumbs--carousel {
+    overflow: hidden;
+    padding: 0;
+}
+
+body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-viewport {
+    overflow: hidden;
+    width: 100%;
+}
+
+body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-strip {
+    display: flex;
+    gap: 0;
+    padding-left: clamp(1rem, 4vw, 2.5rem);
+    padding-right: clamp(1rem, 4vw, 2.5rem);
+    --landing-carousel-max-translate: 0px;
+    animation: landingThumbScroll 40s linear infinite alternate;
+}
+
+body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-strip:hover {
+    animation-play-state: paused;
+}
+
+body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumb--cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--bs-white);
+    text-decoration: none;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    background-color: var(--okar-button-bg);
+}
+
+body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-title {
+    line-height: 1.05;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+}
+
+body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-title > span {
+    display: block;
+}
+
+body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-button {
+    display: inline-block;
+    padding: 0.65em 1.1em;
+    border: 2px solid var(--bs-white);
+    background-color: var(--okar-button-bg);
+    color: var(--bs-white) !important;
+    text-decoration: none;
+    border-radius: 9999px;
+    line-height: 1;
+}
+
+body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-button:hover,
+body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-button:focus {
+    background-color: var(--okar-button-bg-hover);
+    text-decoration: none;
+}
+
+.cta-button {
+    display: inline-block;
+    padding: 0.65em 1.1em;
+    border: 2px solid var(--bs-white);
+    background-color: var(--okar-button-bg);
+    color: var(--bs-white) !important;
+    text-decoration: none;
+    border-radius: 9999px;
+    line-height: 1;
+}
+
+body.landing .cta-button:visited {
+    color: var(--bs-white) !important;
+    text-decoration: none;
+}
+
+body.landing .cta-button:hover,
+body.landing .cta-button:focus {
+    background-color: var(--okar-button-bg-hover);
+    text-decoration: none;
+}
+
+body.landing .landing-thumb {
+    flex: 0 0 auto;
+    display: block;
+    border: 0;
+    background-color: var(--okar-button-bg);
+}
+
+body.landing .landing-thumb img {
+    display: block;
+    width: 100%;
+    height: auto !important;
+}
+
+@keyframes landingThumbScroll {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(var(--landing-carousel-max-translate));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-strip {
+        animation: none;
+    }
+}
+
+/* ==========================================================
+   TOC / Search page layout
+   ========================================================== */
+.search-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.search-col-left {
+    width: var(--site-offcanvas-width);
+    min-width: var(--site-offcanvas-width);
+    background-color: var(--okar-background-colour-1);
+    padding: 1.5rem;
+    overflow-y: auto;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.search-col-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.search-col-right-strip {
+    height: 2rem;
+    background-color: var(--okar-background-colour-0);
+}
+
+.person-left-section {
+    margin-bottom: 1.5rem;
+}
+
+.person-left-heading {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.person-left-togglebar {
+    margin-bottom: 1rem;
+}
+
+.person-view-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.person-view-toggle-text {
+    font-size: 0.875rem;
+}
+
+.person-name-search {
+    margin-bottom: 0.5rem;
+}
+
+.person-name-search-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.person-view-list-btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background-color: transparent;
+    border: 1px solid var(--okar-border-color);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.person-view-list-btn:hover {
+    background-color: var(--okar-background-colour-2);
+}
+
+.person-age-pill {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.person-age-pill-slider {
+    flex: 1;
+}
+
+.person-age-pill-count {
+    font-size: 0.875rem;
+    color: var(--okar-link-colour);
+}
+
+.person-age-hidden {
+    display: none;
+}
+
+.person-left-tailpiece {
+    height: 2rem;
+}
+
+.person-facet-filter {
+    width: 100%;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--okar-border-color);
+    border-radius: 4px;
+}
+
+/* Scroll to top button */
+.scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+}
+
+/* ==========================================================
+   Original OKAR styles (preserved)
+   ========================================================== */
+
 /* needed for interactive map in listplace.xsl */
 div#map {
     height: 50vh;

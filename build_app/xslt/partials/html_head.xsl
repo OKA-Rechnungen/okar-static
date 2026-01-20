@@ -8,9 +8,16 @@
     <xsl:include href="./params.xsl"/>
     <xsl:template match="/" name="html_head">
         <xsl:param name="html_title" select="$project_short_title"></xsl:param>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="{$project_logo}" sizes="any" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="{$html_title}" />
+        <meta name="msapplication-TileColor" content="#ffffff" />
+        <meta name="msapplication-TileImage" content="{$project_logo}" />
+        <link rel="icon" type="image/svg+xml" href="{$project_logo}" sizes="any" />
+        <link rel="profile" href="http://gmpg.org/xfn/11"/>
         <title><xsl:value-of select="$html_title"/></title>
 
         <!-- <link rel="canonical" href="{$base_url}" /> -->
@@ -28,7 +35,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" />
         <link rel="stylesheet" href="css/style.css" type="text/css"></link>
         <link rel="stylesheet" href="css/micro-editor.css" type="text/css"></link>
-        
+        <script src="js/landing-carousel.js" defer="defer"></script>
         
     </xsl:template>
 </xsl:stylesheet>

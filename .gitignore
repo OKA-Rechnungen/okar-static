@@ -5,6 +5,9 @@ html/beacon.txt
 /saxon
 data/imprint.xml
 
+# Large ARCHE export (keep local, do not commit)
+/arche/html/arche.rdf
+
 data/indices/*.xml
 data/editions/*.xml
 data/meta/*.xml

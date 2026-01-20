@@ -11,7 +11,7 @@
     <xsl:import href="partials/html_footer.xsl"/>
     <xsl:template match="/">
         <xsl:variable name="doc_title" select="'Volltextsuche'"/>
-        <html class="page">
+        <html class="page h-100" lang="de">
             <head>
                 <xsl:call-template name="html_head">
                     <xsl:with-param name="html_title" select="$doc_title"/>
@@ -19,7 +19,7 @@
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@8.1.0/themes/algolia-min.css"/>
                 <link rel="stylesheet" href="css/ts_search.css" type="text/css"/>
             </head>
-            <body class="d-flex flex-column">
+            <body class="d-flex flex-column h-100 has-site-top">
                 <xsl:call-template name="nav_bar"/>
                 <main class="flex-grow">
                     <div class="container flex-1">
