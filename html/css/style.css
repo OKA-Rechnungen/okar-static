@@ -102,11 +102,13 @@ body.page-search .site-header,
     align-items: center;
     justify-content: center;
     width: var(--okar-square-btn-size);
-    height: calc(var(--okar-square-btn-size) * 2);
+    height: calc(var(--okar-square-btn-size) * 1.6);
     border: 0 !important;
     border-radius: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
+    margin-right: -1rem !important;
+    margin-top: -2.25rem !important;
     box-shadow: none;
     font-family: var(--bs-font-sans-serif) !important;
     background-image: none !important;
