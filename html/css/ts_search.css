@@ -399,13 +399,14 @@
    ----------------------------------------------------------------- */
 #hits {
   flex: 1;
-  padding: 1.5rem;
+  padding: 2rem;
 }
 
 .ais-InfiniteHits-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, 18rem);
+  justify-content: center;
+  gap: 2rem;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -413,6 +414,12 @@
 
 .ais-InfiniteHits-item {
   list-style: none;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  /* Fixed width, height based on aspect ratio */
+  width: 18rem;
+  aspect-ratio: 3 / 4;
 }
 
 .ais-InfiniteHits-empty {
@@ -423,57 +430,78 @@
 }
 
 .toc-hit-card {
-  position: relative;
+  position: static;
+  width: 100%;
+  height: 100%;
   background: #fff;
   border-radius: 0.75rem;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s, box-shadow 0.2s;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
-.toc-hit-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+.ais-InfiniteHits-item:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .toc-hit-link {
   display: block;
-  aspect-ratio: 3/4;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
 }
 
 .toc-hit-image {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
   transition: transform 0.3s;
 }
 
-.toc-hit-card:hover .toc-hit-image {
+/* Placeholder for cards without thumbnails */
+.toc-hit-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ais-InfiniteHits-item:hover .toc-hit-image {
   transform: scale(1.05);
 }
 
+/* Overlay: hidden by default, shown on hover */
 .toc-hit-overlay {
-  padding: 1rem;
-  flex: 1;
-  display: flex;
+  position: absolute;
+  inset: 0;
+  padding: 1.25rem;
+  background-color: var(--okar-background-colour-4, #343a40);
+  color: var(--bs-white, #fff);
+  display: none;
   flex-direction: column;
+  border-radius: 0.75rem;
+}
+
+.ais-InfiniteHits-item:hover .toc-hit-overlay,
+.ais-InfiniteHits-item:focus-within .toc-hit-overlay {
+  display: flex;
 }
 
 .toc-hit-title {
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  margin: 0 0 0.75rem;
-  color: var(--theme-color, #3a3a3a);
+  margin: 0 0 1rem;
+  color: var(--bs-white, #fff);
   line-height: 1.3;
 }
 
 .toc-hit-title mark,
 .toc-hit-title em {
-  background: rgba(13, 110, 253, 0.2);
+  background: rgba(13, 110, 253, 0.4);
+  color: #fff;
   font-style: normal;
 }
 
@@ -481,26 +509,26 @@
   list-style: none;
   padding: 0;
   margin: 0 0 1rem;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
 }
 
 .toc-hit-list li {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.5rem;
 }
 
 .toc-hit-label {
   font-weight: 600;
-  color: #888;
+  color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
   font-size: 0.6875rem;
   letter-spacing: 0.05em;
-  min-width: 5rem;
+  min-width: 5.5rem;
 }
 
 .toc-hit-value {
-  color: #444;
+  color: var(--bs-white, #fff);
 }
 
 .toc-hit-cta {
@@ -511,9 +539,9 @@
   display: inline-block;
   background: var(--okar-button-bg, #0d6efd);
   color: #fff;
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1.25rem;
   border-radius: 0.5rem;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-decoration: none;
@@ -522,6 +550,7 @@
 
 .toc-hit-cta .cta-button:hover {
   background: var(--okar-button-bg-hover, #0b5ed7);
+  color: #fff;
 }
 
 /* -----------------------------------------------------------------
