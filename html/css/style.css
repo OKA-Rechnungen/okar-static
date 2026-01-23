@@ -841,3 +841,159 @@ div#map {
     border: 0;
     font-style: inherit;
 }
+
+/* ==========================================================
+   Edition Page Two-Column Layout
+   ========================================================== */
+body.page-edition .edition_container {
+    padding: 0;
+}
+
+.edition-two-columns {
+    display: grid;
+    grid-template-columns: var(--site-offcanvas-width) 1fr;
+    min-height: 100vh;
+}
+
+.edition-col-left {
+    background-color: var(--okar-background-colour-4, #343a40);
+    color: var(--bs-white, #fff);
+    padding: 2rem 1.5rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.edition-col-right {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#edition_metadata {
+    /* Reset old styles */
+}
+
+.edition-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--bs-white, #fff);
+    margin: 0 0 1.5rem;
+    line-height: 1.3;
+}
+
+.edition-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.edition-nav-links a {
+    color: var(--okar-button-bg, #0d6efd);
+    text-decoration: none;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: color 0.15s;
+}
+
+.edition-nav-links a:hover {
+    color: #fff;
+}
+
+.edition-metadata-list {
+    margin: 0;
+    padding: 0;
+    font-size: 0.875rem;
+}
+
+.edition-metadata-list dt {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    margin-top: 0.75rem;
+}
+
+.edition-metadata-list dt:first-child {
+    margin-top: 0;
+}
+
+.edition-metadata-list dd {
+    margin: 0.25rem 0 0;
+    color: var(--bs-white, #fff);
+}
+
+/* Edition page: Adjust wp-transcript for new layout */
+body.page-edition .wp-transcript {
+    padding: 1rem;
+}
+
+body.page-edition .transcript.row {
+    margin: 0;
+}
+
+body.page-edition #viewer {
+    min-height: 50vh;
+}
+
+/* Responsive: stack columns on smaller screens */
+@media (max-width: 991.98px) {
+    .edition-two-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .edition-col-left {
+        position: relative;
+        height: auto;
+        max-height: none;
+        padding: 1.5rem;
+    }
+}
+
+/* ==========================================================
+   Simplified Page Navigation
+   ========================================================== */
+.page-navigation {
+    background: var(--okar-background-colour-1, #e9ecef);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+}
+
+/* Page navigation in left sidebar */
+.edition-col-left .page-navigation {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.edition-col-left .page-navigation .btn {
+    color: var(--bs-white, #fff);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.edition-col-left .page-navigation .btn:hover:not(:disabled) {
+    background: var(--okar-button-bg, #0d6efd);
+    border-color: var(--okar-button-bg, #0d6efd);
+    color: #fff;
+}
+
+.edition-col-left .page-navigation .btn:disabled {
+    opacity: 0.4;
+}
+
+.edition-col-left .page-navigation .form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+.edition-col-left .page-navigation .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+}

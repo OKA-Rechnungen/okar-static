@@ -73,10 +73,10 @@
                     }
                 </style> -->
             </head>
-            <body class="d-flex flex-column h-100 has-site-top">
+            <body class="d-flex flex-column h-100 has-site-top page-edition">
                 <xsl:call-template name="nav_bar"/>
                 <main class="hfeed site flex-grow" id="page">
-                    <div class="edition_container ">
+                    <div class="edition_container">
                         <div class="offcanvas offcanvas-start" tabindex="-1"
                             id="offcanvasNavigation" aria-labelledby="offcanvasNavigationLabel"
                             data-bs-scroll="true" data-bs-backdrop="false">
@@ -88,36 +88,31 @@
                             data-bs-backdrop="false">
                         </div>
                         
-                        <div class="row" id="edition_metadata">
-                            <xsl:variable name="doc_type"
-                                select="//tei:sourceDesc/tei:msDesc/tei:physDesc/tei:objectDesc/@form[1]"/>
-                            <h2 align="center">
-                                <xsl:value-of select="$doc_title"/>
-                            </h2>
-                            <div class="d-flex justify-content-end mb-2">
-                                <button id="milestone-nav-btn" type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#milestoneModal">
-                                    Gliederung
-                                </button>
-                            </div>
-                            <div class="row" id="fa_links">
-                                <div class="col-4"  style="text-align:right">
-                                    <xsl:if test="ends-with($prev,'.html')">
-                                        <h3>
-                                            <a>
-                                                <xsl:attribute name="href">
-                                                    <xsl:value-of select="$prev"/>
-                                                </xsl:attribute>
-                                                <span class="left" title="zurück" aria-hidden="true">&#x25C0;&#xFE0E;</span>
+                        <!-- Two-column layout: metadata left, content right -->
+                        <div class="edition-two-columns">
+                            <!-- Left column: metadata -->
+                            <aside class="edition-col-left">
+                                <div id="edition_metadata">
+                                    <xsl:variable name="doc_type"
+                                        select="//tei:sourceDesc/tei:msDesc/tei:physDesc/tei:objectDesc/@form[1]"/>
+                                    <h2 class="edition-title">
+                                        <xsl:value-of select="$doc_title"/>
+                                    </h2>
+                                    <div class="edition-nav-links">
+                                        <xsl:if test="ends-with($prev,'.html')">
+                                            <a class="edition-nav-prev" href="{$prev}" title="zurück">
+                                                <span aria-hidden="true">&#x25C0;&#xFE0E;</span> Zurück
                                             </a>
-                                        </h3>
-                                    </xsl:if>
-                                </div>
-                                <div class="col-4 docinfo" style="text-align:center">
-                                    <h3 align="center">
-                                        <a href="{$teiSource}">
-                                            <i class="fa-solid fa-file-code center" title="TEI/XML"></i>
+                                        </xsl:if>
+                                        <a href="{$teiSource}" class="edition-tei-link" title="TEI/XML">
+                                            <i class="fa-solid fa-file-code"></i> TEI/XML
                                         </a>
-                                    </h3>
+                                        <xsl:if test="ends-with($next, '.html')">
+                                            <a class="edition-nav-next" href="{$next}" title="weiter">
+                                                Weiter <span aria-hidden="true">&#x25B6;&#xFE0E;</span>
+                                            </a>
+                                        </xsl:if>
+                                    </div>
                                     <xsl:variable name="msDesc" select="//tei:sourceDesc/tei:msDesc"/>
                                     <xsl:variable name="msId" select="$msDesc/tei:msIdentifier"/>
                                     <xsl:variable name="msContents" select="$msDesc/tei:msContents"/>
@@ -146,56 +141,52 @@
                                     <xsl:variable name="contentNote" select="normalize-space(($msContents/tei:summary[normalize-space()], $msContents/tei:p[normalize-space(string-join(.//text(), ' '))][1])[1])"/>
 
                                     <xsl:if test="$shelfmark or string($repoName) or string($collection) or string($origDateText) or string($contentNote)">
-                                        <div class="metadata small">
+                                        <dl class="edition-metadata-list">
                                             <xsl:if test="$shelfmark">
-                                                <div><span class="fw-bold">Signatur:</span> <xsl:text> </xsl:text><xsl:value-of select="$shelfmark"/></div>
+                                                <dt>Signatur</dt>
+                                                <dd><xsl:value-of select="$shelfmark"/></dd>
                                             </xsl:if>
                                             <xsl:if test="string($repoName)">
-                                                <div><span class="fw-bold">Archiv:</span> <xsl:text> </xsl:text><xsl:value-of select="$repoName"/></div>
+                                                <dt>Archiv</dt>
+                                                <dd><xsl:value-of select="$repoName"/></dd>
                                             </xsl:if>
                                             <xsl:if test="string($collection)">
-                                                <div><span class="fw-bold">Sammlung:</span> <xsl:text> </xsl:text><xsl:value-of select="$collection"/></div>
+                                                <dt>Sammlung</dt>
+                                                <dd><xsl:value-of select="$collection"/></dd>
                                             </xsl:if>
                                             <xsl:if test="string($origDateText)">
-                                                <div><span class="fw-bold">Datierung:</span> <xsl:text> </xsl:text><xsl:value-of select="$origDateText"/></div>
+                                                <dt>Datierung</dt>
+                                                <dd><xsl:value-of select="$origDateText"/></dd>
                                             </xsl:if>
                                             <xsl:if test="string($contentNote)">
-                                                <div><span class="fw-bold">Inhalt:</span> <xsl:text> </xsl:text><xsl:value-of select="$contentNote"/></div>
+                                                <dt>Inhalt</dt>
+                                                <dd><xsl:value-of select="$contentNote"/></dd>
                                             </xsl:if>
+                                        </dl>
+                                    </xsl:if>
+                                    <button id="milestone-nav-btn" type="button" class="btn btn-outline-primary btn-sm w-100 mt-3" data-bs-toggle="modal" data-bs-target="#milestoneModal">
+                                        Gliederung
+                                    </button>
+                                </div>
+                            </aside>
+                            
+                            <!-- Right column: facsimile and transcript -->
+                            <div class="edition-col-right">
+                                <div class="wp-transcript">
+                                    <div id="container-resize" class="row transcript active">
+                                        <div id="img-resize" class="col-md-6 col-lg-6 col-sm-12 facsimiles">
+                                            <div id="viewer">
+                                                <div id="container_facs_1" class="osd-container"/>
+                                            </div>
                                         </div>
-                                    </xsl:if>
-                                </div>
-                                <div class="col-4" style="text-align:left">
-                                    <xsl:if test="ends-with($next, '.html')">
-                                        <h3>
-                                            <a>
-                                                <xsl:attribute name="href">
-                                                    <xsl:value-of select="$next"/>
-                                                </xsl:attribute>
-                                                <span class="right" title="weiter" aria-hidden="true">&#x25B6;&#xFE0E;</span>
-                                            </a>
-                                        </h3>
-                                    </xsl:if>
-                                </div>
-                            </div> 
-                        </div>
-                        <!--    THIS IS THE MAIN DIV -->                     
-                        <div class="wp-transcript">
-                            <div id="container-resize" class="row transcript active">
-                                <!--  <div id="text-resize" class="col-md-4 col-lg-4 col-sm-1 text" /> -->
-                                <div id="img-resize" class="col-md-6 col-lg-6 col-sm-12 facsimiles" >   <!-- OSD container (facsimiles).  Maybe 6 (1/2 of the total)-->
-                                    <div id="viewer">
-                                        <div id="container_facs_1" class="osd-container"/>
-                                    </div>
-                                </div>
-                                <div id="text-resize" lang="de" class="col-md-6 col-lg-6 col-sm-12 text yes-index"> <!--- Maybe 6 (1/2 of the total) -->
-                                    <div id="transcript">
-                                        <!-- Limit transcript output to the TEI body content -->
-                                        <xsl:apply-templates select="tei:TEI/tei:text/tei:body/node()"/>
+                                        <div id="text-resize" lang="de" class="col-md-6 col-lg-6 col-sm-12 text yes-index">
+                                            <div id="transcript">
+                                                <xsl:apply-templates select="tei:TEI/tei:text/tei:body/node()"/>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <!-- create list* elements for entities bs-modal -->
                         </div>
                     </div>
                 </main>
