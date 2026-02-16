@@ -94,11 +94,6 @@
                             <h2 align="center">
                                 <xsl:value-of select="$doc_title"/>
                             </h2>
-                            <div class="d-flex justify-content-end mb-2">
-                                <button id="milestone-nav-btn" type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#milestoneModal">
-                                    Gliederung
-                                </button>
-                            </div>
                             <div class="row" id="fa_links">
                                 <div class="col-4"  style="text-align:right">
                                     <xsl:if test="ends-with($prev,'.html')">
@@ -112,8 +107,8 @@
                                         </h3>
                                     </xsl:if>
                                 </div>
-                                <div class="col-4 docinfo" style="text-align:center">
-                                    <h3 align="center">
+                                <div class="col-4 docinfo">
+                                    <h3 class="text-center" align="center">
                                         <a href="{$teiSource}">
                                             <i class="fa-solid fa-file-code center" title="TEI/XML"></i>
                                         </a>
@@ -125,6 +120,11 @@
                                     <xsl:variable name="repoName" select="($msId/tei:repository/tei:orgName[@xml:lang='de'], $msId/tei:repository/tei:orgName[1], $msId/tei:institution/tei:orgName[@xml:lang='de'], $msId/tei:institution/tei:orgName[1])[1]"/>
                                     <xsl:variable name="collection" select="$msId/tei:collection[1]"/>
                                     <xsl:variable name="origDate" select="$msContents//tei:origDate[1]"/>
+                                    <xsl:variable name="beilageLabels" as="xs:string*"
+                                        select="distinct-values((
+                                            //tei:standOff//tei:spanGrp//tei:span[@type='section'][matches(@subtype, '^Beilage(\s|$)')]/@subtype,
+                                            //tei:TEI/tei:text//tei:milestone[@type='section'][matches(@subtype, '^Beilage(\s|$)')]/@subtype
+                                        ))"/>
                                     <xsl:variable name="origDateText">
                                         <xsl:choose>
                                             <xsl:when test="$origDate/@when">
@@ -145,8 +145,8 @@
                                     </xsl:variable>
                                     <xsl:variable name="contentNote" select="normalize-space(($msContents/tei:summary[normalize-space()], $msContents/tei:p[normalize-space(string-join(.//text(), ' '))][1])[1])"/>
 
-                                    <xsl:if test="$shelfmark or string($repoName) or string($collection) or string($origDateText) or string($contentNote)">
-                                        <div class="metadata small">
+                                    <xsl:if test="$shelfmark or string($repoName) or string($collection) or string($origDateText) or string($contentNote) or exists($beilageLabels)">
+                                        <div class="metadata small text-start">
                                             <xsl:if test="$shelfmark">
                                                 <div><span class="fw-bold">Signatur:</span> <xsl:text> </xsl:text><xsl:value-of select="$shelfmark"/></div>
                                             </xsl:if>
@@ -159,11 +159,20 @@
                                             <xsl:if test="string($origDateText)">
                                                 <div><span class="fw-bold">Datierung:</span> <xsl:text> </xsl:text><xsl:value-of select="$origDateText"/></div>
                                             </xsl:if>
+                                            <xsl:if test="exists($beilageLabels)">
+                                                <div><span class="fw-bold">Beilage:</span> <xsl:text> </xsl:text><xsl:value-of select="string-join($beilageLabels, ', ')"/></div>
+                                            </xsl:if>
                                             <xsl:if test="string($contentNote)">
                                                 <div><span class="fw-bold">Inhalt:</span> <xsl:text> </xsl:text><xsl:value-of select="$contentNote"/></div>
                                             </xsl:if>
                                         </div>
                                     </xsl:if>
+
+                                    <div class="d-flex justify-content-start mt-2">
+                                        <button id="milestone-nav-btn" type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#milestoneModal">
+                                            Gliederung
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="col-4" style="text-align:left">
                                     <xsl:if test="ends-with($next, '.html')">
