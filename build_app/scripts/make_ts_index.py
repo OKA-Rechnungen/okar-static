@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import argparse
 import glob
 import os
 import re
@@ -79,15 +80,38 @@ def normalize_image_filename(record_id, value, default_extension=".tif"):
 
 
 def main():
-    files = glob.glob("./data/editions/**/*.xml", recursive=True)
+    parser = argparse.ArgumentParser(
+        description="Build / update the Typesense OKAR index from TEI editions"
+    )
+    parser.add_argument(
+        "--recreate",
+        action="store_true",
+        help="Delete and recreate the OKAR collection before importing (destructive).",
+    )
+    parser.add_argument(
+        "--collection",
+        default="OKAR",
+        help="Typesense collection name (default: OKAR)",
+    )
+    parser.add_argument(
+        "--source-glob",
+        default="./data/editions/**/*.xml",
+        help="Glob for TEI sources (default: ./data/editions/**/*.xml)",
+    )
+    args = parser.parse_args()
 
-    try:
-        client.collections["OKAR"].delete()
-    except ObjectNotFound:
-        pass
+    files = glob.glob(args.source_glob, recursive=True)
+
+    collection_name = args.collection
+
+    if args.recreate:
+        try:
+            client.collections[collection_name].delete()
+        except ObjectNotFound:
+            pass
 
     current_schema = {
-        "name": "OKAR",
+        "name": collection_name,
         "fields": [
             {"name": "id", "type": "string", "sort": True},
             {"name": "rec_id", "type": "string", "facet": True, "sort": True},
@@ -110,7 +134,11 @@ def main():
         ],
     }
 
-    client.collections.create(current_schema)
+    # Create collection if it doesn't exist (or if --recreate deleted it).
+    try:
+        client.collections[collection_name].retrieve()
+    except ObjectNotFound:
+        client.collections.create(current_schema)
 
     def iter_import_rows(rows):
         if rows is None:
@@ -161,7 +189,7 @@ def main():
         imported = 0
         for start in range(0, total, batch_size):
             batch = all_records[start : start + batch_size]
-            result_rows = client.collections["OKAR"].documents.import_(
+            result_rows = client.collections[collection_name].documents.import_(
                 batch,
                 {
                     "action": "upsert",
@@ -200,11 +228,14 @@ def main():
                 kaemmerer.append(label)
         kaemmerer = sorted(set(kaemmerer))
 
-        # The UI label is "Inhalt" (table of contents / scope), and in the TEI data
-        # this information typically lives in msContents rather than accMat.
+        # UI label is "Inhalt" (scope/overview). Prefer msContents text.
+        # TEI structure varies across volumes (e.g. text may live under msItem/p,
+        # or other nested elements). Keep this intentionally broad so TOC is stable.
+        # Exclude origDate fragments which are sometimes mixed into the same area.
         inhalt_nodes = doc.any_xpath(
-            "//tei:msDesc/tei:msContents/tei:summary//text() | "
-            "//tei:msDesc/tei:msContents/tei:p[not(tei:origDate)]//text()"
+            "//tei:msDesc/tei:msContents//tei:summary//text() | "
+            "//tei:msDesc/tei:msContents//tei:p//text()[not(ancestor::tei:origDate)] | "
+            "//tei:msDesc/tei:msContents//text()[not(ancestor::tei:origDate)]"
         )
         beilage_text = " ".join(" ".join(inhalt_nodes).split())
         if not beilage_text:
@@ -213,6 +244,8 @@ def main():
             beilage_text = " ".join(" ".join(beilage_text_nodes).split())
         beilage_present = bool(beilage_text)
         facs = doc.any_xpath(".//tei:body/tei:div/tei:pb/@facs")
+
+        doc_has_page_records = False
         # Use the same page numbering as the edition viewer (counts every pb),
         # even if a page has no extracted body text.
         page_number = 0
@@ -301,6 +334,86 @@ def main():
                 record["beilage_text"] = trimmed_beilage
             if len(record["full_text"]) > 0:
                 records.append(record)
+                doc_has_page_records = True
+
+        # Some TEIs only contain <pb/> markers without any interleaved <p>/<ab>/<lg>
+        # transcription content. In that case, ensure the record still appears in
+        # the TOC by upserting a single fallback page document (prefer p=2).
+        if not doc_has_page_records and facs:
+            fallback_page = 2 if len(facs) >= 2 else 1
+            fallback_facs = facs[fallback_page - 1]
+            record = {}
+            record["id"] = os.path.split(x)[-1].replace(
+                ".xml", f".html?p={str(fallback_page)}"
+            )
+            record["rec_id"] = os.path.split(x)[-1]
+            record["page"] = fallback_page
+            r_title = " ".join(
+                " ".join(
+                    doc.any_xpath(
+                        './/tei:titleStmt/tei:title[@level="a" and @type="desc"]/text()'
+                    )
+                ).split()
+            )
+            if not r_title:
+                r_title = " ".join(
+                    " ".join(
+                        doc.any_xpath(
+                            './/tei:titleStmt/tei:title[@level="a" and (@type="main" or not(@type))]/text()'
+                        )
+                    ).split()
+                )
+            if not r_title:
+                r_title = record["rec_id"].replace(".xml", "")
+            record["title"] = f"{r_title} · Seite {str(fallback_page)}"
+            if record_year is not None:
+                record["year"] = record_year
+
+            # Use the msContents-derived scope as searchable text when there is
+            # no page transcription.
+            record["full_text"] = beilage_text or r_title or record_id
+
+            surface_id = str(fallback_facs).lstrip("#")
+            graphic_candidates = doc.any_xpath(
+                f"//tei:facsimile/tei:surface[@xml:id='{surface_id}']//tei:graphic/@url"
+            )
+            image_filename = ""
+            fallback_candidate = ""
+            for candidate in graphic_candidates:
+                candidate = candidate.strip()
+                if not candidate:
+                    continue
+
+                normalized = normalize_image_filename(record_id, candidate)
+                if normalized:
+                    image_filename = normalized
+                    break
+
+                if not fallback_candidate and not candidate.lower().startswith("http"):
+                    fallback_candidate = candidate
+
+            if not image_filename and fallback_candidate:
+                image_filename = normalize_image_filename(record_id, fallback_candidate)
+
+            if image_filename:
+                record["image_source"] = image_filename
+                encoded_record = quote(record_id, safe="")
+                encoded_source = quote(image_filename, safe="")
+                record["thumbnail"] = (
+                    "https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/"
+                    f"{encoded_record}/files/images/{encoded_source}/full/!400,400/0/default.jpg"
+                )
+            if signature:
+                record["signature"] = signature
+            if kaemmerer:
+                record["kaemmerer"] = kaemmerer
+            record["beilage_present"] = beilage_present
+            if beilage_text:
+                trimmed_beilage = (
+                    beilage_text if len(beilage_text) <= 200 else f"{beilage_text[:197]}..."
+                )
+                record["beilage_text"] = trimmed_beilage
+            records.append(record)
 
     print(f"prepared {len(records)} records for import")
 
