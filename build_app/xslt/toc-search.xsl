@@ -34,9 +34,8 @@
                                     <div id="stats-container"/>
                                     <div id="searchbox"/>
                                     <div id="clear-refinements"/>
-                                    <p class="search-panel__hint">Verwenden Sie die Filter, um die Ergebnisliste weiter einzugrenzen.</p>
+                                        <p class="search-panel__hint">Verwenden Sie die Filter, um die Ergebnisliste weiter einzugrenzen. Die unscharfe Suche toleriert Tippfehler und ähnliche Schreibweisen.</p>
                                     <div id="fuzzy-toggle"/>
-                                    <div id="refinement-list-signature"/>
                                     <div id="refinement-range-year"/>
                                     <div id="refinement-list-kaemmerer"/>
                                     <div id="refinement-list-beilage"/>
