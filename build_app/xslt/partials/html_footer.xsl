@@ -17,13 +17,13 @@
                            <div class="row">
                               <div class="col-sm-12 col-6 text-center">
                                  <a href="https://www.oeaw.ac.at/acdh">
-                                    <img src="images/logo_acdh.png"  class="mobile-50w" alt="Austrian Centre for Digital Humanities" title="Austrian Centre for Digital Humanities"/>
+                                    <img src="images/logo_acdh.svg"  class="mobile-50w" alt="Austrian Centre for Digital Humanities" title="Austrian Centre for Digital Humanities"/>
                                  </a>
                               </div>
                               <div class="vspace-1 col-12 mobile-0"/>
                               <div class="col-sm-12 col-6 text-center">
                                  <a href="http://www.oeaw.ac.at/oesterreichische-akademie-der-wissenschaften/">
-                                    <img src="images/logo_oeaw.png" class="mobile-50w" alt="Österreichische Akademie der Wissenschaften" title="Österreichische Akademie der Wissenschaften"/>
+                                    <img src="images/logo_oeaw.svg" class="mobile-50w" alt="Österreichische Akademie der Wissenschaften" title="Österreichische Akademie der Wissenschaften"/>
                                  </a>
                               </div>
                            </div>
