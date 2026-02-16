@@ -13,7 +13,7 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
     ],
   },
   additionalSearchParameters: {
-    query_by: 'full_text,title',
+    query_by: 'full_text,title,rec_id',
     highlight_full_fields: 'full_text,title',
     sort_by: 'title:asc,rec_id:asc',
   },
@@ -72,9 +72,6 @@ function getYear(value) {
 }
 
 function renameLabel(label) {
-  if (label === 'signature') {
-    return 'Signatur';
-  }
   if (label === 'year') {
     return 'Jahr';
   }
@@ -82,7 +79,7 @@ function renameLabel(label) {
     return 'Kämmerer';
   }
   if (label === 'beilage_present') {
-    return 'Beilage';
+    return 'Inhalt';
   }
   return label;
 }
@@ -97,17 +94,269 @@ function formatBeilageValue(value) {
   return normalized ? 'vorhanden' : 'nicht vorhanden';
 }
 
+function stripPageSuffix(text) {
+  if (!text) {
+    return '';
+  }
+  return String(text).replace(/\s*·\s*Seite[\s\S]*$/i, '').trim();
+}
+
+function fallbackTitle(recId) {
+  if (!recId) {
+    return '';
+  }
+  return String(recId).replace(/\.xml$/i, '');
+}
+
 var search = instantsearch({
   indexName: project_collection_name,
   searchClient: typesenseInstantsearchAdapter.searchClient,
+  // Don't run a search on empty query by default, but ensure that a query
+  // provided via the URL (search.html?q=...) actually triggers a search.
   searchFunction: function (helper) {
     var query = helper.state.query || '';
+    if (!query.trim() && initialQuery && initialQuery.trim()) {
+      helper.setQuery(initialQuery).search();
+      return;
+    }
     if (query.trim().length > 0 || hasActiveRefinements(helper.state)) {
       helper.search();
     }
   },
   initialUiState: initialUiState,
 });
+
+function escapeHtml(text) {
+  return String(text || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeAttr(text) {
+  return escapeHtml(text);
+}
+
+function parsePageFromLink(link) {
+  var match = /[?&]p=(\d+)/.exec(String(link || ''));
+  if (!match) {
+    return '';
+  }
+  return match[1] || '';
+}
+
+function getSnippetHtml(item) {
+  if (
+    item &&
+    item._snippetResult &&
+    item._snippetResult.full_text &&
+    typeof item._snippetResult.full_text.value === 'string'
+  ) {
+    return item._snippetResult.full_text.value;
+  }
+  if (item && item.highlight && item.highlight.full_text && typeof item.highlight.full_text.value === 'string') {
+    return item.highlight.full_text.value;
+  }
+  return '';
+}
+
+function transformSearchHits(items) {
+  var helper = search && search.helper ? search.helper : null;
+  var fallbackQuery = '';
+  if (helper && helper.state && typeof helper.state.query === 'string') {
+    fallbackQuery = helper.state.query.trim();
+  }
+
+  function normalizeSnippet(raw) {
+    if (!raw) {
+      return '';
+    }
+    var text = String(raw)
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+    return text;
+  }
+
+  var uniqueItems = [];
+  var seenSnippetsPerRecord = Object.create(null);
+
+  (items || []).forEach(function (item) {
+    var recordKey = item.rec_id || item.id || '';
+    if (!recordKey) {
+      uniqueItems.push(item);
+      return;
+    }
+
+    var snippetSource = getSnippetHtml(item) || item.full_text || '';
+    var snippetKey = normalizeSnippet(snippetSource);
+    if (!snippetKey) {
+      uniqueItems.push(item);
+      return;
+    }
+
+    if (!seenSnippetsPerRecord[recordKey]) {
+      seenSnippetsPerRecord[recordKey] = Object.create(null);
+    }
+
+    if (seenSnippetsPerRecord[recordKey][snippetKey]) {
+      return;
+    }
+
+    seenSnippetsPerRecord[recordKey][snippetKey] = true;
+    uniqueItems.push(item);
+  });
+
+  function collectMatchedWords(result) {
+    if (!result) {
+      return [];
+    }
+    var words = [];
+    if (Array.isArray(result.matchedWords)) {
+      words = words.concat(result.matchedWords);
+    }
+    if (Array.isArray(result.matched_tokens)) {
+      words = words.concat(result.matched_tokens);
+    }
+    return words;
+  }
+
+  function dedupeTerms(terms) {
+    var seen = Object.create(null);
+    return terms
+      .map(function (term) {
+        return String(term || '').trim();
+      })
+      .filter(function (term) {
+        if (!term) {
+          return false;
+        }
+        var key = term.toLowerCase();
+        if (seen[key]) {
+          return false;
+        }
+        seen[key] = true;
+        return true;
+      });
+  }
+
+  var withLinks = uniqueItems.map(function (item) {
+    var markTerms = [];
+    if (item._snippetResult) {
+      if (item._snippetResult.full_text) {
+        markTerms = markTerms.concat(collectMatchedWords(item._snippetResult.full_text));
+      }
+      if (item._snippetResult.title) {
+        markTerms = markTerms.concat(collectMatchedWords(item._snippetResult.title));
+      }
+    }
+    if (!markTerms.length && item.highlight) {
+      if (item.highlight.full_text) {
+        markTerms = markTerms.concat(collectMatchedWords(item.highlight.full_text));
+      }
+      if (item.highlight.title) {
+        markTerms = markTerms.concat(collectMatchedWords(item.highlight.title));
+      }
+    }
+    if (!markTerms.length && fallbackQuery) {
+      markTerms = fallbackQuery.split(/\s+/);
+    }
+
+    var uniqTerms = dedupeTerms(markTerms);
+    var markValue = uniqTerms.join(' ');
+
+    var link = item.id;
+    if (markValue) {
+      var separator = link.indexOf('?') === -1 ? '?' : '&';
+      link = link + separator + 'mark=' + encodeURIComponent(markValue);
+    }
+
+    return Object.assign({}, item, { link: link });
+  });
+
+  // Volltextsuche: avoid multiple rows per document by default.
+  // Keep the first (best-ranked) hit per rec_id.
+  var seenRecIds = Object.create(null);
+  var dedupedByDocument = [];
+  withLinks.forEach(function (item) {
+    var recId = item.rec_id || '';
+    if (!recId) {
+      dedupedByDocument.push(item);
+      return;
+    }
+    if (seenRecIds[recId]) {
+      return;
+    }
+    seenRecIds[recId] = true;
+    dedupedByDocument.push(item);
+  });
+
+  return dedupedByDocument;
+}
+
+var connectHits = instantsearch.connectors.connectHits;
+
+var renderHitsTable = function (renderOptions, isFirstRender) {
+  var container = document.querySelector(renderOptions.widgetParams.container);
+  if (!container) {
+    return;
+  }
+
+  var query = '';
+  if (renderOptions && renderOptions.results && typeof renderOptions.results.query === 'string') {
+    query = renderOptions.results.query;
+  }
+  if (!query && renderOptions && renderOptions.instantSearchInstance && renderOptions.instantSearchInstance.helper) {
+    query = renderOptions.instantSearchInstance.helper.state.query || '';
+  }
+  if (!query) {
+    query = initialQuery || '';
+  }
+  var hits = transformSearchHits(renderOptions.hits || []);
+
+  if (!hits.length) {
+    container.innerHTML = 'Keine Resultate für <q>' + escapeHtml(query) + '</q>';
+    return;
+  }
+
+  var rowsHtml = hits
+    .map(function (hit) {
+      var link = hit.link || hit.id || '';
+      var page = parsePageFromLink(link);
+      var documentTitle = stripPageSuffix(hit.title || '') || fallbackTitle(hit.rec_id || '');
+      var snippetHtml = getSnippetHtml(hit);
+
+      return (
+        '<tr>' +
+        '<td class="ts-results-doc"><a href="' +
+        escapeAttr(link) +
+        '" target="_blank" rel="noopener">' +
+        escapeHtml(documentTitle) +
+        '</a></td>' +
+        '<td class="ts-results-page">' +
+        (page ? escapeHtml(page) : '–') +
+        '</td>' +
+        '<td class="ts-results-hit">' +
+        (snippetHtml || '') +
+        '</td>' +
+        '</tr>'
+      );
+    })
+    .join('');
+
+  container.innerHTML =
+    '<div class="table-responsive">' +
+    '<table class="table table-hover ts-results-table">' +
+    '<thead><tr><th>Dokument</th><th>Seite</th><th>Treffer</th></tr></thead>' +
+    '<tbody>' +
+    rowsHtml +
+    '</tbody></table></div>';
+};
+
+var customHitsTable = connectHits(renderHitsTable);
 
 search.addWidgets([
   {
@@ -128,10 +377,15 @@ search.addWidgets([
       label.className = 'form-check-label';
       label.textContent = 'Unscharfe Suche aktivieren';
 
+      var hint = document.createElement('div');
+      hint.className = 'form-text';
+      hint.textContent = 'Toleriert Tippfehler und ähnliche Schreibweisen.';
+
       var wrapper = document.createElement('div');
       wrapper.className = 'form-check';
       wrapper.appendChild(checkbox);
       wrapper.appendChild(label);
+      wrapper.appendChild(hint);
       container.appendChild(wrapper);
 
       checkbox.addEventListener('change', function (event) {
@@ -205,160 +459,8 @@ search.addWidgets([
     },
   }),
 
-  instantsearch.widgets.hits({
+  customHitsTable({
     container: '#hits',
-    templates: {
-      empty: 'Keine Resultate für <q>{{ query }}</q>',
-      item: [
-        '<article class="ts-hit-item">',
-        '  <h5 class="ts-hit-title"><a href="{{link}}" target="_blank">{{#helpers.highlight}}{ "attribute": "title" }{{/helpers.highlight}}</a></h5>',
-        '  <div class="ts-hit-body row g-3 align-items-start">',
-        '    {{#thumbnail}}',
-  '    <div class="col-12 col-md-12 col-lg-12 ts-hit-thumbnail">',
-        '      <a href="{{link}}" target="_blank" aria-label="Seitenvorschau in neuem Tab öffnen">',
-        '        <img src="{{thumbnail}}" alt="Seitenvorschau" loading="lazy" class="img-fluid rounded shadow-sm" />',
-        '      </a>',
-        '    </div>',
-        '    {{/thumbnail}}',
-        '    <div class="col ts-hit-text">',
-        '      <p class="mb-2">{{#helpers.snippet}}{ "attribute": "full_text", "highlightedTagName": "mark" }{{/helpers.snippet}}</p>',
-        '      {{#beilage_text}}<p class="mt-3 mb-0"><strong>Beilage:</strong> {{beilage_text}}</p>{{/beilage_text}}',
-        '    </div>',
-        '  </div>',
-        '</article>',
-      ].join('\n'),
-    },
-    transformItems: function (items) {
-      var helper = search && search.helper ? search.helper : null;
-      var fallbackQuery = '';
-      if (helper && helper.state && typeof helper.state.query === 'string') {
-        fallbackQuery = helper.state.query.trim();
-      }
-
-      function normalizeSnippet(raw) {
-        if (!raw) {
-          return '';
-        }
-        var text = String(raw)
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim()
-          .toLowerCase();
-        return text;
-      }
-
-      var uniqueItems = [];
-      var seenSnippetsPerRecord = Object.create(null);
-
-      items.forEach(function (item) {
-        var recordKey = item.rec_id || item.id || '';
-        if (!recordKey) {
-          uniqueItems.push(item);
-          return;
-        }
-
-        var snippetSource = '';
-        if (
-          item._snippetResult &&
-          item._snippetResult.full_text &&
-          typeof item._snippetResult.full_text.value === 'string'
-        ) {
-          snippetSource = item._snippetResult.full_text.value;
-        } else if (
-          item.highlight &&
-          item.highlight.full_text &&
-          typeof item.highlight.full_text.value === 'string'
-        ) {
-          snippetSource = item.highlight.full_text.value;
-        } else if (typeof item.full_text === 'string') {
-          snippetSource = item.full_text;
-        }
-
-        var snippetKey = normalizeSnippet(snippetSource);
-        if (!snippetKey) {
-          uniqueItems.push(item);
-          return;
-        }
-
-        if (!seenSnippetsPerRecord[recordKey]) {
-          seenSnippetsPerRecord[recordKey] = Object.create(null);
-        }
-
-        if (seenSnippetsPerRecord[recordKey][snippetKey]) {
-          return;
-        }
-
-        seenSnippetsPerRecord[recordKey][snippetKey] = true;
-        uniqueItems.push(item);
-      });
-
-      function collectMatchedWords(result) {
-        if (!result) {
-          return [];
-        }
-        var words = [];
-        if (Array.isArray(result.matchedWords)) {
-          words = words.concat(result.matchedWords);
-        }
-        if (Array.isArray(result.matched_tokens)) {
-          words = words.concat(result.matched_tokens);
-        }
-        return words;
-      }
-
-      function dedupeTerms(terms) {
-        var seen = Object.create(null);
-        return terms
-          .map(function (term) {
-            return String(term || '').trim();
-          })
-          .filter(function (term) {
-            if (!term) {
-              return false;
-            }
-            var key = term.toLowerCase();
-            if (seen[key]) {
-              return false;
-            }
-            seen[key] = true;
-            return true;
-          });
-      }
-
-      return uniqueItems.map(function (item) {
-        var markTerms = [];
-        if (item._snippetResult) {
-          if (item._snippetResult.full_text) {
-            markTerms = markTerms.concat(collectMatchedWords(item._snippetResult.full_text));
-          }
-          if (item._snippetResult.title) {
-            markTerms = markTerms.concat(collectMatchedWords(item._snippetResult.title));
-          }
-        }
-        if (!markTerms.length && item.highlight) {
-          if (item.highlight.full_text) {
-            markTerms = markTerms.concat(collectMatchedWords(item.highlight.full_text));
-          }
-          if (item.highlight.title) {
-            markTerms = markTerms.concat(collectMatchedWords(item.highlight.title));
-          }
-        }
-        if (!markTerms.length && fallbackQuery) {
-          markTerms = fallbackQuery.split(/\s+/);
-        }
-
-        var uniqTerms = dedupeTerms(markTerms);
-        var markValue = uniqTerms.join(' ');
-
-        var link = item.id;
-        if (markValue) {
-          var separator = link.indexOf('?') === -1 ? '?' : '&';
-          link = link + separator + 'mark=' + encodeURIComponent(markValue);
-        }
-
-        return Object.assign({}, item, { link: link });
-      });
-    },
   }),
 
   instantsearch.widgets.pagination({
@@ -372,27 +474,19 @@ search.addWidgets([
   }),
 
   instantsearch.widgets.panel({
-    templates: { header: 'Signatur' },
-  })(instantsearch.widgets.refinementList)({
-    container: '#refinement-list-signature',
-    attribute: 'signature',
-    cssClasses: {
-      list: 'list-unstyled',
-      label: 'form-check form-check-inline align-items-start',
-      checkbox: 'form-check-input',
-      labelText: 'form-check-label',
-    },
-  }),
-
-  instantsearch.widgets.panel({
     templates: { header: 'Jahr' },
-  })(instantsearch.widgets.rangeSlider)({
+  })(instantsearch.widgets.rangeInput)({
     container: '#refinement-range-year',
     attribute: 'year',
-    tooltips: {
-      format: function (rawValue) {
-        return getYear(rawValue);
-      },
+    templates: {
+      separatorText: 'bis',
+      submitText: 'Anwenden',
+    },
+    cssClasses: {
+      form: 'd-flex align-items-center gap-2',
+      input: 'form-control',
+      separator: 'text-muted small',
+      submit: 'btn btn-outline-secondary btn-sm',
     },
   }),
 

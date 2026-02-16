@@ -13,10 +13,12 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
     ],
   },
   additionalSearchParameters: {
-    query_by: 'title,full_text',
+    query_by: 'title,full_text,rec_id',
     highlight_full_fields: 'title',
     group_by: 'rec_id',
-    group_limit: 1,
+    // Fetch multiple pages per record so we can avoid using the cover (p=1)
+    // as thumbnail if later pages exist.
+    group_limit: 50,
     sort_by: 'title:asc',
   },
 });
@@ -74,9 +76,6 @@ function getYear(value) {
 }
 
 function renameLabel(label) {
-  if (label === 'signature') {
-    return 'Signatur';
-  }
   if (label === 'year') {
     return 'Jahr';
   }
@@ -84,7 +83,7 @@ function renameLabel(label) {
     return 'Kämmerer';
   }
   if (label === 'beilage_present') {
-    return 'Beilage';
+    return 'Inhalt';
   }
   return label;
 }
@@ -109,6 +108,21 @@ function parsePageNumber(id) {
     return Number.MAX_SAFE_INTEGER;
   }
   return parsed;
+}
+
+function isBetterTocPage(candidatePage, currentPage) {
+  // Prefer inside pages over the cover (p=1), then choose the smallest page.
+  var candidate = Number.isFinite(candidatePage) ? candidatePage : Number.MAX_SAFE_INTEGER;
+  var current = Number.isFinite(currentPage) ? currentPage : Number.MAX_SAFE_INTEGER;
+
+  var candidateIsCover = candidate <= 1;
+  var currentIsCover = current <= 1;
+
+  if (candidateIsCover !== currentIsCover) {
+    return !candidateIsCover;
+  }
+
+  return candidate < current;
 }
 
 function stripPageSuffix(text) {
@@ -150,10 +164,15 @@ search.addWidgets([
       label.className = 'form-check-label';
       label.textContent = 'Unscharfe Suche aktivieren';
 
+      var hint = document.createElement('div');
+      hint.className = 'form-text';
+      hint.textContent = 'Toleriert Tippfehler und ähnliche Schreibweisen.';
+
       var wrapper = document.createElement('div');
       wrapper.className = 'form-check';
       wrapper.appendChild(checkbox);
       wrapper.appendChild(label);
+      wrapper.appendChild(hint);
       container.appendChild(wrapper);
 
       checkbox.addEventListener('change', function (event) {
@@ -230,17 +249,17 @@ search.addWidgets([
       empty: 'Keine Resultate für <q>{{ query }}</q>',
       item: [
         '<article class="ts-hit-item">',
-        '  <h5 class="ts-hit-title"><a href="{{link}}" target="_blank">{{{display_title_highlight}}}</a></h5>',
+        '  <h5 class="ts-hit-title"><a href="{{link}}">{{{display_title_highlight}}}</a></h5>',
         '  <div class="ts-hit-body row g-3 align-items-start">',
         '    {{#thumbnail}}',
         '    <div class="col-12 col-md-12 col-lg-12 ts-hit-thumbnail">',
-        '      <a href="{{link}}" target="_blank" aria-label="Seitenvorschau in neuem Tab öffnen">',
+        '      <a href="{{link}}" aria-label="Seitenvorschau öffnen">',
         '        <img src="{{thumbnail}}" alt="Seitenvorschau" loading="lazy" class="img-fluid rounded shadow-sm" />',
         '      </a>',
         '    </div>',
         '    {{/thumbnail}}',
         '    <div class="col ts-hit-text">',
-        '      {{#beilage_text}}<p class="mt-3 mb-0"><strong>Beilage:</strong> {{beilage_text}}</p>{{/beilage_text}}',
+        '      {{#beilage_text}}<p class="mt-3 mb-0"><strong>Inhalt:</strong> {{beilage_text}}</p>{{/beilage_text}}',
         '    </div>',
         '  </div>',
         '</article>',
@@ -269,19 +288,16 @@ search.addWidgets([
         var currentBest = seenByRecId[recId];
         var currentPage = parsePageNumber(currentBest.id);
         var candidatePage = parsePageNumber(item.id);
-        if (currentPage === 1) {
-          return;
-        }
-        if (candidatePage === 1 || candidatePage < currentPage) {
+        if (isBetterTocPage(candidatePage, currentPage)) {
           seenByRecId[recId] = item;
         }
       });
 
       return orderedRecIds.map(function (recId) {
         var sourceItem = seenByRecId[recId];
-        var resolvedLink = recId.replace(/\.xml$/i, '.html');
-        if (resolvedLink.indexOf('?') === -1) {
-          resolvedLink += '?p=1';
+        var resolvedLink = sourceItem && sourceItem.id ? String(sourceItem.id) : '';
+        if (!resolvedLink) {
+          resolvedLink = recId.replace(/\.xml$/i, '.html') + '?p=2';
         }
 
         var highlightTitle = '';
@@ -301,8 +317,17 @@ search.addWidgets([
           plainTitle = fallbackTitle(recId);
         }
 
+        var displayYear = getYear(sourceItem.year);
+        if (displayYear) {
+          plainTitle = 'Oberkammeramtsrechnung | ' + displayYear;
+        }
+
         var displayHighlight = stripPageSuffix(highlightTitle);
         if (!displayHighlight) {
+          displayHighlight = plainTitle;
+        }
+
+        if (displayYear) {
           displayHighlight = plainTitle;
         }
 
@@ -326,27 +351,19 @@ search.addWidgets([
   }),
 
   instantsearch.widgets.panel({
-    templates: { header: 'Signatur' },
-  })(instantsearch.widgets.refinementList)({
-    container: '#refinement-list-signature',
-    attribute: 'signature',
-    cssClasses: {
-      list: 'list-unstyled',
-      label: 'form-check form-check-inline align-items-start',
-      checkbox: 'form-check-input',
-      labelText: 'form-check-label',
-    },
-  }),
-
-  instantsearch.widgets.panel({
     templates: { header: 'Jahr' },
-  })(instantsearch.widgets.rangeSlider)({
+  })(instantsearch.widgets.rangeInput)({
     container: '#refinement-range-year',
     attribute: 'year',
-    tooltips: {
-      format: function (rawValue) {
-        return getYear(rawValue);
-      },
+    templates: {
+      separatorText: 'bis',
+      submitText: 'Anwenden',
+    },
+    cssClasses: {
+      form: 'd-flex align-items-center gap-2',
+      input: 'form-control',
+      separator: 'text-muted small',
+      submit: 'btn btn-outline-secondary btn-sm',
     },
   }),
 
@@ -365,14 +382,14 @@ search.addWidgets([
   }),
 
   instantsearch.widgets.panel({
-    templates: { header: 'Beilage' },
+    templates: { header: 'Inhalt' },
   })(instantsearch.widgets.toggleRefinement)({
     container: '#refinement-list-beilage',
     attribute: 'beilage_present',
     on: true,
     templates: {
       labelText: function () {
-        return 'Nur Einträge mit Beilage anzeigen';
+        return 'Nur Einträge mit Inhalt anzeigen';
       },
     },
     cssClasses: {
