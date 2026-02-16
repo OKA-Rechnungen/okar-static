@@ -13,10 +13,12 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
     ],
   },
   additionalSearchParameters: {
-    query_by: 'title,full_text',
+    query_by: 'title,full_text,rec_id',
     highlight_full_fields: 'title',
     group_by: 'rec_id',
-    group_limit: 1,
+    // Fetch multiple pages per record so we can avoid using the cover (p=1)
+    // as thumbnail if later pages exist.
+    group_limit: 50,
     sort_by: 'title:asc',
   },
 });
@@ -74,9 +76,6 @@ function getYear(value) {
 }
 
 function renameLabel(label) {
-  if (label === 'signature') {
-    return 'Signatur';
-  }
   if (label === 'year') {
     return 'Jahr';
   }
@@ -84,7 +83,7 @@ function renameLabel(label) {
     return 'Kämmerer';
   }
   if (label === 'beilage_present') {
-    return 'Beilage';
+    return 'Inhalt';
   }
   return label;
 }
@@ -111,6 +110,21 @@ function parsePageNumber(id) {
   return parsed;
 }
 
+function isBetterTocPage(candidatePage, currentPage) {
+  // Prefer inside pages over the cover (p=1), then choose the smallest page.
+  var candidate = Number.isFinite(candidatePage) ? candidatePage : Number.MAX_SAFE_INTEGER;
+  var current = Number.isFinite(currentPage) ? currentPage : Number.MAX_SAFE_INTEGER;
+
+  var candidateIsCover = candidate <= 1;
+  var currentIsCover = current <= 1;
+
+  if (candidateIsCover !== currentIsCover) {
+    return !candidateIsCover;
+  }
+
+  return candidate < current;
+}
+
 function stripPageSuffix(text) {
   if (!text) {
     return '';
@@ -131,6 +145,278 @@ var search = instantsearch({
   initialUiState: initialUiState,
 });
 
+function createOkarPaginationWidget(containerSelector) {
+  var nav = {
+    container: null,
+    wrapper: null,
+    numberContainer: null,
+    pageInputWrapper: null,
+    pageInput: null,
+    pageTotalLabel: null,
+    start: null,
+    first: null,
+    prev: null,
+    next: null,
+    last: null,
+    end: null,
+    refine: null,
+    currentIndex: 0,
+    totalPages: 0,
+  };
+
+  function ensureNoSpinStyles() {
+    if (document.getElementById('okar-page-input-style')) {
+      return;
+    }
+    var styleEl = document.createElement('style');
+    styleEl.id = 'okar-page-input-style';
+    styleEl.textContent =
+      '.page-input-no-spin { -moz-appearance: textfield; appearance: textfield; } ' +
+      '.page-input-no-spin::-webkit-outer-spin-button, .page-input-no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }';
+    document.head.appendChild(styleEl);
+  }
+
+  function createNavButton(label, onClick) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn btn-sm btn-outline-secondary';
+    button.textContent = label;
+    button.addEventListener('click', onClick);
+    return button;
+  }
+
+  function showPageByIndex(targetIndex) {
+    if (typeof nav.refine !== 'function') {
+      return;
+    }
+    var clamped = Math.min(Math.max(targetIndex, 0), Math.max(nav.totalPages - 1, 0));
+    nav.refine(clamped + 1);
+
+    // Ensure newly rendered hit links get mark= applied.
+    if (typeof window !== 'undefined' && typeof window.updateHeaderUrl === 'function') {
+      window.updateHeaderUrl();
+    }
+  }
+
+  function buildVisiblePageItems(totalPages, currentIndex) {
+    var effectiveIndex = currentIndex >= 0 ? currentIndex : 0;
+    var start = Math.max(0, effectiveIndex - 3);
+    var end = Math.min(totalPages - 1, effectiveIndex + 3);
+    var items = [];
+    for (var i = start; i <= end; i++) {
+      items.push(i);
+    }
+    return items;
+  }
+
+  function renderNumberButtons() {
+    if (!nav.numberContainer) {
+      return;
+    }
+
+    var container = nav.numberContainer;
+    container.innerHTML = '';
+    var items = buildVisiblePageItems(nav.totalPages, nav.currentIndex);
+
+    items.forEach(function (idx) {
+      if (idx === nav.currentIndex && nav.pageInputWrapper) {
+        container.appendChild(nav.pageInputWrapper);
+        return;
+      }
+
+      var numberButton = createNavButton(String(idx + 1), function () {
+        showPageByIndex(idx);
+      });
+      numberButton.setAttribute('aria-label', 'Seite ' + String(idx + 1));
+      numberButton.dataset.pageIndex = String(idx);
+      container.appendChild(numberButton);
+    });
+  }
+
+  function updateNavState() {
+    if (!nav.container) {
+      return;
+    }
+
+    var totalPages = nav.totalPages;
+    var currentIndex = nav.currentIndex;
+    var visibleItems = buildVisiblePageItems(totalPages, currentIndex);
+    var atStart = currentIndex <= 0;
+    var atEnd = totalPages <= 1 || currentIndex >= totalPages - 1;
+
+    renderNumberButtons();
+
+    if (nav.start) {
+      var startVisible = visibleItems.indexOf(0) !== -1;
+      nav.start.style.display = startVisible ? 'none' : '';
+      nav.start.disabled = startVisible;
+    }
+
+    if (nav.first) {
+      var hasTenBack = currentIndex >= 10;
+      nav.first.style.display = hasTenBack ? '' : 'none';
+      nav.first.disabled = !hasTenBack;
+    }
+
+    if (nav.prev) {
+      nav.prev.style.display = atStart ? 'none' : '';
+      nav.prev.disabled = atStart;
+    }
+
+    if (nav.next) {
+      nav.next.style.display = atEnd ? 'none' : '';
+      nav.next.disabled = atEnd;
+    }
+
+    if (nav.last) {
+      var remainingAhead = totalPages - currentIndex - 1;
+      var hasTenAhead = remainingAhead >= 10;
+      nav.last.style.display = hasTenAhead ? '' : 'none';
+      nav.last.disabled = !hasTenAhead;
+    }
+
+    if (nav.end) {
+      var endVisible = visibleItems.indexOf(totalPages - 1) !== -1;
+      nav.end.style.display = endVisible ? 'none' : '';
+      nav.end.disabled = endVisible;
+    }
+
+    if (nav.pageInput) {
+      nav.pageInput.max = String(Math.max(totalPages, 1));
+      nav.pageInput.value = String(currentIndex + 1);
+    }
+
+    if (nav.pageTotalLabel) {
+      nav.pageTotalLabel.textContent = '/ ' + String(Math.max(totalPages, 0));
+    }
+  }
+
+  function ensureStructure(root) {
+    if (nav.container) {
+      return;
+    }
+    ensureNoSpinStyles();
+
+    nav.container = document.createElement('nav');
+    nav.container.className =
+      'page-navigation d-flex flex-wrap align-items-center justify-content-center gap-2 mb-3 w-100 text-center';
+    nav.container.setAttribute('aria-label', 'Seiten-Navigation');
+
+    nav.wrapper = document.createElement('div');
+    nav.wrapper.className = 'd-flex flex-wrap align-items-center justify-content-center gap-2';
+    nav.container.appendChild(nav.wrapper);
+
+    nav.start = createNavButton('⏮︎', function () {
+      showPageByIndex(0);
+    });
+    nav.wrapper.appendChild(nav.start);
+
+    nav.first = createNavButton('⏪︎', function () {
+      showPageByIndex(nav.currentIndex - 10);
+    });
+    nav.wrapper.appendChild(nav.first);
+
+    nav.prev = createNavButton('◀︎', function () {
+      showPageByIndex(nav.currentIndex - 1);
+    });
+    nav.wrapper.appendChild(nav.prev);
+
+    nav.numberContainer = document.createElement('div');
+    nav.numberContainer.className = 'page-number-container d-flex flex-wrap align-items-center gap-2';
+    nav.wrapper.appendChild(nav.numberContainer);
+
+    nav.pageInputWrapper = document.createElement('div');
+    nav.pageInputWrapper.className = 'd-flex align-items-center gap-1';
+
+    var pageInputLabel = document.createElement('label');
+    pageInputLabel.className = 'visually-hidden';
+    pageInputLabel.setAttribute('for', 'okar-page-jump');
+    pageInputLabel.textContent = 'Seite eingeben';
+    nav.pageInputWrapper.appendChild(pageInputLabel);
+
+    nav.pageInput = document.createElement('input');
+    nav.pageInput.type = 'number';
+    nav.pageInput.min = '1';
+    nav.pageInput.max = '1';
+    nav.pageInput.value = '1';
+    nav.pageInput.id = 'okar-page-jump';
+    nav.pageInput.className = 'form-control form-control-sm page-input-no-spin';
+    nav.pageInput.style.width = '3.25rem';
+    nav.pageInput.setAttribute('aria-label', 'Seite wählen');
+    nav.pageInput.inputMode = 'numeric';
+    nav.pageInput.step = '1';
+
+    function handlePageInput() {
+      var value = parseInt(nav.pageInput.value, 10);
+      if (Number.isNaN(value)) {
+        nav.pageInput.value = String(nav.currentIndex + 1);
+        return;
+      }
+      value = Math.min(Math.max(value, 1), Math.max(nav.totalPages, 1));
+      showPageByIndex(value - 1);
+    }
+
+    nav.pageInput.addEventListener('change', handlePageInput);
+    nav.pageInput.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        handlePageInput();
+      }
+    });
+
+    nav.pageInputWrapper.appendChild(nav.pageInput);
+
+    nav.pageTotalLabel = document.createElement('span');
+    nav.pageTotalLabel.className = 'text-muted small';
+    nav.pageTotalLabel.textContent = '/ 0';
+    nav.pageInputWrapper.appendChild(nav.pageTotalLabel);
+
+    nav.next = createNavButton('▶︎', function () {
+      showPageByIndex(nav.currentIndex + 1);
+    });
+    nav.wrapper.appendChild(nav.next);
+
+    nav.last = createNavButton('⏩︎', function () {
+      showPageByIndex(nav.currentIndex + 10);
+    });
+    nav.wrapper.appendChild(nav.last);
+
+    nav.end = createNavButton('⏭︎', function () {
+      showPageByIndex(nav.totalPages - 1);
+    });
+    nav.wrapper.appendChild(nav.end);
+
+    root.innerHTML = '';
+    root.appendChild(nav.container);
+  }
+
+  var widget = instantsearch.connectors.connectPagination(function (renderOptions, isFirstRender) {
+    var root =
+      typeof containerSelector === 'string'
+        ? document.querySelector(containerSelector)
+        : containerSelector;
+    if (!root) {
+      return;
+    }
+
+    if (isFirstRender) {
+      ensureStructure(root);
+    }
+
+    nav.refine = renderOptions.refine;
+    nav.totalPages = renderOptions.nbPages || 0;
+    nav.currentIndex = Math.max((renderOptions.currentRefinement || 1) - 1, 0);
+
+    // Hide the whole control when there is nothing to paginate.
+    if (nav.container) {
+      nav.container.style.display = nav.totalPages > 1 ? '' : 'none';
+    }
+
+    updateNavState();
+  });
+
+  return widget({});
+}
+
 search.addWidgets([
   {
     init: function (initOptions) {
@@ -150,10 +436,15 @@ search.addWidgets([
       label.className = 'form-check-label';
       label.textContent = 'Unscharfe Suche aktivieren';
 
+      var hint = document.createElement('div');
+      hint.className = 'form-text';
+      hint.textContent = 'Toleriert Tippfehler und ähnliche Schreibweisen.';
+
       var wrapper = document.createElement('div');
       wrapper.className = 'form-check';
       wrapper.appendChild(checkbox);
       wrapper.appendChild(label);
+      wrapper.appendChild(hint);
       container.appendChild(wrapper);
 
       checkbox.addEventListener('change', function (event) {
@@ -230,17 +521,17 @@ search.addWidgets([
       empty: 'Keine Resultate für <q>{{ query }}</q>',
       item: [
         '<article class="ts-hit-item">',
-        '  <h5 class="ts-hit-title"><a href="{{link}}" target="_blank">{{{display_title_highlight}}}</a></h5>',
+        '  <h5 class="ts-hit-title"><a href="{{link}}">{{{display_title_highlight}}}</a></h5>',
         '  <div class="ts-hit-body row g-3 align-items-start">',
         '    {{#thumbnail}}',
         '    <div class="col-12 col-md-12 col-lg-12 ts-hit-thumbnail">',
-        '      <a href="{{link}}" target="_blank" aria-label="Seitenvorschau in neuem Tab öffnen">',
+        '      <a href="{{link}}" aria-label="Seitenvorschau öffnen">',
         '        <img src="{{thumbnail}}" alt="Seitenvorschau" loading="lazy" class="img-fluid rounded shadow-sm" />',
         '      </a>',
         '    </div>',
         '    {{/thumbnail}}',
         '    <div class="col ts-hit-text">',
-        '      {{#beilage_text}}<p class="mt-3 mb-0"><strong>Beilage:</strong> {{beilage_text}}</p>{{/beilage_text}}',
+        '      {{#beilage_text}}<p class="mt-3 mb-0"><strong>Inhalt:</strong> {{beilage_text}}</p>{{/beilage_text}}',
         '    </div>',
         '  </div>',
         '</article>',
@@ -269,19 +560,16 @@ search.addWidgets([
         var currentBest = seenByRecId[recId];
         var currentPage = parsePageNumber(currentBest.id);
         var candidatePage = parsePageNumber(item.id);
-        if (currentPage === 1) {
-          return;
-        }
-        if (candidatePage === 1 || candidatePage < currentPage) {
+        if (isBetterTocPage(candidatePage, currentPage)) {
           seenByRecId[recId] = item;
         }
       });
 
       return orderedRecIds.map(function (recId) {
         var sourceItem = seenByRecId[recId];
-        var resolvedLink = recId.replace(/\.xml$/i, '.html');
-        if (resolvedLink.indexOf('?') === -1) {
-          resolvedLink += '?p=1';
+        var resolvedLink = sourceItem && sourceItem.id ? String(sourceItem.id) : '';
+        if (!resolvedLink) {
+          resolvedLink = recId.replace(/\.xml$/i, '.html') + '?p=2';
         }
 
         var highlightTitle = '';
@@ -301,8 +589,17 @@ search.addWidgets([
           plainTitle = fallbackTitle(recId);
         }
 
+        var displayYear = getYear(sourceItem.year);
+        if (displayYear) {
+          plainTitle = 'Oberkammeramtsrechnung | ' + displayYear;
+        }
+
         var displayHighlight = stripPageSuffix(highlightTitle);
         if (!displayHighlight) {
+          displayHighlight = plainTitle;
+        }
+
+        if (displayYear) {
           displayHighlight = plainTitle;
         }
 
@@ -315,38 +612,22 @@ search.addWidgets([
     },
   }),
 
-  instantsearch.widgets.pagination({
-    container: '#pagination',
-    padding: 2,
-    cssClasses: {
-      list: 'pagination mb-0',
-      item: 'page-item',
-      link: 'page-link',
-    },
-  }),
-
-  instantsearch.widgets.panel({
-    templates: { header: 'Signatur' },
-  })(instantsearch.widgets.refinementList)({
-    container: '#refinement-list-signature',
-    attribute: 'signature',
-    cssClasses: {
-      list: 'list-unstyled',
-      label: 'form-check form-check-inline align-items-start',
-      checkbox: 'form-check-input',
-      labelText: 'form-check-label',
-    },
-  }),
+  createOkarPaginationWidget('#pagination'),
 
   instantsearch.widgets.panel({
     templates: { header: 'Jahr' },
-  })(instantsearch.widgets.rangeSlider)({
+  })(instantsearch.widgets.rangeInput)({
     container: '#refinement-range-year',
     attribute: 'year',
-    tooltips: {
-      format: function (rawValue) {
-        return getYear(rawValue);
-      },
+    templates: {
+      separatorText: 'bis',
+      submitText: 'Anwenden',
+    },
+    cssClasses: {
+      form: 'd-flex align-items-center gap-2',
+      input: 'form-control',
+      separator: 'text-muted small',
+      submit: 'btn btn-outline-secondary btn-sm',
     },
   }),
 
@@ -365,14 +646,14 @@ search.addWidgets([
   }),
 
   instantsearch.widgets.panel({
-    templates: { header: 'Beilage' },
+    templates: { header: 'Inhalt' },
   })(instantsearch.widgets.toggleRefinement)({
     container: '#refinement-list-beilage',
     attribute: 'beilage_present',
     on: true,
     templates: {
       labelText: function () {
-        return 'Nur Einträge mit Beilage anzeigen';
+        return 'Nur Einträge mit Inhalt anzeigen';
       },
     },
     cssClasses: {

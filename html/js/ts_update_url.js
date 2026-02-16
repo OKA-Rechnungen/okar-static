@@ -35,7 +35,7 @@ function updateHeaderUrl() {
 
 function listenToPagination() {
   setTimeout(function () {
-    var tsPagination = document.querySelectorAll('.ais-Pagination-link');
+    var tsPagination = document.querySelectorAll('.ais-Pagination-link, .page-navigation button');
     [].forEach.call(tsPagination, function (opt) {
       opt.removeEventListener('click', updateHeaderUrl);
       opt.addEventListener('click', updateHeaderUrl);
@@ -55,3 +55,10 @@ function initTsInput() {
 }
 
 initTsInput();
+
+// Expose helpers so custom widgets (like TOC pagination) can trigger
+// link updates after rerender.
+if (typeof window !== 'undefined') {
+  window.updateHeaderUrl = updateHeaderUrl;
+  window.listenToPagination = listenToPagination;
+}
