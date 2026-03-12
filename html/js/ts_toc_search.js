@@ -190,7 +190,7 @@ function createOkarPaginationWidget(containerSelector) {
       return;
     }
     var clamped = Math.min(Math.max(targetIndex, 0), Math.max(nav.totalPages - 1, 0));
-    nav.refine(clamped + 1);
+    nav.refine(clamped);
 
     // Ensure newly rendered hit links get mark= applied.
     if (typeof window !== 'undefined' && typeof window.updateHeaderUrl === 'function') {
@@ -404,7 +404,7 @@ function createOkarPaginationWidget(containerSelector) {
 
     nav.refine = renderOptions.refine;
     nav.totalPages = renderOptions.nbPages || 0;
-    nav.currentIndex = Math.max((renderOptions.currentRefinement || 1) - 1, 0);
+    nav.currentIndex = Math.max(renderOptions.currentRefinement || 0, 0);
 
     // Hide the whole control when there is nothing to paginate.
     if (nav.container) {
