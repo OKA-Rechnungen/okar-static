@@ -74,7 +74,9 @@
                 </style> -->
             </head>
             <body class="d-flex flex-column h-100">
-                <xsl:call-template name="nav_bar"/>
+                <xsl:call-template name="nav_bar">
+                    <xsl:with-param name="show-band-scope" select="true()"/>
+                </xsl:call-template>
                 <main class="hfeed site flex-grow" id="page">
                     <div class="edition_container ">
                         <div class="offcanvas offcanvas-start" tabindex="-1"
@@ -226,7 +228,7 @@
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/5.0.1/openseadragon.min.js"/>
                 <script type="text/javascript" src="js/osd_scroll.js"></script>
                 <script src="https://unpkg.com/de-micro-editor@0.3.4/dist/de-editor.min.js"></script>
-                <script type="text/javascript" src="js/run.js"></script>
+                <script type="text/javascript" src="js/run.js?v=20260312f"></script>
             </body>
         </html>
     </xsl:template>
