@@ -581,6 +581,134 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
     }
 
+    function waitForViewerReady(timeoutMs) {
+        return new Promise(function(resolve) {
+            if (!osdViewer) {
+                resolve(false);
+                return;
+            }
+
+            var worldItem = osdViewer.world && osdViewer.world.getItemAt(0);
+            if (worldItem) {
+                resolve(true);
+                return;
+            }
+
+            var settled = false;
+            var timeoutId = null;
+
+            function settle(value) {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                if (timeoutId) {
+                    window.clearTimeout(timeoutId);
+                }
+                resolve(value);
+            }
+
+            if (typeof osdViewer.addOnceHandler === 'function') {
+                osdViewer.addOnceHandler('open', function() {
+                    settle(true);
+                });
+            } else {
+                settle(false);
+                return;
+            }
+
+            timeoutId = window.setTimeout(function() {
+                settle(false);
+            }, typeof timeoutMs === 'number' ? timeoutMs : 1500);
+        });
+    }
+
+    function panViewerToRegion(region) {
+        if (!osdViewer || !region || !region.bounds || !facsimileData || !facsimileData.surfaces) {
+            return;
+        }
+
+        var tiledImage = osdViewer.world.getItemAt(0);
+        if (!tiledImage) {
+            return;
+        }
+
+        var surfaceInfo = facsimileData.surfaces.get(region.surfaceId);
+        if (!surfaceInfo) {
+            return;
+        }
+
+        var contentSize = tiledImage.getContentSize();
+        if (!contentSize || !contentSize.x || !contentSize.y) {
+            return;
+        }
+
+        var scaleX = contentSize.x / surfaceInfo.width;
+        var scaleY = contentSize.y / surfaceInfo.height;
+
+        var centerX = ((region.bounds.minX + region.bounds.maxX) / 2) * scaleX;
+        var centerY = ((region.bounds.minY + region.bounds.maxY) / 2) * scaleY;
+        var viewportPoint = osdViewer.viewport.imageToViewportCoordinates(centerX, centerY);
+
+        osdViewer.viewport.panTo(viewportPoint, true);
+    }
+
+    function jumpToRegionFromTranscript(regionId, targetElement) {
+        if (!regionId) {
+            return;
+        }
+
+        requestHighlight(regionId, targetElement || null);
+
+        ensureFacsimileData().then(function(store) {
+            if (!store || !store.regions) {
+                return;
+            }
+            var region = store.regions.get(regionId);
+            if (!region) {
+                return;
+            }
+            if (currentSurfaceId && region.surfaceId && currentSurfaceId !== region.surfaceId) {
+                return;
+            }
+            facsimileData = store;
+            panViewerToRegion(region);
+        });
+    }
+
+    function handleFacsimileClick(event) {
+        var target = event.currentTarget;
+        if (!target) {
+            return;
+        }
+
+        var regionId = target.dataset.facsRegionId || extractRegionIdFromElement(target);
+        if (!regionId) {
+            return;
+        }
+        if (!isLineRegion(regionId) && !isLineTarget(target)) {
+            return;
+        }
+
+        if (clearHighlightTimer) {
+            window.clearTimeout(clearHighlightTimer);
+            clearHighlightTimer = null;
+        }
+
+        event.preventDefault();
+
+        var targetPageIndex = resolvePageIndexFromElement(target);
+        var pageChanged = targetPageIndex !== -1 && targetPageIndex !== currentPageIndex;
+
+        if (pageChanged) {
+            showPageByIndex(targetPageIndex);
+        }
+
+        waitForViewerReady(1800).then(function() {
+            jumpToRegionFromTranscript(regionId, target);
+        });
+    }
+
     function setupFacsimileTargets() {
         if (!transcript) {
             return;
@@ -611,6 +739,7 @@ Single page transcript navigation with OpenSeadragon image sync.
             target.addEventListener('pointerleave', handleFacsimilePointerLeave);
             target.addEventListener('pointercancel', handleFacsimilePointerLeave);
             target.addEventListener('pointerdown', handleFacsimilePointerEnter);
+            target.addEventListener('click', handleFacsimileClick);
             target.addEventListener('focus', handleFacsimilePointerEnter, true);
             target.addEventListener('blur', handleFacsimilePointerLeave, true);
         });
