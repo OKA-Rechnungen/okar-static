@@ -4,6 +4,7 @@
     xmlns:tei="http://www.tei-c.org/ns/1.0"
     xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="#all" version="2.0">
     <xsl:template match="/" name="nav_bar">
+        <xsl:param name="show-band-scope" as="xs:boolean" select="false()"/>
         <header>
             <nav aria-label="Primary" class="navbar navbar-expand-lg bg-body-tertiary">
                 <div class="container-fluid">
@@ -53,6 +54,20 @@
                                 <form class="navbar-search-form" method="get" action="search.html" role="search">
                                     <label class="visually-hidden" for="navbar-search">Suche</label>
                                     <input class="form-control navbar-search" id="navbar-search" name="q" type="search" placeholder="Suche" aria-label="Suche" autocomplete="off" />
+                                    <xsl:if test="$show-band-scope">
+                                        <div class="form-check mt-1">
+                                            <input id="band-search-scope" class="form-check-input" type="checkbox" checked="checked"/>
+                                            <label class="form-check-label small" for="band-search-scope">In diesem Band</label>
+                                        </div>
+                                        <div id="band-search-nav-controls" class="navbar-band-nav" aria-label="Treffernavigation">
+                                            <button id="band-search-prev" type="button" class="navbar-band-nav-btn" aria-label="Vorheriger Treffer" title="Vorheriger Treffer">
+                                                <i class="bi bi-caret-up-fill" aria-hidden="true"></i>
+                                            </button>
+                                            <button id="band-search-next" type="button" class="navbar-band-nav-btn" aria-label="Nächster Treffer" title="Nächster Treffer">
+                                                <i class="bi bi-caret-down-fill" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                    </xsl:if>
                                 </form>
                             </li>
                         </ul>
