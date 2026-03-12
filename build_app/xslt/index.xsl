@@ -32,7 +32,9 @@
                         <h2><xsl:value-of select="$project_title"/></h2>
                     </div>
                 </main>
-                <xsl:call-template name="html_footer"/>
+                <xsl:call-template name="html_footer">
+                    <xsl:with-param name="show_full_footer" select="true()"/>
+                </xsl:call-template>
             </body>
         </html>
     </xsl:template>
