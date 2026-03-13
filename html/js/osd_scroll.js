@@ -834,9 +834,12 @@ Single page transcript navigation with OpenSeadragon image sync.
             var multiColumn = visibleCount === 2;
             var columnClass = multiColumn ? 'col-12 col-lg-6 transcript-column' : 'col-12 transcript-column';
 
-            abBlocks.forEach(function(abBlock) {
+            abBlocks.forEach(function(abBlock, idx) {
                 var column = document.createElement('div');
                 column.className = columnClass;
+                if (multiColumn) {
+                    column.classList.add(idx === 0 ? 'transcript-column-left' : 'transcript-column-right');
+                }
                 column.appendChild(abBlock);
                 row.appendChild(column);
             });
