@@ -168,6 +168,10 @@ div#map {
     display: block;
 }
 
+.facsimile-line[data-facs] {
+    cursor: pointer;
+}
+
 /* Neutralize link styling for edition prev/next controls now using plain arrows */
 #fa_links a {
     text-decoration: none;
