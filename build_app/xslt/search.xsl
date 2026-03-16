@@ -26,6 +26,11 @@
                         <h2 class="align-center">
                             <xsl:value-of select="$doc_title"/>
                         </h2>
+                        <p class="text-center">
+                            <a href="search-help.html">
+                                <i class="bi bi-question-circle"></i> Hinweise zur Volltextsuche
+                            </a>
+                        </p>
                     </div>
                     <div class="container-md">
                         <div class="search-panel">
