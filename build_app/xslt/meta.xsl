@@ -64,4 +64,9 @@
     <xsl:template match="tei:ref[@target]">
         <a href="{@target}"><xsl:apply-templates/></a>
     </xsl:template>
+    <xsl:template match="tei:head[@rend]">
+        <xsl:element name="{@rend}">
+            <xsl:apply-templates/>
+        </xsl:element>
+    </xsl:template>
 </xsl:stylesheet>

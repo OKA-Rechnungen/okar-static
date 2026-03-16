@@ -133,6 +133,12 @@
         </span>
     </xsl:template>
 
+    <xsl:template match="tei:head[@rend]">
+        <xsl:element name="{@rend}">
+            <xsl:apply-templates/>
+        </xsl:element>
+    </xsl:template>
+
     <xsl:template match="tei:hi">
         <span>
             <xsl:attribute name="class">
