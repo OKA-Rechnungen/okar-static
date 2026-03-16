@@ -215,3 +215,50 @@ div#map {
         margin-bottom: 1rem;
     }
 }
+
+/* Font rendition classes */
+.headline {
+    font-weight: bold;
+    font-size: 1.15em;
+}
+
+.superscript {
+    vertical-align: super;
+    font-size: smaller;
+}
+
+.hi {
+    /* generic highlight — plain <hi> without attributes */
+}
+
+.italic {
+    font-style: italic;
+}
+
+.smallcaps {
+    font-variant: small-caps;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.corr {
+    color: red;
+}
+
+.corr::before {
+    content: "[";
+    color: red;
+}
+
+.corr::after {
+    content: "]";
+    color: red;
+}
+
+.sic {
+    /* hidden for now; will be styled later */
+    display: none;
+}
+}
