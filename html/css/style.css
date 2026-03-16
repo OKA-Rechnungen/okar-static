@@ -740,6 +740,7 @@ div#map {
     display: flex;
     align-items: center;
     padding: 0 .5rem;
+    gap: .5rem;
 }
 
 .navbar-search {
@@ -751,16 +752,75 @@ div#map {
     align-items: center;
 }
 
+.navbar-band-scope {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.navbar-search-status {
+    min-width: 2.5rem;
+    text-align: right;
+}
+
+.navbar-band-nav {
+    display: flex;
+    flex-direction: column;
+    width: 1.2em;
+    min-width: 1.2em;
+    height: 2.375rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .25rem;
+    overflow: hidden;
+}
+
+.navbar-band-nav-btn {
+    flex: 1;
+    border: 0;
+    background: var(--bs-body-bg);
+    color: var(--bs-secondary-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+}
+
+.navbar-band-nav-btn + .navbar-band-nav-btn {
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.navbar-band-nav-btn:hover {
+    color: var(--bs-body-color);
+    background: var(--bs-tertiary-bg);
+}
+
+.navbar-band-nav-btn:disabled {
+    cursor: default;
+    opacity: .5;
+}
+
 @media (max-width: 992px) {
     .navbar-search-form {
         width: 100%;
         padding: .5rem 0;
+        flex-wrap: wrap;
     }
 
     .navbar-search {
         min-width: 0;
         width: 100%;
         padding-right: .75rem;
+    }
+
+    .navbar-band-scope,
+    .navbar-search-status {
+        margin-left: 0 !important;
+    }
+
+    .navbar-band-nav {
+        margin-left: 0;
     }
 }
 
@@ -820,6 +880,10 @@ div#map {
 
 .facsimile-line {
     display: block;
+}
+
+.facsimile-line[data-facs] {
+    cursor: pointer;
 }
 
 /* Neutralize link styling for edition prev/next controls now using plain arrows */
@@ -996,4 +1060,75 @@ body.page-edition #viewer {
 
 .edition-col-left .page-navigation .text-muted {
     color: rgba(255, 255, 255, 0.7) !important;
+}
+
+#transcript mark.search-highlight {
+    background-color: rgba(255, 193, 7, 0.45);
+    color: inherit;
+    padding: 0 .1em;
+}
+
+#transcript mark.search-highlight.search-highlight-active {
+    background-color: rgba(255, 153, 0, 0.85);
+}
+
+/* Vertical divider between left and right transcript columns */
+.transcript-column {
+    border-left: 1px solid var(--bs-border-color, black);
+}
+
+@media (max-width: 991.98px) {
+    .transcript-column {
+        border-left: none;
+        border-bottom: 1px solid var(--bs-border-color,black);
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Font rendition classes */
+.headline {
+    font-weight: bold;
+    font-size: 1.15em;
+}
+
+.superscript {
+    vertical-align: super;
+    font-size: smaller;
+}
+
+.hi {
+    /* generic highlight — plain <hi> without attributes */
+}
+
+.italic {
+    font-style: italic;
+}
+
+.smallcaps {
+    font-variant: small-caps;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.corr {
+    color: red;
+}
+
+.corr::before {
+    content: "[";
+    color: red;
+}
+
+.corr::after {
+    content: "]";
+    color: red;
+}
+
+.sic {
+    /* hidden for now; will be styled later */
+    display: none;
+}
 }

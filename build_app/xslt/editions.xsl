@@ -120,6 +120,11 @@
                                     <xsl:variable name="repoName" select="($msId/tei:repository/tei:orgName[@xml:lang='de'], $msId/tei:repository/tei:orgName[1], $msId/tei:institution/tei:orgName[@xml:lang='de'], $msId/tei:institution/tei:orgName[1])[1]"/>
                                     <xsl:variable name="collection" select="$msId/tei:collection[1]"/>
                                     <xsl:variable name="origDate" select="$msContents//tei:origDate[1]"/>
+                                    <xsl:variable name="beilageLabels" as="xs:string*"
+                                        select="distinct-values((
+                                            //tei:standOff//tei:spanGrp//tei:span[@type='section'][matches(@subtype, '^Beilage(\s|$)')]/@subtype,
+                                            //tei:TEI/tei:text//tei:milestone[@type='section'][matches(@subtype, '^Beilage(\s|$)')]/@subtype
+                                        ))"/>
                                     <xsl:variable name="origDateText">
                                         <xsl:choose>
                                             <xsl:when test="$origDate/@when">
@@ -140,7 +145,7 @@
                                     </xsl:variable>
                                     <xsl:variable name="contentNote" select="normalize-space(($msContents/tei:summary[normalize-space()], $msContents/tei:p[normalize-space(string-join(.//text(), ' '))][1])[1])"/>
 
-                                    <xsl:if test="$shelfmark or string($repoName) or string($collection) or string($origDateText) or string($contentNote)">
+                                    <xsl:if test="$shelfmark or string($repoName) or string($collection) or string($origDateText) or string($contentNote) or exists($beilageLabels)">
                                         <dl class="edition-metadata-list">
                                             <xsl:if test="$shelfmark">
                                                 <dt>Signatur</dt>
@@ -157,6 +162,9 @@
                                             <xsl:if test="string($origDateText)">
                                                 <dt>Datierung</dt>
                                                 <dd><xsl:value-of select="$origDateText"/></dd>
+                                            </xsl:if>
+                                            <xsl:if test="exists($beilageLabels)">
+                                                <div><span class="fw-bold">Beilage:</span> <xsl:text> </xsl:text><xsl:value-of select="string-join($beilageLabels, ', ')"/></div>
                                             </xsl:if>
                                             <xsl:if test="string($contentNote)">
                                                 <dt>Inhalt</dt>
@@ -184,6 +192,7 @@
                                                 <xsl:apply-templates select="tei:TEI/tei:text/tei:body/node()"/>
                                             </div>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -208,7 +217,7 @@
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/5.0.1/openseadragon.min.js"/>
                 <script type="text/javascript" src="js/osd_scroll.js"></script>
                 <script src="https://unpkg.com/de-micro-editor@0.3.4/dist/de-editor.min.js"></script>
-                <script type="text/javascript" src="js/run.js"></script>
+                <script type="text/javascript" src="js/run.js?v=20260312f"></script>
             </body>
         </html>
     </xsl:template>
@@ -255,14 +264,7 @@
         <xsl:variable name="subtype" select="string(@subtype)"/>
         <xsl:variable name="n" select="string(@n)"/>
         <xsl:variable name="target-pb" as="element(tei:pb)?">
-            <xsl:choose>
-                <xsl:when test="lower-case($type) = 'summary'">
-                    <xsl:sequence select="preceding::tei:pb[1]"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:sequence select="following::tei:pb[1]"/>
-                </xsl:otherwise>
-            </xsl:choose>
+            <xsl:sequence select="preceding::tei:pb[1]"/>
         </xsl:variable>
         <xsl:variable name="page-number" select="local:compute-page-number($target-pb)"/>
         <span class="milestone-anchor visually-hidden" aria-hidden="true"

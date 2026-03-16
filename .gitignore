@@ -12,7 +12,7 @@ data/indices/*.xml
 data/editions/*.xml
 data/meta/*.xml
 
-
+arche 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

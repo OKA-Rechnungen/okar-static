@@ -48,5 +48,25 @@
     </xsl:template>
     <xsl:template match="tei:del">
         <del><xsl:apply-templates/></del>
-    </xsl:template>    
+    </xsl:template>
+    <xsl:template match="tei:list">
+        <ul><xsl:apply-templates/></ul>
+    </xsl:template>
+    <xsl:template match="tei:item">
+        <li><xsl:apply-templates/></li>
+    </xsl:template>
+    <xsl:template match="tei:hi[@rend='bold']">
+        <strong><xsl:apply-templates/></strong>
+    </xsl:template>
+    <xsl:template match="tei:hi[@rend='italic']">
+        <em><xsl:apply-templates/></em>
+    </xsl:template>
+    <xsl:template match="tei:ref[@target]">
+        <a href="{@target}"><xsl:apply-templates/></a>
+    </xsl:template>
+    <xsl:template match="tei:head[@rend]">
+        <xsl:element name="{@rend}">
+            <xsl:apply-templates/>
+        </xsl:element>
+    </xsl:template>
 </xsl:stylesheet>

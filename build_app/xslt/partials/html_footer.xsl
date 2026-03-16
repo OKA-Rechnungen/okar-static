@@ -3,8 +3,10 @@
    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
    xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="#all" version="2.0">
    <xsl:template match="/" name="html_footer">
+      <xsl:param name="show_full_footer" as="xs:boolean" select="false()"/>
       <footer class="footer mt-auto py-3">
-         <div class="wrapper" id="wrapper-footer-full">
+         <xsl:if test="$show_full_footer">
+            <div class="wrapper" id="wrapper-footer-full">
             <div class="container" id="footer-full-content" tabindex="-1">
                <div class="footer-separator">
                   <span class="texts">KONTAKT</span>
@@ -17,13 +19,13 @@
                            <div class="row">
                               <div class="col-sm-12 col-6 text-center">
                                  <a href="https://www.oeaw.ac.at/acdh">
-                                    <img src="images/logo_acdh.png"  class="mobile-50w" alt="Austrian Centre for Digital Humanities" title="Austrian Centre for Digital Humanities"/>
+                                    <img src="images/logo_acdh.svg"  class="mobile-50w" alt="Austrian Centre for Digital Humanities" title="Austrian Centre for Digital Humanities"/>
                                  </a>
                               </div>
                               <div class="vspace-1 col-12 mobile-0"/>
                               <div class="col-sm-12 col-6 text-center">
                                  <a href="http://www.oeaw.ac.at/oesterreichische-akademie-der-wissenschaften/">
-                                    <img src="images/logo_oeaw.png" class="mobile-50w" alt="Österreichische Akademie der Wissenschaften" title="Österreichische Akademie der Wissenschaften"/>
+                                    <img src="images/logo_oeaw.svg" class="mobile-50w" alt="Österreichische Akademie der Wissenschaften" title="Österreichische Akademie der Wissenschaften"/>
                                  </a>
                               </div>
                            </div>
@@ -79,7 +81,8 @@
                   </div>
                </div>
             </div>
-         </div>
+            </div>
+         </xsl:if>
          <div class="footer-imprint-bar hide-reading" id="wrapper-footer-secondary" style="text-align:center; padding:0.4rem 0; font-size: 0.9rem;"> © 2025 OEAW | <a href="imprint.html">Impressum</a> |      <a href="{$github_url}">
             <i class="bi bi-github" title="GitHub" alt="GitHub" aria-hidden="true">
                <span class="visually-hidden">GitHub</span>

@@ -13,6 +13,32 @@
     <xsl:import href="./partials/html_footer.xsl"/>
     <xsl:import href="./partials/one_time_alert.xsl"/>
 
+    <xsl:template match="tei:body">
+        <xsl:apply-templates/>
+    </xsl:template>
+    <xsl:template match="tei:div">
+        <div><xsl:apply-templates/></div>
+    </xsl:template>
+    <xsl:template match="tei:p">
+        <p><xsl:apply-templates/></p>
+    </xsl:template>
+    <xsl:template match="tei:head[@rend]">
+        <xsl:element name="{@rend}">
+            <xsl:apply-templates/>
+        </xsl:element>
+    </xsl:template>
+    <xsl:template match="tei:ref[@target]">
+        <a href="{@target}"><xsl:apply-templates/></a>
+    </xsl:template>
+    <xsl:template match="tei:h2">
+        <h2>
+            <xsl:if test="@class">
+                <xsl:attribute name="class"><xsl:value-of select="@class"/></xsl:attribute>
+            </xsl:if>
+            <xsl:apply-templates/>
+        </h2>
+    </xsl:template>
+
     <xsl:template match="/">
         <xsl:variable name="doc_title">
             <xsl:value-of select='"OKAR – Oberkammeramtsrechnungsbücher"'/>

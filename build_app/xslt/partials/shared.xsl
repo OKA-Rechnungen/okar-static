@@ -127,30 +127,46 @@
         </xsl:choose>
     </xsl:template>
 
+    <xsl:template match="tei:headline">
+        <span class="headline">
+            <xsl:apply-templates/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="tei:head[@rend]">
+        <xsl:element name="{@rend}">
+            <xsl:apply-templates/>
+        </xsl:element>
+    </xsl:template>
+
     <xsl:template match="tei:hi">
         <span>
-            <xsl:choose>
-                <xsl:when test="@rendition = '#em'">
-                    <xsl:attribute name="class">
-                        <xsl:text>italic</xsl:text>
-                    </xsl:attribute>
-                </xsl:when>
-                <xsl:when test="@rendition = '#italic'">
-                    <xsl:attribute name="class">
-                        <xsl:text>italic</xsl:text>
-                    </xsl:attribute>
-                </xsl:when>
-                <xsl:when test="@rendition = '#smallcaps'">
-                    <xsl:attribute name="class">
-                        <xsl:text>smallcaps</xsl:text>
-                    </xsl:attribute>
-                </xsl:when>
-                <xsl:when test="@rendition = '#bold'">
-                    <xsl:attribute name="class">
-                        <xsl:text>bold</xsl:text>
-                    </xsl:attribute>
-                </xsl:when>
-            </xsl:choose>
+            <xsl:attribute name="class">
+                <xsl:choose>
+                    <xsl:when test="@rendition = '#em'">italic</xsl:when>
+                    <xsl:when test="@rendition = '#italic'">italic</xsl:when>
+                    <xsl:when test="@rendition = '#smallcaps'">smallcaps</xsl:when>
+                    <xsl:when test="@rendition = '#bold'">bold</xsl:when>
+                    <xsl:when test="contains(@style, 'superscript')">superscript</xsl:when>
+                    <xsl:otherwise>hi</xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
+            <xsl:apply-templates/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="tei:choice">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="tei:corr">
+        <span class="corr">
+            <xsl:apply-templates/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="tei:sic">
+        <span class="sic">
             <xsl:apply-templates/>
         </span>
     </xsl:template>

@@ -33,6 +33,10 @@
                         <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
                         <span class="site-menu-text">Über das Projekt</span>
                     </a>
+                    <a class="site-menu-link site-menu-link--leaf" href="data.html">
+                        <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
+                        <span class="site-menu-text">Daten &amp; Methodik</span>
+                    </a>
                     <a class="site-menu-link site-menu-link--leaf" href="books.html">
                         <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
                         <span class="site-menu-text">Rechnungsbücher</span>
@@ -42,6 +46,10 @@
                     <a class="site-menu-link site-menu-link--leaf" href="search.html">
                         <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
                         <span class="site-menu-text">Volltextsuche</span>
+                    </a>
+                    <a class="site-menu-link site-menu-link--leaf" href="search-help.html">
+                        <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
+                        <span class="site-menu-text">Hinweise zur Suche</span>
                     </a>
 
                     <div class="site-menu-section">Info</div>
