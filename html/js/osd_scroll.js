@@ -1107,7 +1107,6 @@ Single page transcript navigation with OpenSeadragon image sync.
         pageInput: null,
         pageInputWrapper: null,
         pageTotalLabel: null,
-        numberButtons: [],
         numberContainer: null
     };
 
@@ -1238,14 +1237,7 @@ Single page transcript navigation with OpenSeadragon image sync.
 
         navControls.pageInputWrapper = pageInputWrapper;
 
-        navControls.numberButtons = pages.map(function(page, idx) {
-            var numberButton = createNavButton(String(idx + 1), function() {
-                showPageByIndex(idx);
-            });
-            numberButton.setAttribute('aria-label', 'Seite ' + (page.label || idx + 1));
-            numberButton.dataset.pageIndex = String(idx);
-            return numberButton;
-        });
+        navControls.numberContainer.appendChild(navControls.pageInputWrapper);
 
         navControls.next = createNavButton('▶︎', function() {
             showPageByIndex(currentPageIndex + 1);
@@ -1261,8 +1253,6 @@ Single page transcript navigation with OpenSeadragon image sync.
             showPageByIndex(pages.length - 1);
         });
         navWrapper.appendChild(navControls.end);
-    } else {
-        navControls.numberButtons = [];
     }
 
     var osdViewer = null;
@@ -1496,75 +1486,29 @@ Single page transcript navigation with OpenSeadragon image sync.
 
     var currentPageIndex = -1;
 
-    function buildVisiblePageItems(totalPages, currentIndex) {
-        var effectiveIndex = currentIndex >= 0 ? currentIndex : 0;
-        var start = Math.max(0, effectiveIndex - 3);
-        var end = Math.min(totalPages - 1, effectiveIndex + 3);
 
-        var items = [];
-        for (var i = start; i <= end; i++) {
-            items.push(i);
-        }
-
-        return items;
-    }
-
-    function renderNumberButtons() {
-        if (!navControls.numberContainer || !navControls.numberButtons.length) {
-            return;
-        }
-
-        var items = buildVisiblePageItems(pages.length, currentPageIndex);
-        var container = navControls.numberContainer;
-        container.innerHTML = '';
-
-        items.forEach(function(item) {
-            if (item === 'ellipsis') {
-                var ellipsis = document.createElement('span');
-                ellipsis.className = 'pagination-ellipsis text-muted';
-                ellipsis.textContent = '…';
-                container.appendChild(ellipsis);
-            } else if (item === currentPageIndex && navControls.pageInputWrapper) {
-                container.appendChild(navControls.pageInputWrapper);
-            } else {
-                var button = navControls.numberButtons[item];
-                if (button) {
-                    container.appendChild(button);
-                }
-            }
-        });
-    }
 
     function updateNavState() {
         if (!navContainer) {
             return;
         }
 
-        renderNumberButtons();
-
-        var visibleItems = buildVisiblePageItems(pages.length, currentPageIndex);
         var atStart = currentPageIndex === 0;
         var atEnd = currentPageIndex === pages.length - 1;
 
         if (navControls.start) {
-            var startVisible = visibleItems.indexOf(0) !== -1;
-            navControls.start.style.display = startVisible ? 'none' : '';
-            navControls.start.disabled = startVisible;
+            navControls.start.disabled = atStart;
         }
 
         if (navControls.first) {
-            var hasTenBack = currentPageIndex >= 10;
-            navControls.first.style.display = hasTenBack ? '' : 'none';
-            navControls.first.disabled = !hasTenBack;
+            navControls.first.disabled = atStart;
         }
 
         if (navControls.prev) {
-            navControls.prev.style.display = atStart ? 'none' : '';
             navControls.prev.disabled = atStart;
         }
 
         if (navControls.next) {
-            navControls.next.style.display = atEnd ? 'none' : '';
             navControls.next.disabled = atEnd;
         }
 
@@ -1576,16 +1520,11 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
 
         if (navControls.last) {
-            var remainingAhead = pages.length - currentPageIndex - 1;
-            var hasTenAhead = remainingAhead >= 10;
-            navControls.last.style.display = hasTenAhead ? '' : 'none';
-            navControls.last.disabled = !hasTenAhead;
+            navControls.last.disabled = atEnd;
         }
 
         if (navControls.end) {
-            var endVisible = visibleItems.indexOf(pages.length - 1) !== -1;
-            navControls.end.style.display = endVisible ? 'none' : '';
-            navControls.end.disabled = endVisible;
+            navControls.end.disabled = atEnd;
         }
 
         if (navControls.pageInput) {
@@ -1597,17 +1536,7 @@ Single page transcript navigation with OpenSeadragon image sync.
             navControls.pageTotalLabel.textContent = '/ ' + pages.length;
         }
 
-        navControls.numberButtons.forEach(function(btn, idx) {
-            if (idx === currentPageIndex) {
-                btn.classList.remove('btn-outline-secondary');
-                btn.classList.add('btn-secondary');
-                btn.setAttribute('aria-current', 'page');
-            } else {
-                btn.classList.remove('btn-secondary');
-                btn.classList.add('btn-outline-secondary');
-                btn.removeAttribute('aria-current');
-            }
-        });
+
     }
 
     function showPageByIndex(index, options) {
