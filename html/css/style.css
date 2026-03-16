@@ -346,7 +346,7 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
 
 .site-top-right {
     display: flex;
-    justify-content: flex-end;
+    justify-content: left;
     align-items: center;
     position: relative;
 }
@@ -407,7 +407,7 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
 
 .site-top-strip {
     margin: 2rem 0 0;
-    height: 168px;
+    /*height: 168px;*/
     width: 100vw;
     margin-left: calc(-50vw + 50%);
     margin-right: calc(-50vw + 50%);
@@ -743,12 +743,14 @@ div#map {
 .navbar-search-form {
     display: flex;
     align-items: center;
-    padding: 0 .5rem;
+    padding: .5rem .5rem;
     gap: .5rem;
+    flex-wrap: wrap;
 }
 
 .navbar-search {
-    min-width: 12rem;
+    min-width: 0;
+    width: 100%;
 }
 
 .navbar-search-item {
@@ -757,9 +759,13 @@ div#map {
 }
 
 .navbar-band-scope {
-    display: flex;
+    display: none;
     align-items: center;
     white-space: nowrap;
+}
+
+.navbar-band-scope.visible {
+    display: flex;
 }
 
 .navbar-search-status {

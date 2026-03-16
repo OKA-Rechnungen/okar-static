@@ -25,38 +25,36 @@
             <div class="offcanvas-body">
                 <nav class="site-menu" aria-label="Hauptmenü">
                     <div class="site-menu-section">Das Projekt</div>
-                    <a class="site-menu-link site-menu-link--leaf" href="toc.html">
-                        <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
-                        <span class="site-menu-text">Editionseinheiten</span>
-                    </a>
                     <a class="site-menu-link site-menu-link--leaf" href="about.html">
-                        <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
                         <span class="site-menu-text">Über das Projekt</span>
                     </a>
                     <a class="site-menu-link site-menu-link--leaf" href="data.html">
-                        <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
                         <span class="site-menu-text">Daten &amp; Methodik</span>
                     </a>
                     <a class="site-menu-link site-menu-link--leaf" href="books.html">
-                        <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
                         <span class="site-menu-text">Rechnungsbücher</span>
                     </a>
 
                     <div class="site-menu-section">Suche</div>
-                    <a class="site-menu-link site-menu-link--leaf" href="search.html">
-                        <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
+                    <a class="site-menu-link site-menu-link--leaf" href="toc.html">
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
+                        <span class="site-menu-text">Editionseinheiten</span>
+                    </a>
+                    <!-- <a class="site-menu-link site-menu-link-
+                    -leaf" href="search.html">
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
                         <span class="site-menu-text">Volltextsuche</span>
-                    </a>
-                    <a class="site-menu-link site-menu-link--leaf" href="search-help.html">
-                        <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
-                        <span class="site-menu-text">Hinweise zur Suche</span>
-                    </a>
-
-                    <div class="site-menu-section">Info</div>
-                    <a class="site-menu-link site-menu-link--leaf" href="imprint.html">
-                        <span class="site-menu-bullet" aria-hidden="true"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></span>
+                    </a> -->
+                    <!--  
+                    <div class="site-menu-section">Info</div> 
+                    <a class="site-menu-link site-menu-link-
+                    -leaf" href="imprint.html"> 
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
                         <span class="site-menu-text">Impressum</span>
-                    </a>
+                    </a> --> 
                 </nav>
             </div>
         </div>
@@ -75,22 +73,36 @@
                             </a>
                         </div>
                         <div class="site-top-right">
-                            <xsl:choose>
+                            <!-- <xsl:choose>
                                 <xsl:when test="$site_top_variant = 'image'">
                                     <img class="site-top-image" src="images/banner_hero.png" alt="Titelbild"/>
                                 </xsl:when>
                                 <xsl:otherwise>
                                     <a class="section-button bgc site-top-project-button" href="about.html">Mehr über das Projekt</a>
                                 </xsl:otherwise>
-                            </xsl:choose>
+                            </xsl:choose> -->
+ <form class="navbar-search-form" action="search.html" method="get">
+                        <div class="navbar-search-item" style="flex:1">
+                            <input id="navbar-search" class="form-control form-control-sm navbar-search" type="search" name="q" placeholder="Suche…" autocomplete="off"/>
+                        </div>
+                        <div class="navbar-search-item navbar-band-scope">
+                            <input id="band-search-scope" type="checkbox" checked="checked" class="form-check-input me-1"/>
+                            <label for="band-search-scope" class="form-check-label small">In diesem Band</label>
+                        </div>
+                        <div id="band-search-nav-controls" class="navbar-search-item navbar-band-scope" style="gap:.25rem">
+                            <span id="band-search-status" class="navbar-search-status small"></span>
+                            <div class="navbar-band-nav">
+                                <button id="band-search-prev" type="button" class="navbar-band-nav-btn" aria-label="Vorheriges Ergebnis" disabled="disabled">&#x25B2;</button>
+                                <button id="band-search-next" type="button" class="navbar-band-nav-btn" aria-label="Nächstes Ergebnis" disabled="disabled">&#x25BC;</button>
+                            </div>
+                        </div>
+                    </form>
                         </div>
                     </div>
                     <xsl:choose>
                         <xsl:when test="$site_top_variant = 'image'">
                             <div class="site-top-strip bild" aria-hidden="true">
-                                <a class="site-button site-bottom-button semitrans" href="toc.html" role="button" aria-label="Schnellvorlauf">
-                                    <i class="bi bi-chevron-double-right" aria-hidden="true"></i>
-                                </a>
+                                <a class="site-button site-bottom-button semitrans" href="toc.html" role="button" aria-label="Schnellvorlauf">▶︎</a>
                             </div>
                         </xsl:when>
                         <xsl:otherwise>

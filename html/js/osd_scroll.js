@@ -1553,7 +1553,6 @@ Single page transcript navigation with OpenSeadragon image sync.
         if (navControls.pageTotalLabel) {
             navControls.pageTotalLabel.textContent = '/ ' + pages.length;
         }
-        }
     }
 
     function showPageByIndex(index, options) {
