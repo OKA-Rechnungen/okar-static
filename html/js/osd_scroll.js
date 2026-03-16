@@ -1274,9 +1274,34 @@ Single page transcript navigation with OpenSeadragon image sync.
             prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.0.0/images/',
             sequenceMode: false,
             showNavigator: false,
+            showNavigationControl: true,
             crossOriginPolicy: 'Anonymous',
             ajaxWithCredentials: false
         });
+
+        // Add prev/next page buttons using OSD's Button class (same icons as built-in controls)
+        var imgPrefix = 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.0.0/images/';
+        var osdPrevBtn = new OpenSeadragon.Button({
+            tooltip: 'Vorherige Seite',
+            srcRest: imgPrefix + 'previous_rest.png',
+            srcGroup: imgPrefix + 'previous_grouphover.png',
+            srcHover: imgPrefix + 'previous_hover.png',
+            srcDown: imgPrefix + 'previous_pressed.png',
+            onClick: function() { showPageByIndex(currentPageIndex - 1); }
+        });
+        osdViewer.addControl(osdPrevBtn.element, { anchor: OpenSeadragon.ControlAnchor.TOP_LEFT });
+        navControls.osdPrev = osdPrevBtn.element;
+
+        var osdNextBtn = new OpenSeadragon.Button({
+            tooltip: 'Nächste Seite',
+            srcRest: imgPrefix + 'next_rest.png',
+            srcGroup: imgPrefix + 'next_grouphover.png',
+            srcHover: imgPrefix + 'next_hover.png',
+            srcDown: imgPrefix + 'next_pressed.png',
+            onClick: function() { showPageByIndex(currentPageIndex + 1); }
+        });
+        osdViewer.addControl(osdNextBtn.element, { anchor: OpenSeadragon.ControlAnchor.TOP_LEFT });
+        navControls.osdNext = osdNextBtn.element;
 
         osdViewer.addHandler('open', function() {
             ensureFacsimileData().then(function() {
@@ -1541,6 +1566,13 @@ Single page transcript navigation with OpenSeadragon image sync.
         if (navControls.next) {
             navControls.next.style.display = atEnd ? 'none' : '';
             navControls.next.disabled = atEnd;
+        }
+
+        if (navControls.osdPrev) {
+            navControls.osdPrev.style.display = atStart ? 'none' : '';
+        }
+        if (navControls.osdNext) {
+            navControls.osdNext.style.display = atEnd ? 'none' : '';
         }
 
         if (navControls.last) {
