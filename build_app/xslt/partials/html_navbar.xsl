@@ -23,6 +23,9 @@
                                         <a class="dropdown-item" href="about.html">Über das Projekt</a>
                                     </li>
                                     <li>
+                                        <a class="dropdown-item" href="search-help.html">Hinweise zur Suche</a>
+                                    </li>
+                                    <li>
                                         <a class="dropdown-item" href="imprint.html">Impressum</a>
                                     </li>
                                 </ul>
