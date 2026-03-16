@@ -231,19 +231,14 @@ var editor = new LoadEditor({
     };
 
     function buildLabel(node) {
-      var n = node.getAttribute('data-n') || '';
       var subtype = node.getAttribute('data-subtype') || '';
       var type = node.getAttribute('data-type') || '';
-      var labelParts = [];
-      if (n) {
-        labelParts.push(n);
-      }
       if (subtype) {
-        labelParts.push(subtype);
+        return subtype;
       } else if (type) {
-        labelParts.push(typeLabels[type.toLowerCase()] || type);
+        return typeLabels[type.toLowerCase()] || type;
       }
-      return labelParts.join(' – ');
+      return '';
     }
 
     function buildTargetUrl(pageNumber) {
@@ -275,14 +270,10 @@ var editor = new LoadEditor({
       title.textContent = buildLabel(node) || 'Abschnitt';
       body.appendChild(title);
 
-      var meta = document.createElement('small');
-      meta.className = 'text-muted';
-      meta.textContent = 'Seite ' + pageNumber;
-      body.appendChild(meta);
-
+      var foliation = node.getAttribute('data-n') || pageNumber;
       var badge = document.createElement('span');
       badge.className = 'badge bg-secondary rounded-pill';
-      badge.textContent = pageNumber;
+      badge.textContent = foliation;
 
       item.appendChild(body);
       item.appendChild(badge);
