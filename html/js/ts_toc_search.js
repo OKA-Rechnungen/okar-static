@@ -198,17 +198,6 @@ function createOkarPaginationWidget(containerSelector) {
     }
   }
 
-  function buildVisiblePageItems(totalPages, currentIndex) {
-    var effectiveIndex = currentIndex >= 0 ? currentIndex : 0;
-    var start = Math.max(0, effectiveIndex - 3);
-    var end = Math.min(totalPages - 1, effectiveIndex + 3);
-    var items = [];
-    for (var i = start; i <= end; i++) {
-      items.push(i);
-    }
-    return items;
-  }
-
   function renderNumberButtons() {
     if (!nav.numberContainer) {
       return;
@@ -216,21 +205,9 @@ function createOkarPaginationWidget(containerSelector) {
 
     var container = nav.numberContainer;
     container.innerHTML = '';
-    var items = buildVisiblePageItems(nav.totalPages, nav.currentIndex);
-
-    items.forEach(function (idx) {
-      if (idx === nav.currentIndex && nav.pageInputWrapper) {
-        container.appendChild(nav.pageInputWrapper);
-        return;
-      }
-
-      var numberButton = createNavButton(String(idx + 1), function () {
-        showPageByIndex(idx);
-      });
-      numberButton.setAttribute('aria-label', 'Seite ' + String(idx + 1));
-      numberButton.dataset.pageIndex = String(idx);
-      container.appendChild(numberButton);
-    });
+    if (nav.pageInputWrapper) {
+      container.appendChild(nav.pageInputWrapper);
+    }
   }
 
   function updateNavState() {
@@ -240,45 +217,33 @@ function createOkarPaginationWidget(containerSelector) {
 
     var totalPages = nav.totalPages;
     var currentIndex = nav.currentIndex;
-    var visibleItems = buildVisiblePageItems(totalPages, currentIndex);
     var atStart = currentIndex <= 0;
     var atEnd = totalPages <= 1 || currentIndex >= totalPages - 1;
 
     renderNumberButtons();
 
     if (nav.start) {
-      var startVisible = visibleItems.indexOf(0) !== -1;
-      nav.start.style.display = startVisible ? 'none' : '';
-      nav.start.disabled = startVisible;
+      nav.start.disabled = atStart;
     }
 
     if (nav.first) {
-      var hasTenBack = currentIndex >= 10;
-      nav.first.style.display = hasTenBack ? '' : 'none';
-      nav.first.disabled = !hasTenBack;
+      nav.first.disabled = atStart;
     }
 
     if (nav.prev) {
-      nav.prev.style.display = atStart ? 'none' : '';
       nav.prev.disabled = atStart;
     }
 
     if (nav.next) {
-      nav.next.style.display = atEnd ? 'none' : '';
       nav.next.disabled = atEnd;
     }
 
     if (nav.last) {
-      var remainingAhead = totalPages - currentIndex - 1;
-      var hasTenAhead = remainingAhead >= 10;
-      nav.last.style.display = hasTenAhead ? '' : 'none';
-      nav.last.disabled = !hasTenAhead;
+      nav.last.disabled = atEnd;
     }
 
     if (nav.end) {
-      var endVisible = visibleItems.indexOf(totalPages - 1) !== -1;
-      nav.end.style.display = endVisible ? 'none' : '';
-      nav.end.disabled = endVisible;
+      nav.end.disabled = atEnd;
     }
 
     if (nav.pageInput) {
