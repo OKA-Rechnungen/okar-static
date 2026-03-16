@@ -275,14 +275,7 @@
         <xsl:variable name="subtype" select="string(@subtype)"/>
         <xsl:variable name="n" select="string(@n)"/>
         <xsl:variable name="target-pb" as="element(tei:pb)?">
-            <xsl:choose>
-                <xsl:when test="lower-case($type) = 'summary'">
-                    <xsl:sequence select="preceding::tei:pb[1]"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:sequence select="following::tei:pb[1]"/>
-                </xsl:otherwise>
-            </xsl:choose>
+            <xsl:sequence select="preceding::tei:pb[1]"/>
         </xsl:variable>
         <xsl:variable name="page-number" select="local:compute-page-number($target-pb)"/>
         <span class="milestone-anchor visually-hidden" aria-hidden="true"
