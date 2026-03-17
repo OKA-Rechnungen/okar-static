@@ -16,8 +16,6 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
     query_by: 'full_text,title,rec_id',
     highlight_full_fields: 'full_text,title',
     sort_by: 'title:asc,rec_id:asc',
-    group_by: 'rec_id',
-    group_limit: 1,
   },
 });
 
