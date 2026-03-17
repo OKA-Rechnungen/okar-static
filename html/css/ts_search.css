@@ -354,7 +354,7 @@
 
 .ais-SearchBox-input {
   flex: 1;
-  padding: 0.75rem 3rem 0.75rem 1rem;
+  padding: 0.75rem 2rem 0.75rem 2rem;
   border: 2px solid var(--okar-button-bg, #0d6efd);
   border-radius: 0.5rem;
   font-size: 1rem;
@@ -709,4 +709,10 @@
 .ais-Panel-header {
   font-weight: 600;
   margin-bottom: 0.75rem;
+  border-bottom: none;
+  color: var(--okar-button-bg) ;
+}
+
+.ais-Panel-body {
+  padding-bottom: 1em;
 }
