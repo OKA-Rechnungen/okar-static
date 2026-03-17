@@ -12,7 +12,7 @@
 }
 
 .search-col-left {
-  background-color: var(--okar-background-colour-4, #343a40);
+  background-color: var(--okar-background-colour-3) ; /*var(--okar-background-colour-4, #343a40); */
   padding: 2rem 1.5rem;
   position: sticky;
   top: 0;
@@ -25,6 +25,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* -----------------------------------------------------------------
@@ -39,7 +41,7 @@
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--okar-button-bg, #0d6efd);
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 0.5rem;
@@ -124,7 +126,7 @@
 }
 
 .toc-year-count .ais-Stats-text {
-  color: var(--okar-button-bg, #0d6efd);
+  color: white;
   font-weight: 600;
 }
 
@@ -254,8 +256,8 @@
 
 .search-col-left .ais-ClearRefinements-button {
   background: transparent;
-  border: 1px solid var(--okar-button-bg, #0d6efd);
-  color: var(--okar-button-bg, #0d6efd);
+  border: 1px solid white ;/*  var(--okar-button-bg, #0d6efd); */
+  color: white ;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -404,8 +406,7 @@
 
 .ais-InfiniteHits-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 18rem);
-  justify-content: center;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
   gap: 2rem;
   list-style: none;
   padding: 0;
@@ -417,9 +418,8 @@
   position: relative;
   overflow: hidden;
   border-radius: 0.75rem;
-  /* Fixed width, height based on aspect ratio */
-  width: 18rem;
-  aspect-ratio: 3 / 4;
+  width: 100%;
+  aspect-ratio: 4 / 3;
 }
 
 .ais-InfiniteHits-empty {
@@ -491,7 +491,7 @@
 }
 
 .toc-hit-title {
-  font-size: 1.125rem;
+  font-size: 0.9em;
   font-weight: 600;
   margin: 0 0 1rem;
   color: var(--bs-white, #fff);
@@ -509,7 +509,7 @@
   list-style: none;
   padding: 0;
   margin: 0 0 1rem;
-  font-size: 0.875rem;
+  font-size: 0.8em;
 }
 
 .toc-hit-list li {
@@ -522,35 +522,26 @@
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
-  font-size: 0.6875rem;
+  font-size: 0.7em;
   letter-spacing: 0.05em;
-  min-width: 5.5rem;
+  min-width: 6.5em;
 }
 
 .toc-hit-value {
   color: var(--bs-white, #fff);
 }
 
-.toc-hit-cta {
-  margin-top: auto;
-}
-
-.toc-hit-cta .cta-button {
-  display: inline-block;
-  background: var(--okar-button-bg, #0d6efd);
-  color: #fff;
-  padding: 0.625rem 1.25rem;
-  border-radius: 0.5rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+.toc-hit-card-link {
+  display: contents;
   text-decoration: none;
-  transition: background 0.15s;
+  color: inherit;
+  cursor: pointer;
 }
 
-.toc-hit-cta .cta-button:hover {
-  background: var(--okar-button-bg-hover, #0b5ed7);
-  color: #fff;
+.ais-InfiniteHits-item:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  transition: opacity 0.15s, transform 0.15s;
 }
 
 /* -----------------------------------------------------------------
@@ -710,7 +701,7 @@
   font-weight: 600;
   margin-bottom: 0.75rem;
   border-bottom: none;
-  color: var(--okar-button-bg) ;
+  color: white ;
 }
 
 .ais-Panel-body {

@@ -155,10 +155,9 @@ var renderInfiniteHits = function(renderOptions, isFirstRender) {
     : '<ol class="ais-InfiniteHits-list">' + processedHits.map(function(hit) {
         var titleUpper = String(hit.display_title_plain).toLocaleUpperCase('de-DE');
         return '<li class="ais-InfiniteHits-item">' +
+          '<a class="toc-hit-card-link" href="' + hit.link + '" aria-label="Details zu ' + hit.display_title_plain + '">' +
           '<div class="toc-hit-card">' +
-            '<a class="toc-hit-link" href="' + hit.link + '" aria-label="Details zu ' + hit.display_title_plain + '">' +
               (hit.thumbnail ? '<img class="toc-hit-image" src="' + hit.thumbnail + '" alt="Seitenvorschau" loading="lazy" />' : '<div class="toc-hit-placeholder"></div>') +
-            '</a>' +
           '</div>' +
           '<div class="toc-hit-overlay">' +
             '<h4 class="toc-hit-title">' + hit.display_title_highlight + '</h4>' +
@@ -168,10 +167,8 @@ var renderInfiniteHits = function(renderOptions, isFirstRender) {
               '<li><span class="toc-hit-label">KÄMMERER</span><span class="toc-hit-value">' + (Array.isArray(hit.kaemmerer) ? hit.kaemmerer.join(', ') : hit.kaemmerer || '–') + '</span></li>' +
               (hit.beilage_text ? '<li><span class="toc-hit-label">BEILAGE</span><span class="toc-hit-value">' + hit.beilage_text + '</span></li>' : '') +
             '</ul>' +
-            '<div class="toc-hit-cta">' +
-              '<a class="cta-button" href="' + hit.link + '">DETAILS</a>' +
-            '</div>' +
           '</div>' +
+          '</a>' +
         '</li>';
       }).join('') + '</ol>';
 
@@ -183,15 +180,6 @@ var renderInfiniteHits = function(renderOptions, isFirstRender) {
 var customInfiniteHits = connectInfiniteHits(renderInfiniteHits);
 
 search.addWidgets([
-  instantsearch.widgets.searchBox({
-    container: '#searchbox',
-    placeholder: 'Suche in den Editionseinheiten',
-    autofocus: false,
-    showReset: true,
-    showSubmit: true,
-    showLoadingIndicator: false,
-  }),
-
   instantsearch.widgets.stats({
     container: '#yearCount',
     templates: {
@@ -238,14 +226,6 @@ search.addWidgets([
         });
       });
     },
-  }),
-
-  instantsearch.widgets.refinementList({
-    container: '#refinement-list-signature',
-    attribute: 'signature',
-    sortBy: ['name:asc', 'count:desc'],
-    limit: 50,
-    searchable: false,
   }),
 
   instantsearch.widgets.refinementList({

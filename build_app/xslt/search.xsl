@@ -56,9 +56,9 @@
                                     <xsl:value-of select="$doc_title"/>
                                 </h2> -->
                             </div>
-                            <div>
+                            <!--- <div>
                                 <div class="d-flex flex-column align-items-center" id="current-refinements"></div>
-                            </div>
+                            </div> -->
                             <div id="hits"/>
                             <div id="pagination"/>
                             <div class="search-col-right-strip"/>

@@ -24,18 +24,6 @@
                     <div id="searchContainer" class="search-container">
                         <div class="search-col-left">
                             <div class="toc-left-section">
-                                <h3 class="toc-left-heading">Suche</h3>
-                                <div class="toc-search-pill">
-                                    <div class="toc-search-pill-inner">
-                                        <div id="searchbox"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="toc-left-section">
-                                <h3 class="toc-left-heading">Signatur</h3>
-                                <div id="refinement-list-signature"></div>
-                            </div>
-                            <div class="toc-left-section">
                                 <h3 class="toc-left-heading">Jahr</h3>
                                 <div id="yearSlider"></div>
                                 <div id="yearCount" class="toc-year-count"></div>
