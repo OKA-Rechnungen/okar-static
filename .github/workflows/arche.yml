@@ -1,0 +1,77 @@
+name: ARCHE-Ingest
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_pages:
+    name: Ingest Data into ARCHE
+    runs-on: ubuntu-latest
+    env:
+      ANT_OPTS: -Xmx5g
+      REDMINE_ID: 21500
+      ARCHE_INSTANCE: arche.acdh
+      PROJECT_NAME : hanslick-vms
+      OUTPUT_DIR: arche
+      DATA_DIR: data/editions
+      META_DIR: data/meta
+      IMG_DIR: data/img
+    steps:
+    - name: Perform Checkout
+      uses: actions/checkout@v6
+    - name: Install Saxon and Ant
+      run: |
+        apt-get update && apt-get install openjdk-11-jre-headless ant -y --no-install-recommend
+        ./scripts/sh/script.sh && pip install -r scripts/py/requirements.txt
+    - name: Build preprocess
+      run: |
+        ant -f scripts/ant/build_preprocess.xml
+    - name: fetch data
+      run: |
+        ./scripts/sh/fetch_data_arche.sh
+    - name: add attributes and denormalize
+      run: |
+        ./scripts/sh/attr_denorm.sh
+    - name: Build
+      run: |
+        ant -f scripts/ant/build_arche.xml
+    - name: ingestion dependencies
+      run: composer require "acdh-oeaw/arche-ingest:^1"
+    - name: Fetch WF-URL
+      run: echo "RUN_URL=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+    - name: ingest arche metadata topcol, col, res
+      run: |
+        echo 'STEP=Upload AIP to Productive Instance (Apollo)' >> $GITHUB_ENV
+        vendor/bin/arche-import-metadata ${OUTPUT_DIR}/arche.rdf https://${ARCHE_INSTANCE}.oeaw.ac.at/api ${{secrets.ARCHE_LOGIN}} ${{secrets.ARCHE_PASSWORD}} --retriesOnConflict 25
+        vendor/bin/arche-update-redmine --token ${{ secrets.REDMINE_TOKEN }} --append "$RUN_URL" $REDMINE_ID 'Upload AIP to Productive Instance (Apollo)'
+    - name: Copy XML Files to to_ingest 
+      run: |
+        mkdir $PWD/to_ingest
+        find -path "./${DATA_DIR}/*.xml" -exec cp -prv '{}' './to_ingest' ';'
+        find -path "./${META_DIR}/*.odd" -exec cp -prv '{}' './to_ingest' ';'
+        find -path "./${META_DIR}/out/*.rng" -exec cp -prv '{}' './to_ingest' ';'
+        find -path "./${IMG_DIR}/*.svg" -exec cp -prv '{}' './to_ingest' ';'
+    - name: cache AV database
+      id: avdb
+      uses: actions/cache@v3
+      with:
+        path: ~/.cvdupdate
+        key: constant
+    - name: refresh AV database
+      run: |
+        python3 -m pip install --user cvdupdate && cvd update
+    - name: run repo-file-checker
+      run: |
+        echo 'STEP=Run repo-file-checker' >> $GITHUB_ENV
+        docker run --rm -d --name filechecker -v `pwd`/filechecker/reports:/reports -v `pwd`/to_ingest:/data -v ~/.cvdupdate/database/:/var/lib/clamav -e DAEMONIZE=1 acdhch/arche-filechecker 0
+        vendor/bin/arche-update-redmine --token ${{ secrets.REDMINE_TOKEN }} --append "$RUN_URL" $REDMINE_ID 'Virus scan'
+        vendor/bin/arche-update-redmine --token ${{ secrets.REDMINE_TOKEN }} --append "$RUN_URL" $REDMINE_ID 'Run repo-file-checker'
+    - name: ingest binaries
+      run: |
+        echo 'STEP=Upload Binaries' >> $GITHUB_ENV
+        vendor/bin/arche-import-binary to_ingest https://id.acdh.oeaw.ac.at/${PROJECT_NAME} https://${ARCHE_INSTANCE}.oeaw.ac.at/api ${{secrets.ARCHE_LOGIN}} ${{secrets.ARCHE_PASSWORD}} --skip not_exist
+        vendor/bin/arche-update-redmine --token ${{ secrets.REDMINE_TOKEN }} --append "$RUN_URL" $REDMINE_ID 'Upload AIP to Productive Instance (Apollo)'
+    - name: on failure
+      if: ${{ failure() }}
+      run: |
+        vendor/bin/arche-update-redmine --token ${{ secrets.REDMINE_TOKEN }} --append "$RUN_URL" --statusCode 1 $REDMINE_ID "$STEP"
