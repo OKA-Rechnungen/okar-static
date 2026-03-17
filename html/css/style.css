@@ -48,7 +48,14 @@ body {
 }
 
 .site-top-inner, .container {
-    margin-left: calc(var(--site-offcanvas-width) + 1rem);
+    margin: 0 calc(var(--site-offcanvas-width) + var(--okar-square-btn-size) + 1rem) 0 calc(var(--site-offcanvas-width) + var(--okar-square-btn-size) + 1rem);
+    max-width: calc(100vw - 2 * (var(--site-offcanvas-width) + 1rem));
+}
+
+.page-search .site-top-inner,
+.page-search .container {
+    margin: 0 calc(var(--site-offcanvas-width) + var(--okar-square-btn-size) + 1rem) 0 calc(var(--okar-square-btn-size) + 1rem);
+    max-width: calc(100vw - var(--site-offcanvas-width) - 2rem);
 }
 body.page-search .site-header,
 #searchPage #searchContainer .site-header {
@@ -84,6 +91,7 @@ body.page-search .site-header,
    Square / icon buttons (burger, close, action)
    ========================================================== */
 .site-button {
+    font-family: sans-serif;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -105,18 +113,16 @@ body.page-search .site-header,
     align-items: center;
     justify-content: center;
     width: var(--okar-square-btn-size);
-    height: calc(var(--okar-square-btn-size) * 1.6);
+    height: calc(var(--okar-square-btn-size) * 2);
     border: 0 !important;
     border-radius: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
-    margin-right: -1rem !important;
-    margin-top: -2.25rem !important;
     box-shadow: none;
     font-family: var(--bs-font-sans-serif) !important;
     background-image: none !important;
     color: var(--okar-button-bg-hover) !important;
-    background-color: var(--okar-background-colour-0) !important;
+    background-color: transparent !important;
     font-size: small;
     text-decoration: none !important;
     line-height: 1;
@@ -124,6 +130,9 @@ body.page-search .site-header,
     text-orientation: mixed;
     transform: rotate(180deg);
     white-space: nowrap;
+    position: absolute;
+    right: 0;
+    z-index: 2000;
 }
 
 .site-button:focus-visible {
@@ -137,6 +146,27 @@ body.page-search .site-header,
     background-color: var(--okar-button-bg-hover) !important;
     color: var(--bs-white) !important;
     box-shadow: none !important;
+}
+
+.site-burger::before {
+  content: "☰";
+}
+
+.site-close::before {
+  content: "×";
+}
+
+.load-more-btn::before {
+    content: "⏷";
+}
+
+
+.scroll-to-top::before{
+    content: "⏶";
+}
+
+.site-bottom-button::before{
+content: "⏵" ;
 }
 
 /* Semitrans utility */
@@ -153,7 +183,8 @@ body.page-search .site-header,
 .semitrans:focus,
 .semitrans:focus-visible,
 .semitrans:active {
-    background-color: rgba(13, 110, 253, 1) !important;
+    background-color: var(--okar-button-bg-hover) !important;
+    cursor: pointer;
 }
 
 /* ==========================================================
@@ -294,6 +325,7 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
 .site-top {
     background-color: var(--okar-button-bg);
     padding: 5rem 0 0;
+    position: relative;
 }
 
 .site-top-grid {
@@ -305,8 +337,6 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
     padding-right: 2rem;
     width: 100%;
     max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 @media (min-width: 576px) {
@@ -406,13 +436,13 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
 }
 
 .site-top-strip {
-    margin: 2rem 0 0;
+
     /*height: 168px;*/
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
-    margin-right: calc(-50vw + 50%);
     background-color: var(--okar-button-bg);
     position: relative;
+     /*margin: 0 calc(var(--site-offcanvas-width) + 1rem) 0 calc(var(--site-offcanvas-width) + 1rem); */
+    width: 100vw ; /* calc(100vw - 2 * (var(--site-offcanvas-width) + 1rem)); */
+    height: 2rem;
 }
 
 .site-top-strip .site-bottom-button {
@@ -423,11 +453,12 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
     padding: 0 !important;
 }
 
-.site-top-strip.bild {
-    background-image: url('../images/banner.png');
+
+/* .site-top-strip.bild {
+   background-image: url('../images/banner.png');
     background-repeat: repeat-x;
     background-size: auto 100%;
-}
+} */
 
 /* ==========================================================
    Landing page sections
@@ -452,8 +483,6 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
     align-items: flex-start;
     gap: 1rem;
     max-width: 1320px;
-    margin: 0 auto;
-    margin-left: calc(var(--site-offcanvas-width) + 1rem);
     padding: 0 1rem;
 }
 
@@ -619,6 +648,10 @@ body.landing .landing-thumb img {
     position: relative;
 }
 
+
+.search-panel__hint, #fuzzy-toggle * {
+color: white;
+}
 .search-col-right-strip {
     height: 2rem;
     background-color: var(--okar-background-colour-0);
