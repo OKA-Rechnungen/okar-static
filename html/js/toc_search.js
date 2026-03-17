@@ -236,6 +236,16 @@ search.addWidgets([
 
 search.start();
 
+// Detail view toggle
+(function initDetailViewToggle() {
+  var toggle = document.getElementById('detailViewToggle');
+  var hitsContainer = document.getElementById('hits');
+  if (!toggle || !hitsContainer) return;
+  toggle.addEventListener('change', function() {
+    hitsContainer.classList.toggle('detail-view', toggle.checked);
+  });
+})();
+
 // Load More button
 (function initLoadMoreButton() {
   var paginationEl = document.getElementById('pagination');

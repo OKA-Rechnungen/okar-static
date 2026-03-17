@@ -24,6 +24,12 @@
                     <div id="searchContainer" class="search-container">
                         <div class="search-col-left">
                             <div class="toc-left-section">
+                                <label class="card-view-toggle">
+                                    <input type="checkbox" id="detailViewToggle"/>
+                                    <span class="card-view-toggle-text">Detailansicht</span>
+                                </label>
+                            </div>
+                            <div class="toc-left-section">
                                 <h3 class="toc-left-heading">Jahr</h3>
                                 <div id="yearSlider"></div>
                                 <div id="yearCount" class="toc-year-count"></div>

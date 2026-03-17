@@ -486,8 +486,22 @@
 }
 
 .ais-InfiniteHits-item:hover .toc-hit-overlay,
-.ais-InfiniteHits-item:focus-within .toc-hit-overlay {
+.ais-InfiniteHits-item:focus-within .toc-hit-overlay,
+.detail-view .toc-hit-overlay {
   display: flex;
+}
+
+/* Detail-view toggle styling */
+.card-view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.card-view-toggle input[type="checkbox"] {
+  accent-color: var(--okar-button-bg);
 }
 
 .toc-hit-title {
@@ -757,6 +771,6 @@
   padding-bottom: 1em;
 }
 
-.search-panel__hint,  .search-panel__hint *, #fuzzy-toggle, #fuzzy-toggle * {
+.search-panel__hint,  .search-panel__hint *, #fuzzy-toggle, #fuzzy-toggle *, .card-view-toggle *{
 color:  rgba(255, 255, 255, 0.7);
 }
