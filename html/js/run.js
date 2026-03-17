@@ -306,6 +306,10 @@ var editor = new LoadEditor({
       return;
     }
 
+    var bandScopeWrapper = scopeCheckbox ? scopeCheckbox.closest('.navbar-band-scope') : null;
+    if (bandScopeWrapper) bandScopeWrapper.classList.add('visible');
+    if (navControls) navControls.classList.add('visible');
+
     var matches = [];
     var activeIndex = -1;
     var lastSearchKey = '';

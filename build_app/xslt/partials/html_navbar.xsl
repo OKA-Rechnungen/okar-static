@@ -3,83 +3,114 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:tei="http://www.tei-c.org/ns/1.0"
     xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="#all" version="2.0">
+    
     <xsl:template match="/" name="nav_bar">
-        <xsl:param name="show-band-scope" as="xs:boolean" select="false()"/>
-        <header>
-            <nav aria-label="Primary" class="navbar navbar-expand-lg bg-body-tertiary">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="index.html">
-                        <xsl:value-of select="$project_short_title"/>
-                    </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Projekt</a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="about.html">Über das Projekt</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="data.html">Daten &amp; Methodik</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="search-help.html">Hinweise zur Suche</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="imprint.html">Impressum</a>
-                                    </li>
-                                </ul>
-                            </li>
+        <xsl:param name="site_top_variant" as="xs:string" select="'button'"/>
+        <xsl:param name="show_site_top" as="xs:boolean" select="true()"/>
 
-                            <li class="nav-item">
-                                <a class="nav-link" href="toc.html">Editionseinheiten</a>
-                            </li>
-<!-- 
-                            <li class="nav-item dropdown disabled">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Register</a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="listperson.html">Personen</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="listplace.html">Orte</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="listorg.html">Organisationen</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="listbibl.html">Werke</a>
-                                    </li>
-                                </ul>
-                            </li>
--->
-                            <li class="nav-item navbar-search-item">
-                                <form class="navbar-search-form" method="get" action="search.html" role="search">
-                                    <label class="visually-hidden" for="navbar-search">Suche</label>
-                                    <input class="form-control navbar-search" id="navbar-search" name="q" type="search" placeholder="Suche" aria-label="Suche" autocomplete="off" />
-                                    <xsl:if test="$show-band-scope">
-                                        <div class="form-check mt-1">
-                                            <input id="band-search-scope" class="form-check-input" type="checkbox" checked="checked"/>
-                                            <label class="form-check-label small" for="band-search-scope">In diesem Band</label>
-                                        </div>
-                                        <div id="band-search-nav-controls" class="navbar-band-nav" aria-label="Treffernavigation">
-                                            <button id="band-search-prev" type="button" class="navbar-band-nav-btn" aria-label="Vorheriger Treffer" title="Vorheriger Treffer">
-                                                <i class="bi bi-caret-up-fill" aria-hidden="true"></i>
-                                            </button>
-                                            <button id="band-search-next" type="button" class="navbar-band-nav-btn" aria-label="Nächster Treffer" title="Nächster Treffer">
-                                                <i class="bi bi-caret-down-fill" aria-hidden="true"></i>
-                                            </button>
-                                        </div>
-                                    </xsl:if>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
+        <header class="site-header">
+            <div class="container-fluid site-header-inner">
+                <button class="site-button site-burger" type="button" data-bs-toggle="offcanvas" data-bs-target="#siteMenu" aria-controls="siteMenu" aria-label="Menü öffnen">
+                    <i class="bi bi-list" aria-hidden="true"></i>
+                </button>
+            </div>
         </header>
+
+        <div class="offcanvas offcanvas-start site-offcanvas" tabindex="-1" id="siteMenu" aria-labelledby="siteMenuLabel" data-bs-scroll="true">
+            <div class="offcanvas-header">
+                <button type="button" class="site-button site-close" data-bs-dismiss="offcanvas" aria-label="Schließen">
+                    <i class="bi bi-x" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="offcanvas-body">
+                <nav class="site-menu" aria-label="Hauptmenü">
+                    <div class="site-menu-section">Das Projekt</div>
+                    <a class="site-menu-link site-menu-link--leaf" href="about.html">
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
+                        <span class="site-menu-text">Über das Projekt</span>
+                    </a>
+                    <a class="site-menu-link site-menu-link--leaf" href="data.html">
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
+                        <span class="site-menu-text">Daten &amp; Methodik</span>
+                    </a>
+                    <a class="site-menu-link site-menu-link--leaf" href="books.html">
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
+                        <span class="site-menu-text">Rechnungsbücher</span>
+                    </a>
+
+                    <div class="site-menu-section">Suche</div>
+                    <a class="site-menu-link site-menu-link--leaf" href="toc.html">
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
+                        <span class="site-menu-text">Editionseinheiten</span>
+                    </a>
+                    <!-- <a class="site-menu-link site-menu-link-
+                    -leaf" href="search.html">
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
+                        <span class="site-menu-text">Volltextsuche</span>
+                    </a> -->
+                    <!--  
+                    <div class="site-menu-section">Info</div> 
+                    <a class="site-menu-link site-menu-link-
+                    -leaf" href="imprint.html"> 
+                        <span class="site-menu-bullet" aria-hidden="true">▶︎</span>
+                        <span class="site-menu-text">Impressum</span>
+                    </a> --> 
+                </nav>
+            </div>
+        </div>
+
+        <xsl:if test="$show_site_top">
+            <section class="site-top" aria-label="Start">
+                <div class="container site-top-inner">
+                    <div class="site-top-grid">
+                        <div class="site-top-left">
+                            <a class="site-top-title-link" href="index.html" aria-label="Zur Startseite">
+                                <div class="site-top-title">
+                                    <span>OBERKAMMER</span>
+                                    <span>AMTSRECHNUNGS</span>
+                                    <span>BÜCHER</span>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="site-top-right">
+                            <!-- <xsl:choose>
+                                <xsl:when test="$site_top_variant = 'image'">
+                                    <img class="site-top-image" src="images/banner_hero.png" alt="Titelbild"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <a class="section-button bgc site-top-project-button" href="about.html">Mehr über das Projekt</a>
+                                </xsl:otherwise>
+                            </xsl:choose> -->
+ <form class="navbar-search-form" action="search.html" method="get">
+                        <div class="navbar-search-item" style="flex:1">
+                            <input id="navbar-search" class="form-control form-control-sm navbar-search" type="search" name="q" placeholder="Suche…" autocomplete="off"/>
+                        </div>
+                        <div class="navbar-search-item navbar-band-scope">
+                            <input id="band-search-scope" type="checkbox" checked="checked" class="form-check-input me-1"/>
+                            <label for="band-search-scope" class="form-check-label small">In diesem Band</label>
+                        </div>
+                        <div id="band-search-nav-controls" class="navbar-search-item navbar-band-scope" style="gap:.25rem">
+                            <span id="band-search-status" class="navbar-search-status small"></span>
+                            <div class="navbar-band-nav">
+                                <button id="band-search-prev" type="button" class="navbar-band-nav-btn" aria-label="Vorheriges Ergebnis" disabled="disabled">&#x25B2;</button>
+                                <button id="band-search-next" type="button" class="navbar-band-nav-btn" aria-label="Nächstes Ergebnis" disabled="disabled">&#x25BC;</button>
+                            </div>
+                        </div>
+                    </form>
+                        </div>
+                    </div>
+                    <xsl:choose>
+                        <xsl:when test="$site_top_variant = 'image'">
+                            <div class="site-top-strip bild" aria-hidden="true">
+                                <a class="site-button site-bottom-button semitrans" href="toc.html" role="button" aria-label="Schnellvorlauf">▶︎</a>
+                            </div>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <div class="site-top-strip" aria-hidden="true"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </div>
+            </section>
+        </xsl:if>
     </xsl:template>
 </xsl:stylesheet>

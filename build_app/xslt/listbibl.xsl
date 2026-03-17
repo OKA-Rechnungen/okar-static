@@ -16,7 +16,7 @@
         <xsl:variable name="doc_title">
             <xsl:value-of select=".//tei:titleStmt/tei:title[1]/text()"/>
         </xsl:variable>
-        <html class="h-100">
+        <html class="h-100" lang="de">
 
             <head >
                 <xsl:call-template name="html_head">
@@ -24,11 +24,11 @@
                 </xsl:call-template>
             </head>
             
-            <body class="d-flex flex-column h-100">
+            <body class="d-flex flex-column h-100 has-site-top">
                 <xsl:call-template name="nav_bar"/>
 
                 <main class="flex-shrink-0 flex-grow-1">                    
-                    <div class="container">                        
+                    <div class="container py-4">                        
                         <h1>
                             <xsl:value-of select="$doc_title"/>
                         </h1>

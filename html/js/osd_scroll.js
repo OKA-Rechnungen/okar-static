@@ -4,6 +4,7 @@ Single page transcript navigation with OpenSeadragon image sync.
 ##################################################################
 */
 (function() {
+    console.log('[osd_scroll] Script started');
     var screenHeight = window.innerHeight || screen.height || 800;
     var osdContainer = document.getElementById('container_facs_1');
     var facsimileWrapper = document.getElementsByClassName('facsimiles')[0];
@@ -1080,11 +1081,15 @@ Single page transcript navigation with OpenSeadragon image sync.
 
     contentRoot.innerHTML = '';
 
+    console.log('[osd_scroll] Building pages from', pbElements.length, 'pb elements');
+
     pages.forEach(function(page) {
         page.wrapper.style.display = 'none';
         page.wrapper.setAttribute('aria-hidden', 'true');
         contentRoot.appendChild(page.wrapper);
     });
+
+    console.log('[osd_scroll] Pages array has', pages.length, 'pages');
 
     setupFacsimileTargets();
 
@@ -1126,8 +1131,13 @@ Single page transcript navigation with OpenSeadragon image sync.
     var navInsertTarget = null;
     var navInsertBefore = null;
 
-    if (textContainer && textContainer.contains(transcript)) {
-        // Place navigation above the entire transcript/facsimile row.
+    // Try to insert navigation into the left column (edition metadata sidebar)
+    var editionMetadata = document.getElementById('edition_metadata');
+    if (editionMetadata) {
+        navInsertTarget = editionMetadata;
+        navInsertBefore = null; // append at end
+    } else if (textContainer && textContainer.contains(transcript)) {
+        // Fallback: Place navigation above the entire transcript/facsimile row.
         var transcriptColumn = textContainer; // col-6 that holds transcript
         var transcriptRow = transcriptColumn ? transcriptColumn.parentNode : null; // row transcript active
         var transcriptRowContainer = transcriptRow ? transcriptRow.parentNode : null; // wp-transcript
@@ -1149,8 +1159,8 @@ Single page transcript navigation with OpenSeadragon image sync.
 
     if (navInsertTarget) {
         navContainer = document.createElement('nav');
-        // Center across the full transcript width, even when two columns are shown.
-        navContainer.className = 'page-navigation d-flex flex-wrap align-items-center justify-content-center gap-2 mb-3 w-100 text-center';
+        // Style for left sidebar placement
+        navContainer.className = 'page-navigation d-flex flex-wrap align-items-center justify-content-center gap-2 mt-4 w-100';
         navContainer.setAttribute('aria-label', 'Seiten-Navigation');
 
         navWrapper = document.createElement('div');
@@ -1160,7 +1170,7 @@ Single page transcript navigation with OpenSeadragon image sync.
         if (navInsertBefore) {
             navInsertTarget.insertBefore(navContainer, navInsertBefore);
         } else {
-            navInsertTarget.insertBefore(navContainer, transcript);
+            navInsertTarget.appendChild(navContainer);
         }
 
         navControls.start = createNavButton('⏮︎', function() {
@@ -1237,7 +1247,8 @@ Single page transcript navigation with OpenSeadragon image sync.
 
         navControls.pageInputWrapper = pageInputWrapper;
 
-        navControls.numberContainer.appendChild(navControls.pageInputWrapper);
+        // Add the page input wrapper directly to the number container
+        navControls.numberContainer.appendChild(pageInputWrapper);
 
         navControls.next = createNavButton('▶︎', function() {
             showPageByIndex(currentPageIndex + 1);
@@ -1486,43 +1497,50 @@ Single page transcript navigation with OpenSeadragon image sync.
 
     var currentPageIndex = -1;
 
-
+    function renderNumberButtons() {
+        // Page input is already added to numberContainer during init
+        // This function now just ensures the page input values are updated
+    }
 
     function updateNavState() {
         if (!navContainer) {
             return;
         }
 
+        renderNumberButtons();
+
         var atStart = currentPageIndex === 0;
         var atEnd = currentPageIndex === pages.length - 1;
 
+        // |< (first page) - always show, disable when at start
         if (navControls.start) {
             navControls.start.disabled = atStart;
         }
 
+        // << (back 10 pages)
         if (navControls.first) {
-            navControls.first.disabled = atStart;
+            var hasTenBack = currentPageIndex >= 10;
+            navControls.first.disabled = !hasTenBack;
         }
 
+        // < (previous page)
         if (navControls.prev) {
             navControls.prev.disabled = atStart;
         }
 
+        // > (next page)
         if (navControls.next) {
             navControls.next.disabled = atEnd;
         }
 
-        if (navControls.osdPrev) {
-            navControls.osdPrev.style.display = atStart ? 'none' : '';
-        }
-        if (navControls.osdNext) {
-            navControls.osdNext.style.display = atEnd ? 'none' : '';
-        }
-
+        // >> (forward 10 pages)
         if (navControls.last) {
-            navControls.last.disabled = atEnd;
+            var remainingAhead = pages.length - currentPageIndex - 1;
+            var hasTenAhead = remainingAhead >= 10;
+            navControls.last.disabled = !hasTenAhead;
         }
 
+        // >| (last page) - always show, disable when at end
         if (navControls.end) {
             navControls.end.disabled = atEnd;
         }
@@ -1535,11 +1553,10 @@ Single page transcript navigation with OpenSeadragon image sync.
         if (navControls.pageTotalLabel) {
             navControls.pageTotalLabel.textContent = '/ ' + pages.length;
         }
-
-
     }
 
     function showPageByIndex(index, options) {
+        console.log('[osd_scroll] showPageByIndex called with', index, 'pages.length:', pages.length);
         if (typeof index !== 'number') {
             index = parseInt(index, 10);
         }
@@ -1551,6 +1568,7 @@ Single page transcript navigation with OpenSeadragon image sync.
         index = Math.min(Math.max(index, 0), pages.length - 1);
 
         if (currentPageIndex === index && (!options || options.force !== true)) {
+            console.log('[osd_scroll] Same page, skipping');
             return;
         }
 
@@ -1564,6 +1582,7 @@ Single page transcript navigation with OpenSeadragon image sync.
 
         clearHighlight();
 
+        console.log('[osd_scroll] Setting page', index, 'to display:block');
         pages[index].wrapper.style.display = 'block';
         pages[index].wrapper.setAttribute('aria-hidden', 'false');
         if (pages[index].row) {
@@ -1574,6 +1593,7 @@ Single page transcript navigation with OpenSeadragon image sync.
         currentSurfaceId = pages[index].surfaceId || null;
 
         logDebug('showPageByIndex', { index: index, surfaceId: currentSurfaceId, imageSource: pages[index].imageSource });
+        console.log('[osd_scroll] Page displayed, currentPageIndex now:', currentPageIndex);
 
         loadOsdImage(pages[index].imageSource);
         ensureFacsimileData().then(function() {
@@ -1616,7 +1636,9 @@ Single page transcript navigation with OpenSeadragon image sync.
 
     initialIndex = Math.min(Math.max(initialIndex, 0), pages.length - 1);
 
+    console.log('[osd_scroll] Showing initial page index:', initialIndex);
     showPageByIndex(initialIndex, { updateHistory: false, force: true });
+    console.log('[osd_scroll] Init complete, currentPageIndex:', currentPageIndex);
 
     window.addEventListener('popstate', function() {
         var popParams = new URLSearchParams(window.location.search);
