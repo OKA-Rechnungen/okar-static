@@ -47,7 +47,9 @@
                             <div class="person-left-tailpiece" aria-hidden="true"></div>
                         </div>
                         <div class="search-col-right">
-                            <xsl:call-template name="nav_bar"/>
+                            <xsl:call-template name="nav_bar">
+                                <xsl:with-param name="show_bottom_button" select="false()"/>
+                            </xsl:call-template>
                             <div class="container py-4">
                                 <h1>Inhaltsverzeichnis</h1>
                                 <table id="myTable">
@@ -72,7 +74,7 @@
                                                                 select="replace(tokenize($full_path, '/')[last()], '.xml', '.html')"
                                                             />
                                                         </xsl:attribute>
-                                                        <i class="bi bi-link-45deg"/>
+                                                        🔗\FE0E
                                                     </a>
                                                 </td>
                                                 <td>

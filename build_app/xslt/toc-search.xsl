@@ -52,16 +52,16 @@
                             <div class="toc-left-tailpiece" aria-hidden="true"></div>
                         </div>
                         <div class="search-col-right">
-                            <xsl:call-template name="nav_bar"/>
+                            <xsl:call-template name="nav_bar">
+                                <xsl:with-param name="show_bottom_button" select="false()"/>
+                            </xsl:call-template>
                             <div>
                                 <div class="d-flex flex-column align-items-center" id="current-refinements"></div>
                             </div>
                             <div id="hits"/>
                             <div id="pagination"/>
                             <div class="search-col-right-strip"/>
-                            <button type="button" class="site-button scroll-to-top" id="scrollToTopBtn" aria-label="Nach oben scrollen">
-                                <i class="bi bi-chevron-double-up" aria-hidden="true"></i>
-                            </button>
+                            <button type="button" class="site-button scroll-to-top" id="scrollToTopBtn" aria-label="Nach oben scrollen" />
                         </div>
                     </div>
                 </main>

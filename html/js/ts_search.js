@@ -401,7 +401,7 @@ search.addWidgets([
 
   instantsearch.widgets.searchBox({
     container: '#searchbox',
-    placeholder: 'Suche im Volltext',
+    placeholder: 'Textsuche',
     autofocus: false,
     showReset: true,
     showSubmit: true,

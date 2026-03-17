@@ -69,11 +69,6 @@
                     <xsl:for-each select="$landing_divs">
                         <section class="landing-section landing-section--light">
                             <div class="container landing-section-inner">
-                                <xsl:if test="position() = 1">
-                                    <a class="sitebutton site-button-bis" href="toc.html" role="button" aria-label="Zum Inhaltsverzeichnis">
-                                        ZUR EDITION
-                                    </a>
-                                </xsl:if>
                                 <div class="landing-section-text">
                                     <xsl:apply-templates select="." mode="landing"/>
                                 </div>
@@ -86,7 +81,9 @@
                     </xsl:for-each>
                 </main>
 
-                <xsl:call-template name="html_footer"/>
+                <xsl:call-template name="html_footer">
+                    <xsl:with-param name="show_full_footer" select="true()"/>
+                </xsl:call-template>
             </body>
         </html>
     </xsl:template>
