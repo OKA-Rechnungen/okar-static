@@ -17,7 +17,7 @@
 
     --okar-button-bg: var(--bs-primary, #0d6efd);
     --okar-button-bg-hover: #0b5ed7;
-    --okar-bg-dark:  #00234c;
+    --okar-bg-dark:  #0047c0;
     --okar-link-colour: #0d6efd;
     --okar-link-visited-colour: #6c757d;
     --okar-border-color: #6c757d;
@@ -168,6 +168,33 @@ body.page-search .site-header,
 
 .site-bottom-button::before{
 content: "⏵" ;
+}
+
+.site-play-button::before{
+content: "▸" ;
+font-size: .75em;
+line-height: 1;
+vertical-align: middle;
+transform: translateY(-0.15em);
+display: inline-block;
+}
+
+.site-ff-button::before{
+content: "⏩\FE0E" ;
+}
+
+.site-frew-button::before{
+content: "⏪\FE0E" ;
+}
+
+
+.site-rew-button::before{
+content: "◂" ;
+font-size: .75em;
+line-height: 1;
+vertical-align: middle;
+transform: translateY(-0.15em);
+display: inline-block;
 }
 
 /* Semitrans utility */
@@ -650,9 +677,7 @@ body.landing .landing-thumb img {
 }
 
 
-.search-panel__hint, #fuzzy-toggle * {
-color: white;
-}
+
 .search-col-right-strip {
     height: 2rem;
     background-color: var(--okar-background-colour-0);
