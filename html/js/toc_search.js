@@ -210,24 +210,6 @@ search.addWidgets([
     },
   }),
 
-  instantsearch.widgets.currentRefinements({
-    container: '#current-refinements',
-    transformItems: function(items) {
-      return items.map(function(item) {
-        var refinements = (item.refinements || []).map(function(ref) {
-          if (item.attribute === 'beilage_present') {
-            return Object.assign({}, ref, { label: formatBeilageValue(ref.value) });
-          }
-          return ref;
-        });
-        return Object.assign({}, item, {
-          label: renameLabel(item.label),
-          refinements: refinements,
-        });
-      });
-    },
-  }),
-
   instantsearch.widgets.refinementList({
     container: '#refinement-list-kaemmerer',
     attribute: 'kaemmerer',

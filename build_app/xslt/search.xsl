@@ -34,7 +34,6 @@
                                 <div id="stats-container"/>
                             </div>
                             <div class="toc-left-section">
-                                <div id="clear-refinements"/>
                                 <p class="search-panel__hint">Verwenden Sie die Filter, um die Ergebnisliste weiter einzugrenzen. Die unscharfe Suche toleriert Tippfehler und ähnliche Schreibweisen.</p>
                                 <p class="text-center search-panel__hint">
                                     <a href="search-help.html">
@@ -48,6 +47,7 @@
                                 <div id="refinement-list-kaemmerer" />
                                 <div id="refinement-list-beilage" />
                             </div>
+                            <div id="clear-refinements" />
                         </div>
                         <div class="search-col-right">
                             <xsl:call-template name="nav_bar"/>

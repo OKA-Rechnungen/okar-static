@@ -16,6 +16,8 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
     query_by: 'full_text,title,rec_id',
     highlight_full_fields: 'full_text,title',
     sort_by: 'title:asc,rec_id:asc',
+    group_by: 'rec_id',
+    group_limit: 1,
   },
 });
 
@@ -277,24 +279,8 @@ function transformSearchHits(items) {
     return Object.assign({}, item, { link: link });
   });
 
-  // Volltextsuche: avoid multiple rows per document by default.
-  // Keep the first (best-ranked) hit per rec_id.
-  var seenRecIds = Object.create(null);
-  var dedupedByDocument = [];
-  withLinks.forEach(function (item) {
-    var recId = item.rec_id || '';
-    if (!recId) {
-      dedupedByDocument.push(item);
-      return;
-    }
-    if (seenRecIds[recId]) {
-      return;
-    }
-    seenRecIds[recId] = true;
-    dedupedByDocument.push(item);
-  });
-
-  return dedupedByDocument;
+  // Volltextsuche: deduplication now handled server-side via group_by.
+  return withLinks;
 }
 
 var connectHits = instantsearch.connectors.connectHits;
@@ -436,29 +422,6 @@ search.addWidgets([
     },
   }),
 
-  instantsearch.widgets.currentRefinements({
-    container: '#current-refinements',
-    cssClasses: {
-      delete: 'btn-close',
-    },
-    transformItems: function (items) {
-      return items.map(function (item) {
-        var refinements = (item.refinements || []).map(function (ref) {
-          if (item.attribute === 'beilage_present') {
-            return Object.assign({}, ref, {
-              label: formatBeilageValue(ref.value),
-            });
-          }
-          return ref;
-        });
-        return Object.assign({}, item, {
-          label: renameLabel(item.label),
-          refinements: refinements,
-        });
-      });
-    },
-  }),
-
   customHitsTable({
     container: '#hits',
   }),
@@ -466,6 +429,12 @@ search.addWidgets([
   instantsearch.widgets.pagination({
     container: '#pagination',
     padding: 2,
+    templates: {
+      first: '<span class="site-frew-button"></span>',
+      previous: '<span class="site-rew-button"></span>',
+      next: '<span class="site-play-button"></span>',
+      last: '<span class="site-ff-button"></span>',
+    },
     cssClasses: {
       list: 'pagination mb-0',
       item: 'page-item',
@@ -473,20 +442,11 @@ search.addWidgets([
     },
   }),
 
-  instantsearch.widgets.panel({
-    templates: { header: 'Jahr' },
-  })(instantsearch.widgets.rangeInput)({
+  instantsearch.widgets.rangeSlider({
     container: '#refinement-range-year',
     attribute: 'year',
-    templates: {
-      separatorText: 'bis',
-      submitText: 'Anwenden',
-    },
-    cssClasses: {
-      form: 'd-flex align-items-center gap-2',
-      input: 'form-control',
-      separator: 'text-muted small',
-      submit: 'btn btn-outline-secondary btn-sm',
+    tooltips: {
+      format: function(rawValue) { return getYear(rawValue); },
     },
   }),
 
@@ -525,7 +485,7 @@ search.addWidgets([
   }),
 
   instantsearch.widgets.configure({
-    hitsPerPage: 12,
+    hitsPerPage: 20,
     attributesToSnippet: ['full_text:50'],
     snippetEllipsisText: '...',
     typoTolerance: 'false',
