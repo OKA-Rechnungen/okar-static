@@ -61,23 +61,6 @@
                 <div class="container site-top-inner">
                     <div class="site-top-grid">
                         <div class="site-top-left">
-                            <a class="site-top-title-link" href="index.html" aria-label="Zur Startseite">
-                                <div class="site-top-title">
-                                    <span>OBERKAMMER</span>
-                                    <span>AMTSRECHNUNGS</span>
-                                    <span>BÜCHER</span>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="site-top-right">
-                            <!-- <xsl:choose>
-                                <xsl:when test="$site_top_variant = 'image'">
-                                    <img class="site-top-image" src="images/banner_hero.png" alt="Titelbild"/>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <a class="section-button bgc site-top-project-button" href="about.html">Mehr über das Projekt</a>
-                                </xsl:otherwise>
-                            </xsl:choose> -->
                             <form class="navbar-search-form" action="search.html" method="get">
                                 <div class="navbar-search-item" style="flex:1">
                                     <input id="navbar-search" class="form-control form-control-sm navbar-search" type="search" name="q" placeholder="Suche…" autocomplete="off"/>
@@ -95,16 +78,25 @@
                                 </div>
                             </form>
                         </div>
+                        <div class="site-top-right">
+                         <a class="site-top-title-link" href="index.html" aria-label="Zur Startseite">
+                                <div class="site-top-title">
+                                    <span>OBERKAMMER</span>
+                                    <span>AMTSRECHNUNGS</span>
+                                    <span>BÜCHER</span>
+                                </div>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <xsl:choose>
-                        <xsl:when test="$site_top_variant = 'image'">
-                            <div class="site-top-strip bild" aria-hidden="true"/>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <div class="site-top-strip" aria-hidden="true"/>
-                        </xsl:otherwise>
-                    </xsl:choose>
+                    <xsl:when test="$site_top_variant = 'image'">
+                        <div class="site-top-strip bild" aria-hidden="true"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <div class="site-top-strip" aria-hidden="true"/>
+                    </xsl:otherwise>
+                </xsl:choose>
                 <xsl:if test="$show_bottom_button">
                     <a href="toc.html">
                         <button type="button" class="site-button  site-bottom-button semitrans" aria-label="Editionseinheiten"/>

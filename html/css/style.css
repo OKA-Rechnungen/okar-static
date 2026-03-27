@@ -48,10 +48,6 @@ body {
     margin: 0;
 }
 
-.site-top-inner, .container {
-    margin: 0 calc(var(--site-offcanvas-width) + var(--okar-square-btn-size) + 1rem) 0 calc(var(--site-offcanvas-width) + var(--okar-square-btn-size) + 1rem);
-    max-width: calc(100vw - 2 * (var(--site-offcanvas-width) + 1rem));
-}
 
 .page-search .site-top-inner,
 .page-search .container {
@@ -396,6 +392,7 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
     text-transform: uppercase;
     line-height: 1.2;
     font-size: clamp(2.6rem, 5vw, 4rem);
+    text-align: center;
 }
 
 .site-top-title > span {
@@ -404,10 +401,19 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
 
 .site-top-right {
     display: flex;
-    justify-content: left;
+    justify-content: right;
+    align-items: right;
+    position: relative;
+}
+
+
+.site-top-left {
+    display: flex;
+    justify-content: center;
     align-items: center;
     position: relative;
 }
+
 
 .section-button,
 .section-button:visited {
@@ -492,12 +498,11 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
    Landing page sections
    ========================================================== */
 .landing-section {
-    padding: 2.25rem 0;
+    max-width: 1320px;
+   margin-left: auto;
+   margin-right: auto ;
 }
 
-.landing-section--light {
-    background-color: var(--okar-background-colour-0);
-}
 
 .landing-section--banner {
     background-color: var(--okar-button-bg);
@@ -510,8 +515,7 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
     justify-content: space-between;
     align-items: flex-start;
     gap: 1rem;
-    max-width: 1320px;
-    padding: 0 1rem;
+        padding: 0 1rem;
 }
 
 .landing-section-title {
@@ -523,6 +527,14 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
 
 .landing-section-text {
     max-width: 80ch;
+    padding-top: 10%;
+}
+
+.landing-section-pic-wrapper {
+padding-top: 10%
+}
+.landing-section-pic {
+        max-height: 24em;
 }
 
 .landing-cta {
@@ -868,6 +880,10 @@ div#map {
 .navbar-band-nav-btn:disabled {
     cursor: default;
     opacity: .5;
+}
+
+.navbar-search-item {
+    max-width: 30ch;
 }
 
 @media (max-width: 992px) {

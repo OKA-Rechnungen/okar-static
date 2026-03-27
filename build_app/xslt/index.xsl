@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet 
-    xmlns="http://www.w3.org/1999/xhtml"
+<xsl:stylesheet xmlns="http://www.w3.org/1999/xhtml"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:tei="http://www.tei-c.org/ns/1.0"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    xmlns:local="http://dse-static.foo.bar"
-    version="2.0" exclude-result-prefixes="xsl tei xs local">
+    xmlns:local="http://dse-static.foo.bar" version="2.0" exclude-result-prefixes="xsl tei xs local">
     <xsl:output encoding="UTF-8" media-type="text/html" method="html" version="5.0" indent="yes" omit-xml-declaration="yes"/>
 
     <xsl:import href="./partials/html_head.xsl"/>
@@ -17,10 +15,14 @@
         <xsl:apply-templates/>
     </xsl:template>
     <xsl:template match="tei:div">
-        <div><xsl:apply-templates/></div>
+        <div>
+            <xsl:apply-templates/>
+        </div>
     </xsl:template>
     <xsl:template match="tei:p">
-        <p><xsl:apply-templates/></p>
+        <p>
+            <xsl:apply-templates/>
+        </p>
     </xsl:template>
     <xsl:template match="tei:head[@rend]">
         <xsl:element name="{@rend}">
@@ -28,12 +30,16 @@
         </xsl:element>
     </xsl:template>
     <xsl:template match="tei:ref[@target]">
-        <a href="{@target}"><xsl:apply-templates/></a>
+        <a href="{@target}">
+            <xsl:apply-templates/>
+        </a>
     </xsl:template>
     <xsl:template match="tei:h2">
         <h2>
             <xsl:if test="@class">
-                <xsl:attribute name="class"><xsl:value-of select="@class"/></xsl:attribute>
+                <xsl:attribute name="class">
+                    <xsl:value-of select="@class"/>
+                </xsl:attribute>
             </xsl:if>
             <xsl:apply-templates/>
         </h2>
@@ -66,19 +72,20 @@
                 </xsl:call-template>
 
                 <main class="flex-shrink-0 landing-main">
-                    <xsl:for-each select="$landing_divs">
-                        <section class="landing-section landing-section--light">
-                            <div class="container landing-section-inner">
+                    <div class="landing-section">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="landing-section-pic-wrapper">
+                                    <img class="landing-section-pic" src="images/page_03.png" alt="Bild eines Rechnungsbuchs aus dem 18. Jahrhundert"/>
+                                </div>
+                            </div>
+                            <div class="col-6">
                                 <div class="landing-section-text">
                                     <xsl:apply-templates select="." mode="landing"/>
                                 </div>
                             </div>
-                        </section>
-
-                        <xsl:if test="position() lt last()">
-                            <xsl:call-template name="landing_carousel"/>
-                        </xsl:if>
-                    </xsl:for-each>
+                        </div>
+                    </div>
                 </main>
 
                 <xsl:call-template name="html_footer">
@@ -86,29 +93,6 @@
                 </xsl:call-template>
             </body>
         </html>
-    </xsl:template>
-
-    <xsl:template name="landing_carousel">
-        <section class="landing-section landing-section--banner">
-            <div class="container landing-section-inner">
-                <div class="landing-thumbs landing-thumbs--carousel" aria-label="Rechnungsbücher Vorschau">
-                    <div class="landing-thumbs-viewport">
-                        <div class="landing-thumbs-strip">
-                            <!-- Add thumbnails for representative pages from the OKAR collection -->
-                            <!-- These can be updated later to point to actual IIIF images -->
-                            <a class="landing-thumb landing-thumb--cta" href="toc.html" aria-label="Rechnungsbücher ansehen">
-                                <div class="landing-thumbs-cta-title">
-                                    <span>OBERKAMMER</span>
-                                    <span>AMTSRECHNUNGS</span>
-                                    <span>BÜCHER</span>
-                                </div>
-                                <span class="landing-thumbs-cta-button">Ansehen</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
     </xsl:template>
 
     <xsl:template match="tei:div" mode="landing">
