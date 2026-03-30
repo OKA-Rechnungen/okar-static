@@ -74,14 +74,14 @@
 }
 
 .search-col-left .ais-RangeSlider .rheostat-progress {
-  background: var(--okar-button-bg, #0d6efd);
+  background: var(--okar-bg-colour));
   height: 6px;
   top: 0;
   border-radius: 3px;
 }
 
 .search-col-left .ais-RangeSlider .rheostat-handle {
-  background: var(--okar-button-bg, #0d6efd);
+  background: var(--okar-bg-colour));
   border: none;
   border-radius: 50%;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
@@ -98,7 +98,7 @@
 }
 
 .search-col-left .ais-RangeSlider .rheostat-tooltip {
-  background: var(--okar-button-bg, #0d6efd);
+  background: var(--okar-bg-colour);
   border: none;
   border-radius: 4px;
   color: #fff;
@@ -140,11 +140,11 @@
 }
 
 .noUi-connect {
-  background: var(--okar-button-bg, #0d6efd);
+  background: var(--okar-bg-colour));
 }
 
 .noUi-handle {
-  background: var(--okar-button-bg, #0d6efd);
+  background: var(--okar-bg-colour));
   border: none;
   border-radius: 50%;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
@@ -161,7 +161,7 @@
 }
 
 .noUi-tooltip {
-  background: var(--okar-button-bg, #0d6efd);
+  background: var(--okar-bg-colour));
   border: none;
   border-radius: 4px;
   color: #fff;
@@ -184,7 +184,7 @@
 
 .toc-year-pill-count {
   font-weight: 700;
-  color: var(--okar-button-bg, #0d6efd);
+  color: var(--okar-bg-colour));
 }
 
 /* Refinement lists in left column */
@@ -218,7 +218,7 @@
 .search-col-left .ais-RefinementList-checkbox {
   width: 1rem;
   height: 1rem;
-  accent-color: var(--okar-button-bg, #0d6efd);
+  accent-color: var(--okar-bg-colour));
 }
 
 .search-col-left .ais-RefinementList-labelText {
@@ -246,7 +246,7 @@
 .search-col-left .ais-ToggleRefinement-checkbox {
   width: 1rem;
   height: 1rem;
-  accent-color: var(--okar-button-bg, #0d6efd);
+  accent-color: var(--okar-bg-colour));
 }
 
 /* Clear refinements */
@@ -267,7 +267,7 @@
 }
 
 .search-col-left .ais-ClearRefinements-button:hover:not(:disabled) {
-  background: var(--okar-button-bg, #0d6efd);
+  background: var(--okar-bg-colour));
   color: #fff;
 }
 
@@ -315,7 +315,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  background: var(--okar-button-bg, #0d6efd);
+  background: var(--okar-bg-colour));
   color: #fff;
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
@@ -357,7 +357,7 @@
 .ais-SearchBox-input {
   flex: 1;
   padding: 0.75rem 2rem 0.75rem 2rem;
-  border: 2px solid var(--okar-button-bg, #0d6efd);
+  border: 2px solid var(--okar-bg-colour));
   border-radius: 0.5rem;
   font-size: 1rem;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -365,7 +365,7 @@
 
 .ais-SearchBox-input:focus {
   outline: none;
-  border-color: var(--okar-button-bg-hover, #0b5ed7);
+  border-color: var(--okar-button-bg-hover);
   box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
 }
 
@@ -382,7 +382,7 @@
 
 .ais-SearchBox-submit {
   right: 2.5rem;
-  color: var(--okar-button-bg, #0d6efd);
+  color: var(--okar-bg-colour));
 }
 
 .ais-SearchBox-reset {
@@ -501,7 +501,7 @@
 }
 
 .card-view-toggle input[type="checkbox"] {
-  accent-color: var(--okar-button-bg);
+  accent-color: var(--okar-bg-colour));
 }
 
 .toc-hit-title {
@@ -589,7 +589,7 @@
   box-shadow: none;
   background-image: none !important;
   color: var(--bs-white) !important;
-  background-color: var(--okar-button-bg) !important;
+  background-color: var(--okar-bg-colour)) !important;
   font-size: calc(var(--okar-square-btn-icon-size) / 2);
   line-height: 1;
   text-decoration: none;
@@ -654,7 +654,7 @@
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
-  background: var(--okar-button-bg, #0d6efd);
+  background: var(--okar-bg-colour));
   color: #fff;
   border: none;
   cursor: pointer;
@@ -675,7 +675,7 @@
 }
 
 #scrollToTopBtn:hover {
-  background: var(--okar-button-bg-hover, #0b5ed7);
+  background: var(--okar-button-bg-hover);
 }
 
 /* -----------------------------------------------------------------
