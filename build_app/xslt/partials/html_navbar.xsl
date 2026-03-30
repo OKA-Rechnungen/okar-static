@@ -81,9 +81,8 @@
                         <div class="site-top-right">
                          <a class="site-top-title-link" href="index.html" aria-label="Zur Startseite">
                                 <div class="site-top-title">
-                                    <span>OBERKAMMER</span>
-                                    <span>AMTSRECHNUNGS</span>
-                                    <span>BÜCHER</span>
+                                    <span>Oberkammeramts⸗</span>
+                                    <span>rechnungsbücher</span>
                                 </div>
                             </a>
                         </div>

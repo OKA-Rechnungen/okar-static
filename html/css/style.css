@@ -15,8 +15,11 @@
     --okar-background-colour-3: #495057;
     --okar-background-colour-4: #343a40;
 
-    --okar-button-bg: var(--bs-primary, #0d6efd);
-    --okar-button-bg-hover: #0b5ed7;
+
+    --okar-bg-colour: #2f5a95 ;
+
+    --okar-button-bg: var(--bs-primary,#2f5a95 );
+    --okar-button-bg-hover: #3f6aA5;
     --okar-bg-dark:  #0047c0;
     --okar-link-colour: #0d6efd;
     --okar-link-visited-colour: #6c757d;
@@ -70,17 +73,17 @@ body.page-search .site-header,
    Button variants (bga, bgb, bgc)
    ========================================================== */
 .bga {
-    --button-bg: var(--okar-button-bg);
+    --button-bg: var(--okar-bg-colour);
     --button-bg-hover: var(--okar-button-bg-hover);
 }
 
 .bgb {
-    --button-bg: var(--okar-button-bg);
+    --button-bg: var(--okar-bg-colour);
     --button-bg-hover: var(--okar-button-bg-hover);
 }
 
 .bgc {
-    --button-bg: var(--okar-button-bg);
+    --button-bg: var(--okar-bg-colour);
     --button-bg-hover: var(--okar-button-bg-hover);
 }
 
@@ -100,7 +103,7 @@ body.page-search .site-header,
     box-shadow: none;
     background-image: none !important;
     color: var(--bs-white) !important;
-    background-color: var(--okar-button-bg) !important;
+    background-color: var(--okar-bg-colour) !important;
     font-size: var(--okar-square-btn-icon-size);
     line-height: 1;
 }
@@ -196,7 +199,7 @@ display: inline-block;
 /* Semitrans utility */
 .semitrans {
     color: var(--bs-white) !important;
-    background-color: rgba(13, 110, 253, 0.8) !important;
+    background-color: var(--okar-button-bg-hover: #3f6aA5) !important;
 }
 
 .semitrans .bi {
@@ -347,7 +350,7 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
    Site Top (banner area)
    ========================================================== */
 .site-top {
-    background-color: var(--okar-button-bg);
+    background-color: var( --okar-bg-colour);
     padding: 5rem 0 0;
     position: relative;
 }
@@ -391,8 +394,8 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
     letter-spacing: 0.03em;
     text-transform: uppercase;
     line-height: 1.2;
-    font-size: clamp(2.6rem, 5vw, 4rem);
-    text-align: center;
+    font-size: clamp(1.5rem, 1.5vw, 1.5rem);
+    text-align: right;
 }
 
 .site-top-title > span {
@@ -472,7 +475,7 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
 .site-top-strip {
 
     /*height: 168px;*/
-    background-color: var(--okar-button-bg);
+    background-color: var(--okar-bg-colour);
     position: relative;
      /*margin: 0 calc(var(--site-offcanvas-width) + 1rem) 0 calc(var(--site-offcanvas-width) + 1rem); */
     width: 100vw ; /* calc(100vw - 2 * (var(--site-offcanvas-width) + 1rem)); */
@@ -505,7 +508,7 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
 
 
 .landing-section--banner {
-    background-color: var(--okar-button-bg);
+    background-color: var(--okar-bg-colour);
     padding: 0;
 }
 
@@ -581,7 +584,7 @@ body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumb--cta {
     color: var(--bs-white);
     text-decoration: none;
     font-size: clamp(1.5rem, 3vw, 2rem);
-    background-color: var(--okar-button-bg);
+    background-color: var(--okar-bg-colour);
 }
 
 body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-title {
@@ -599,7 +602,7 @@ body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-button
     display: inline-block;
     padding: 0.65em 1.1em;
     border: 2px solid var(--bs-white);
-    background-color: var(--okar-button-bg);
+    background-color: var(--okar-bg-colour);
     color: var(--bs-white) !important;
     text-decoration: none;
     border-radius: 9999px;
@@ -616,7 +619,7 @@ body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-button
     display: inline-block;
     padding: 0.65em 1.1em;
     border: 2px solid var(--bs-white);
-    background-color: var(--okar-button-bg);
+    background-color: var(--okar-bg-colour);
     color: var(--bs-white) !important;
     text-decoration: none;
     border-radius: 9999px;
@@ -638,7 +641,7 @@ body.landing .landing-thumb {
     flex: 0 0 auto;
     display: block;
     border: 0;
-    background-color: var(--okar-button-bg);
+    background-color: var(--okar-bg-colour);
 }
 
 body.landing .landing-thumb img {
@@ -1043,7 +1046,7 @@ body.page-edition .edition_container {
 }
 
 .edition-nav-links a {
-    color: var(--okar-button-bg, #0d6efd);
+    color: var(--okar-bg-colour);
     text-decoration: none;
     font-size: 0.875rem;
     display: inline-flex;
@@ -1128,8 +1131,8 @@ body.page-edition #viewer {
 }
 
 .edition-col-left .page-navigation .btn:hover:not(:disabled) {
-    background: var(--okar-button-bg, #0d6efd);
-    border-color: var(--okar-button-bg, #0d6efd);
+    background: var(--okar-bg-colour);
+    border-color: var(--okar-bg-colour);
     color: #fff;
 }
 
