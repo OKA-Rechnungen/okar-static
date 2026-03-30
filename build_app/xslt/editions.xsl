@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet 
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:tei="http://www.tei-c.org/ns/1.0"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    xmlns:local="http://dse-static.foo.bar"
-    version="2.0" exclude-result-prefixes="xsl tei xs local">
+    xmlns:local="http://dse-static.foo.bar" version="2.0" exclude-result-prefixes="xsl tei xs local">
     <xsl:output encoding="UTF-8" media-type="text/html" method="html" version="5.0" indent="yes" omit-xml-declaration="yes"/>
-    
+
     <xsl:import href="./partials/shared.xsl"/>
     <xsl:import href="./partials/osd-container.xsl" />
     <xsl:import href="./partials/html_navbar.xsl"/>
     <xsl:import href="./partials/html_head.xsl"/>
     <xsl:import href="./partials/html_footer.xsl"/>
-     <xsl:import href="./partials/tei-facsimile.xsl"/>
+    <xsl:import href="./partials/tei-facsimile.xsl"/>
     <xsl:import href="./partials/aot-options.xsl"/>
 
     <xsl:function name="local:compute-page-number" as="xs:integer?">
@@ -77,42 +75,22 @@
                 <xsl:call-template name="nav_bar"/>
                 <main class="hfeed site flex-grow" id="page">
                     <div class="edition_container">
-                        <div class="offcanvas offcanvas-start" tabindex="-1"
-                            id="offcanvasNavigation" aria-labelledby="offcanvasNavigationLabel"
-                            data-bs-scroll="true" data-bs-backdrop="false">
+                        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavigation" aria-labelledby="offcanvasNavigationLabel" data-bs-scroll="true" data-bs-backdrop="false">
                             <div class="offcanvas-header" />
                             <div class="offcanvas-body" />
                         </div>
-                        <div class="offcanvas offcanvas-end" tabindex="0" id="offcanvasOptions"
-                            aria-labelledby="offcanvasOptionsLabel" data-bs-scroll="true"
-                            data-bs-backdrop="false">
+                        <div class="offcanvas offcanvas-end" tabindex="0" id="offcanvasOptions" aria-labelledby="offcanvasOptionsLabel" data-bs-scroll="true" data-bs-backdrop="false">
                         </div>
-                        
+
                         <!-- Two-column layout: metadata left, content right -->
                         <div class="edition-two-columns">
                             <!-- Left column: metadata -->
                             <aside class="edition-col-left">
                                 <div id="edition_metadata">
-                                    <xsl:variable name="doc_type"
-                                        select="//tei:sourceDesc/tei:msDesc/tei:physDesc/tei:objectDesc/@form[1]"/>
+                                    <xsl:variable name="doc_type" select="//tei:sourceDesc/tei:msDesc/tei:physDesc/tei:objectDesc/@form[1]"/>
                                     <h2 class="edition-title">
                                         <xsl:value-of select="$doc_title"/>
                                     </h2>
-                                    <div class="edition-nav-links">
-                                        <xsl:if test="ends-with($prev,'.html')">
-                                            <a class="edition-nav-prev" href="{$prev}" title="zurück">
-                                                <span aria-hidden="true">&#x25C0;&#xFE0E;</span> Zurück
-                                            </a>
-                                        </xsl:if>
-                                        <a href="{$teiSource}" class="edition-tei-link" title="TEI/XML">
-                                            <i class="fa-solid fa-file-code"></i> TEI/XML
-                                        </a>
-                                        <xsl:if test="ends-with($next, '.html')">
-                                            <a class="edition-nav-next" href="{$next}" title="weiter">
-                                                Weiter <span aria-hidden="true">&#x25B6;&#xFE0E;</span>
-                                            </a>
-                                        </xsl:if>
-                                    </div>
                                     <xsl:variable name="msDesc" select="//tei:sourceDesc/tei:msDesc"/>
                                     <xsl:variable name="msId" select="$msDesc/tei:msIdentifier"/>
                                     <xsl:variable name="msContents" select="$msDesc/tei:msContents"/>
@@ -120,10 +98,7 @@
                                     <xsl:variable name="repoName" select="($msId/tei:repository/tei:orgName[@xml:lang='de'], $msId/tei:repository/tei:orgName[1], $msId/tei:institution/tei:orgName[@xml:lang='de'], $msId/tei:institution/tei:orgName[1])[1]"/>
                                     <xsl:variable name="collection" select="$msId/tei:collection[1]"/>
                                     <xsl:variable name="origDate" select="$msContents//tei:origDate[1]"/>
-                                    <xsl:variable name="beilageLabels" as="xs:string*"
-                                        select="distinct-values((
-                                            //tei:standOff//tei:spanGrp//tei:span[@type='section'][matches(@subtype, '^Beilage(\s|$)')]/@subtype,
-                                            //tei:TEI/tei:text//tei:milestone[@type='section'][matches(@subtype, '^Beilage(\s|$)')]/@subtype
+                                    <xsl:variable name="beilageLabels" as="xs:string*" select="distinct-values(( //tei:standOff//tei:spanGrp//tei:span[@type='section'][matches(@subtype, '^Beilage(\s|$)')]/@subtype, //tei:TEI/tei:text//tei:milestone[@type='section'][matches(@subtype, '^Beilage(\s|$)')]/@subtype
                                         ))"/>
                                     <xsl:variable name="origDateText">
                                         <xsl:choose>
@@ -136,7 +111,7 @@
                                                 <xsl:variable name="to" select="string($origDate/@to)"/>
                                                 <xsl:variable name="fromYear" select="if (matches($from, '^\d{4}')) then substring($from, 1, 4) else normalize-space($from)"/>
                                                 <xsl:variable name="toYear" select="if (matches($to, '^\d{4}')) then substring($to, 1, 4) else normalize-space($to)"/>
-                                                    <xsl:value-of select="concat($fromYear, '–', $toYear)"/>
+                                                <xsl:value-of select="concat($fromYear, '–', $toYear)"/>
                                             </xsl:when>
                                             <xsl:otherwise>
                                                 <xsl:value-of select="normalize-space($origDate)"/>
@@ -149,37 +124,68 @@
                                         <dl class="edition-metadata-list">
                                             <xsl:if test="$shelfmark">
                                                 <dt>Signatur</dt>
-                                                <dd><xsl:value-of select="$shelfmark"/></dd>
+                                                <dd>
+                                                    <xsl:value-of select="$shelfmark"/>
+                                                </dd>
                                             </xsl:if>
                                             <xsl:if test="string($repoName)">
                                                 <dt>Archiv</dt>
-                                                <dd><xsl:value-of select="$repoName"/></dd>
+                                                <dd>
+                                                    <xsl:value-of select="$repoName"/>
+                                                </dd>
                                             </xsl:if>
                                             <xsl:if test="string($collection)">
                                                 <dt>Sammlung</dt>
-                                                <dd><xsl:value-of select="$collection"/></dd>
+                                                <dd>
+                                                    <xsl:value-of select="$collection"/>
+                                                </dd>
                                             </xsl:if>
                                             <xsl:if test="string($origDateText)">
                                                 <dt>Datierung</dt>
-                                                <dd><xsl:value-of select="$origDateText"/></dd>
+                                                <dd>
+                                                    <xsl:value-of select="$origDateText"/>
+                                                </dd>
                                             </xsl:if>
                                             <xsl:if test="exists($beilageLabels)">
-                                                <div><span class="fw-bold">Beilage:</span> <xsl:text> </xsl:text><xsl:value-of select="string-join($beilageLabels, ', ')"/></div>
+                                                <div>
+                                                    <span class="fw-bold">Beilage:</span>
+                                                    <xsl:text></xsl:text>
+                                                    <xsl:value-of select="string-join($beilageLabels, ', ')"/>
+                                                </div>
                                             </xsl:if>
                                             <xsl:if test="string($contentNote)">
                                                 <dt>Inhalt</dt>
-                                                <dd><xsl:value-of select="$contentNote"/></dd>
+                                                <dd>
+                                                    <xsl:value-of select="$contentNote"/>
+                                                </dd>
                                             </xsl:if>
                                         </dl>
                                     </xsl:if>
-                                    <button id="milestone-nav-btn" type="button" class="btn btn-outline-primary btn-sm w-100 mt-3" data-bs-toggle="modal" data-bs-target="#milestoneModal">
+                                    <div class="left-column-section flex">
+                                        <button id="milestone-nav-btn" type="button" class="pill-btn" data-bs-toggle="modal" data-bs-target="#milestoneModal">
                                         Gliederung
-                                    </button>
+                                        </button>
+                                    </div>
                                 </div>
                             </aside>
-                            
+
                             <!-- Right column: facsimile and transcript -->
                             <div class="edition-col-right">
+                                <div class="edition-nav-links">
+                                    <xsl:if test="ends-with($prev,'.html')">
+                                        <a class="edition-nav-prev" href="{$prev}" title="zurück">
+                                            <span aria-hidden="true">&#x25C0;&#xFE0E;</span> Zurück
+                                        </a>
+                                    </xsl:if>
+                                    <a href="{$teiSource}" class="edition-tei-link" title="TEI/XML">
+                                        <i class="fa-solid fa-file-code"></i> TEI/XML
+                                    </a>
+                                    <xsl:if test="ends-with($next, '.html')">
+                                        <a class="edition-nav-next" href="{$next}" title="weiter">
+                                            Weiter <span aria-hidden="true">&#x25B6;&#xFE0E;</span>
+                                        </a>
+                                    </xsl:if>
+                                </div>
                                 <div class="wp-transcript">
                                     <div id="container-resize" class="row transcript active">
                                         <div id="img-resize" class="col-md-6 col-lg-6 col-sm-12 facsimiles">
@@ -188,6 +194,7 @@
                                             </div>
                                         </div>
                                         <div id="text-resize" lang="de" class="col-md-6 col-lg-6 col-sm-12 text yes-index">
+                                            <div class="page-nav-container"/>
                                             <div id="transcript">
                                                 <xsl:apply-templates select="tei:TEI/tei:text/tei:body/node()"/>
                                             </div>
@@ -228,8 +235,7 @@
         <xsl:variable name="facs" select="substring-after(data(@facs), '#')"/>
         <xsl:variable name="graphic_url" select="(ancestor::tei:TEI//tei:surface[@xml:id=$facs]/tei:graphic/@url)[1]"/>
 
-        <xsl:variable name="page-number" as="xs:integer"
-        select="if (@n castable as xs:integer and xs:integer(@n) &gt; 0)
+        <xsl:variable name="page-number" as="xs:integer" select="if (@n castable as xs:integer and xs:integer(@n) &gt; 0)
             then xs:integer(@n)
             else xs:integer(count(preceding::tei:pb[
             not(@n)
@@ -267,8 +273,7 @@
             <xsl:sequence select="preceding::tei:pb[1]"/>
         </xsl:variable>
         <xsl:variable name="page-number" select="local:compute-page-number($target-pb)"/>
-        <span class="milestone-anchor visually-hidden" aria-hidden="true"
-            data-unit="{$unit}" data-type="{$type}" data-subtype="{$subtype}" data-n="{$n}">
+        <span class="milestone-anchor visually-hidden" aria-hidden="true" data-unit="{$unit}" data-type="{$type}" data-subtype="{$subtype}" data-n="{$n}">
             <xsl:if test="$page-number">
                 <xsl:attribute name="data-page-number">
                     <xsl:value-of select="$page-number"/>

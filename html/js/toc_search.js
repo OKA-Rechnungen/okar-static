@@ -257,9 +257,8 @@ search.start();
 
   var loadMoreBtn = document.createElement('button');
   loadMoreBtn.type = 'button';
-  loadMoreBtn.className = 'site-button load-more-btn';
-  /* loadMoreBtn.innerHTML = '⏬' */
-	/*'<i class="bi bi-chevron-double-down" aria-hidden="true"></i>'; */
+  loadMoreBtn.className = 'square-btn load-more-btn semitrans';
+  loadMoreBtn.innerHTML = '<i class="bi bi-chevron-double-down" aria-hidden="true"></i>';
   loadMoreBtn.addEventListener('click', function() {
     if (infiniteHitsShowMore) infiniteHitsShowMore();
   });

@@ -68,7 +68,6 @@
             </head>
             <body class="d-flex flex-column h-100 landing has-site-top">
                 <xsl:call-template name="nav_bar">
-                    <xsl:with-param name="site_top_variant" select="'image'"/>
                 </xsl:call-template>
 
                 <main class="flex-shrink-0 landing-main">
@@ -101,7 +100,7 @@
             <xsl:apply-templates select="node()" mode="landing"/>
             <xsl:if test="@type = 'contents' and not(preceding-sibling::tei:div[@type = 'contents'])">
                 <div class="landing-cta">
-                    <a class="section-button bga site-top-project-button" href="about.html">Mehr über das Projekt</a>
+                    <a class="pill-btn" href="about.html">Mehr über das Projekt</a>
                 </div>
             </xsl:if>
         </div>

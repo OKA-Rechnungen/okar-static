@@ -1131,11 +1131,11 @@ Single page transcript navigation with OpenSeadragon image sync.
     var navInsertTarget = null;
     var navInsertBefore = null;
 
-    // Try to insert navigation into the left column (edition metadata sidebar)
-    var editionMetadata = document.getElementById('edition_metadata');
-    if (editionMetadata) {
-        navInsertTarget = editionMetadata;
-        navInsertBefore = null; // append at end
+    var pageNavContainer = document.querySelector('.page-nav-container');
+
+    if (pageNavContainer) {
+        navInsertTarget = pageNavContainer;
+        navInsertBefore = null;
     } else if (textContainer && textContainer.contains(transcript)) {
         // Fallback: Place navigation above the entire transcript/facsimile row.
         var transcriptColumn = textContainer; // col-6 that holds transcript
@@ -1152,6 +1152,10 @@ Single page transcript navigation with OpenSeadragon image sync.
             navInsertTarget = textContainer;
             navInsertBefore = transcript;
         }
+    } else if (document.getElementById('edition_metadata')) {
+        // Fallback: place navigation into the edition metadata sidebar when no dedicated placeholder exists.
+        navInsertTarget = document.getElementById('edition_metadata');
+        navInsertBefore = null;
     } else if (transcript.parentNode) {
         navInsertTarget = transcript.parentNode;
         navInsertBefore = transcript;

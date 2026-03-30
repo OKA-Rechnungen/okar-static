@@ -47,7 +47,9 @@
                         </div>
                         <div class="search-col-right">
                             <xsl:call-template name="nav_bar">
-                                <xsl:with-param name="show_bottom_button" select="false()"/>
+                                <xsl:with-param name="site_top_corner_href" select="'index.html'"/>
+                                <xsl:with-param name="site_top_corner_icon_class" select="'bi bi-house'"/>
+                                <xsl:with-param name="site_top_corner_aria_label" select="'Zur Startseite'"/>
                             </xsl:call-template>
                             <div>
                                 <div class="d-flex flex-column align-items-center" id="current-refinements"></div>
@@ -55,7 +57,8 @@
                             <div id="hits"/>
                             <div id="pagination"/>
                             <div class="search-col-right-strip"/>
-                            <button type="button" class="site-button scroll-to-top" id="scrollToTopBtn" aria-label="Nach oben scrollen" />
+                            <button type="button" class="square-btn scroll-to-top semitrans" id="scrollToTopBtn" aria-label="Nach oben scrollen">
+                                <i class="bi bi-chevron-up" aria-hidden="true"></i></button>
                         </div>
                     </div>
                 </main>
