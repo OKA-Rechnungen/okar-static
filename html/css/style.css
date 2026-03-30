@@ -17,6 +17,7 @@
     
 
     --okar-colour-1:  #ffffff ;
+    --okar-colour-1-solid: rgb(255, 255, 255, 1) ;
     --okar-bg-colour-1: #2f5a95 ;
     --okar-bg-1-hover: #3f6aA5;
 
@@ -105,7 +106,7 @@ body.page-search .site-header,
     padding: 0 !important;
     box-shadow: none;
     background-image: none !important;
-    color: var(--bs-white) !important;
+    color: var(--okar-colour-1-solid) !important;
     background-color: var(--okar-bg-colour-1) !important;
     font-size: var(--okar-square-btn-icon-size);
     line-height: 1;
@@ -123,7 +124,7 @@ body.page-search .site-header,
     box-shadow: none;
     font-family: var(--bs-font-sans-serif) !important;
     background-image: none !important;
-    color: var(--okar-bg-colour-1) !important;
+    color: var(--okar-colour-1-solid) !important;
     background-color: transparent !important;
     font-size: small;
     text-decoration: none !important;
@@ -133,10 +134,10 @@ body.page-search .site-header,
 
 .square-btn-bis{
     height: calc(var(--okar-square-btn-size) * 3);
-      writing-mode: vertical-rl;
+    writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-     position: absolute;
+    position: absolute;
     right: 0;
     z-index: 2000;
 }
@@ -150,26 +151,25 @@ body.page-search .site-header,
 .load-more-label:focus
 {
     background-color: transparent !important;
-    color: var(--okar-bg-colour-1) !important;
+    color: var(--okar-colour-1-solid) !important;
     box-shadow: none !important;
 }
 
 
 
 /* Semitrans utility */
-.semitrans {
-    color: var(--bs-white) !important;
-    background-color: var(--okar-bg-colour-1) ;
+.semitrans, 
+.semitrans:focus,
+.semitrans:focus-visible {
+    color: var(--okar-colour-1-solid) !important;
+    background-color: var(--okar-bg-colour-1) !important;
 }
 
 .semitrans .bi {
-    color: rgba(255, 255, 255, 1) !important;
+   color: var(--okar-colour-1-solid) !important;
 }
 
-.semitrans:hover,
-.semitrans:focus,
-.semitrans:focus-visible,
-.semitrans:active {
+.semitrans:hover {
     background-color: var(--okar-bg-1-hover) !important;
     cursor: pointer;
 }
@@ -725,8 +725,14 @@ div#map {
     padding: .5rem .5rem;
     gap: .5rem;
     flex-wrap: wrap;
+    width: 32rem;
 }
 
+
+.navbar-search-form .form-check-label,
+.navbar-search-form .navbar-search-status {
+    color: var(--okar-colour-1);
+}
 .navbar-search {
     min-width: 0;
     width: 100%;
