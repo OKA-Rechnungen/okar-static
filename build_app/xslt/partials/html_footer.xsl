@@ -4,7 +4,7 @@
    xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="#all" version="2.0">
    <xsl:template match="/" name="html_footer">
       <xsl:param name="show_full_footer" as="xs:boolean" select="false()"/>
-      <footer class="footer mt-auto py-3">
+      <footer class="footer mt-auto">
          <xsl:if test="$show_full_footer">
             <div class="container" id="footer-full-content" tabindex="-1">
                <div class="row">

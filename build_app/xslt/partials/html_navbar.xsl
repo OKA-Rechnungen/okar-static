@@ -20,7 +20,7 @@
 
         <div class="offcanvas offcanvas-start site-offcanvas" tabindex="-1" id="siteMenu" aria-labelledby="siteMenuLabel" data-bs-scroll="true">
             <div class="offcanvas-header">
-                <button type="button" class="square-btn site-close" data-bs-dismiss="offcanvas" aria-label="Schließen">
+                <button type="button" class="square-btn close-btn" data-bs-dismiss="offcanvas" aria-label="Schließen">
                     <i class="bi bi-x" aria-hidden="true"></i>
                 </button>
             </div>

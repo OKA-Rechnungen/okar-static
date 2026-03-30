@@ -9,10 +9,6 @@
     --catch-offset-right: -75%;
 
     /* OKAR retains its own colorway – these are layout-neutral defaults */
-    --okar-background-colour-0: #f8f9fa;
-    --okar-background-colour-1: #e9ecef;
-    --okar-background-colour-2: #dee2e6;
-    --okar-background-colour-4: #343a40; 
 
 
     --okar-colour:  #000000 ;
@@ -28,6 +24,7 @@
     --okar-bg-colour-2: #c2c2c2 ;
 
     --okar-colour-3: #7faae5 ;
+    --okar-bg-colour-3: #002566 ;
 
 
     --okar-colour-4: #1f4a85 ;
@@ -94,24 +91,6 @@ body.page-search .site-header,
 }
 
 /* ==========================================================
-   Button variants (bga, bgb, bgc)
-   ========================================================== */
-.bga {
-    --button-bg: var(--okar-bg-colour);
-    --button-bg-hover: var(--okar-button-bg-hover);
-}
-
-.bgb {
-    --button-bg: var(--okar-bg-colour);
-    --button-bg-hover: var(--okar-button-bg-hover);
-}
-
-.bgc {
-    --button-bg: var(--okar-bg-colour);
-    --button-bg-hover: var(--okar-button-bg-hover);
-}
-
-/* ==========================================================
    Square / icon buttons (burger, close, action)
    ========================================================== */
 .square-btn {
@@ -132,12 +111,11 @@ body.page-search .site-header,
     line-height: 1;
 }
 
-.square-btn-bis {
+.square-btn-bis, .load-more-label {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: var(--okar-square-btn-size);
-    height: calc(var(--okar-square-btn-size) * 3);
     border: 0 !important;
     border-radius: 0 !important;
     padding: 0 !important;
@@ -150,33 +128,34 @@ body.page-search .site-header,
     font-size: small;
     text-decoration: none !important;
     line-height: 1;
-    writing-mode: vertical-rl;
+    white-space: nowrap;
+}
+
+.square-btn-bis{
+    height: calc(var(--okar-square-btn-size) * 3);
+      writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-    white-space: nowrap;
-    position: absolute;
+     position: absolute;
     right: 0;
     z-index: 2000;
 }
 
-.square-btn:focus-visible {
-    outline: 2px solid var(--bs-white);
-    outline-offset: 2px;
-}
 
 .square-btn:hover,
 .square-btn:active,
-.square-btn:focus {
-    background-color: var(--okar-button-bg-hover) !important;
-    color: var(--bs-white) !important;
+.square-btn:focus
+ .load-more-label:hover,
+.load-more-label:active,
+.load-more-label:focus
+{
+    background-color: transparent !important;
+    color: var(--okar-bg-colour-1) !important;
     box-shadow: none !important;
 }
 
 
-.square-btn-bis:hover, .square-btn-bis:focus {
-    background-color: transparent !important;
-    color: var(--okar-bg-colour-1) !important;
-}
+
 /* Semitrans utility */
 .semitrans {
     color: var(--bs-white) !important;
@@ -202,19 +181,18 @@ body.page-search .site-header,
 /* ==========================================================
    Offcanvas close button positioning
    ========================================================== */
-.site-close,
-button.close-btn.site-close {
+.offcanvas-header .close-btn {
     display: none !important;
+        background-color: var(--okar-bg-colour-1) !important;
+   
 }
 
-.site-bottom-button {
-    font-size: 1.8rem;
-    line-height: 1;
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    z-index: 2000;
+.offcanvas-header .close-btn:hover {
+    display: none !important;
+     background-color: var(--okar-bg-1-hover) !important;
 }
+
+
 
 .site-offcanvas.show [data-bs-dismiss="offcanvas"],
 .offcanvas.show [data-bs-dismiss="offcanvas"] {
@@ -266,7 +244,7 @@ body:has(.offcanvas.show:not(.hiding), .offcanvas.showing) .site-header .square-
    ========================================================== */
 .site-offcanvas {
     width: var(--site-offcanvas-width);
-    background-color: var(--okar-background-colour-4) !important;
+    background-color: var(--okar-bg-colour-1) !important;
     color: var(--bs-white) !important;
     overflow: visible !important;
     transition: width 480ms cubic-bezier(.22, 1, .36, 1);
@@ -383,8 +361,8 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
 }
 
 
-.section-button,
-.section-button:visited {
+.pill-btn,
+.pill-btn:visited {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -398,13 +376,20 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
     border-radius: 9999px;
 }
 
-.section-button:hover {
-    background-color: var(--button-bg-hover) !important;
+.pill-btn:hover:not(:disabled) {
+    background-color: var(--okar-bg-1-hover) !important;
+    text-decoration: none;
 }
 
-.site-top-project-button:hover,
-.site-top-project-button:focus {
-    text-decoration: none;
+.pill-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.left-column-section {
+padding-top: 2rem;
+display:flex;
+justify-content: center;
 }
 
 .site-top-image {
@@ -563,73 +548,6 @@ body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-title 
     display: block;
 }
 
-body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-button {
-    display: inline-block;
-    padding: 0.65em 1.1em;
-    border: 2px solid var(--bs-white);
-    background-color: var(--okar-bg-colour);
-    color: var(--bs-white) !important;
-    text-decoration: none;
-    border-radius: 9999px;
-    line-height: 1;
-}
-
-body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-button:hover,
-body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-button:focus {
-    background-color: var(--okar-button-bg-hover);
-    text-decoration: none;
-}
-
-.cta-button {
-    display: inline-block;
-    padding: 0.65em 1.1em;
-    border: 2px solid var(--bs-white);
-    background-color: var(--okar-bg-colour);
-    color: var(--bs-white) !important;
-    text-decoration: none;
-    border-radius: 9999px;
-    line-height: 1;
-}
-
-body.landing .cta-button:visited {
-    color: var(--bs-white) !important;
-    text-decoration: none;
-}
-
-body.landing .cta-button:hover,
-body.landing .cta-button:focus {
-    background-color: var(--okar-button-bg-hover);
-    text-decoration: none;
-}
-
-body.landing .landing-thumb {
-    flex: 0 0 auto;
-    display: block;
-    border: 0;
-    background-color: var(--okar-bg-colour);
-}
-
-body.landing .landing-thumb img {
-    display: block;
-    width: 100%;
-    height: auto !important;
-}
-
-@keyframes landingThumbScroll {
-    from {
-        transform: translateX(0);
-    }
-    to {
-        transform: translateX(var(--landing-carousel-max-translate));
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-strip {
-        animation: none;
-    }
-}
-
 /* ==========================================================
    TOC / Search page layout
    ========================================================== */
@@ -781,6 +699,19 @@ div#map {
 
 .footer-row{margin-bottom: 1rem;}
 
+#wrapper-footer-secondary{
+    background-color: var(--okar-bg-colour-3);
+    color: var(--okar-colour-1) ;
+}
+
+#wrapper-footer-secondary a{
+    color: var(--okar-colour-3);
+}
+
+#wrapper-footer-secondary a:visited{
+      color: var(--okar-colour-3);
+
+}
 
 .text.mobile-0 {
     font-size: x-small;
@@ -1102,41 +1033,11 @@ body.page-edition #viewer {
    Simplified Page Navigation
    ========================================================== */
 .page-navigation {
-    background: var(--okar-background-colour-1, #e9ecef);
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
 }
 
-/* Page navigation in left sidebar */
-.edition-col-left .page-navigation {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-}
 
-.edition-col-left .page-navigation .btn {
-    color: var(--bs-white, #fff);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.edition-col-left .page-navigation .btn:hover:not(:disabled) {
-    background: var(--okar-bg-colour);
-    border-color: var(--okar-bg-colour);
-    color: #fff;
-}
-
-.edition-col-left .page-navigation .btn:disabled {
-    opacity: 0.4;
-}
-
-.edition-col-left .page-navigation .form-control {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: #fff;
-}
-
-.edition-col-left .page-navigation .text-muted {
-    color: rgba(255, 255, 255, 0.7) !important;
-}
 
 #transcript mark.search-highlight {
     background-color: rgba(255, 193, 7, 0.45);

@@ -209,8 +209,6 @@ var editor = new LoadEditor({
     if (!milestones.length) {
       trigger.disabled = true;
       trigger.classList.add('disabled');
-      trigger.classList.remove('btn-outline-primary');
-      trigger.classList.add('btn-outline-secondary');
       trigger.removeAttribute('data-bs-toggle');
       trigger.removeAttribute('data-bs-target');
       if (emptyState) {
@@ -220,8 +218,7 @@ var editor = new LoadEditor({
     }
 
     trigger.disabled = false;
-    trigger.classList.remove('disabled', 'btn-outline-secondary');
-    trigger.classList.add('btn-outline-primary');
+    trigger.classList.remove('disabled');
     trigger.setAttribute('data-bs-toggle', 'modal');
     trigger.setAttribute('data-bs-target', '#milestoneModal');
 

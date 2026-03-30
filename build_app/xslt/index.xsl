@@ -100,7 +100,7 @@
             <xsl:apply-templates select="node()" mode="landing"/>
             <xsl:if test="@type = 'contents' and not(preceding-sibling::tei:div[@type = 'contents'])">
                 <div class="landing-cta">
-                    <a class="section-button bga site-top-project-button" href="about.html">Mehr über das Projekt</a>
+                    <a class="pill-btn" href="about.html">Mehr über das Projekt</a>
                 </div>
             </xsl:if>
         </div>
