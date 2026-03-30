@@ -1032,9 +1032,9 @@ body.page-edition #viewer {
 /* ==========================================================
    Simplified Page Navigation
    ========================================================== */
-.page-navigation {
+.page-navigation.d-flex {
     border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
+    margin-top: 0!important;
 }
 
 
