@@ -68,7 +68,6 @@
             </head>
             <body class="d-flex flex-column h-100 landing has-site-top">
                 <xsl:call-template name="nav_bar">
-                    <xsl:with-param name="site_top_variant" select="'image'"/>
                 </xsl:call-template>
 
                 <main class="flex-shrink-0 landing-main">

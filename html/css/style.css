@@ -12,22 +12,31 @@
     --okar-background-colour-0: #f8f9fa;
     --okar-background-colour-1: #e9ecef;
     --okar-background-colour-2: #dee2e6;
-    --okar-background-colour-3: #495057;
-    --okar-background-colour-4: #343a40;
+    --okar-background-colour-4: #343a40; 
 
 
-    --okar-bg-colour: #2f5a95 ;
-    --okar-button-bg-hover: #3f6aA5;
-    --okar-link-visited-colour: #7faae5 ;
+    --okar-colour:  #000000 ;
+    --okar-colour-semitrans: rgba(0, 0, 0, 0.7) ;
+    --okar-bg-colour:  #ffffff ;
+    
 
-    --okar-bg-dark:  #0047c0;
-    --okar-link-colour: #0d6efd;
-    --okar-border-color: #6c757d;
+    --okar-colour-1:  #ffffff ;
+    --okar-bg-colour-1: #2f5a95 ;
+    --okar-bg-1-hover: #3f6aA5;
+
+    --okar-colour-2:  #2f5a95 ;
+    --okar-bg-colour-2: #c2c2c2 ;
+
+    --okar-colour-3: #7faae5 ;
+
+
+    --okar-colour-4: #1f4a85 ;
+
 
     /* Shared sizes for square/icon buttons (burger/close/action) */
-    --okar-square-btn-size: 4.5rem;
-    --okar-square-btn-icon-size: 2.625rem;
-
+    --okar-square-btn-size: 3rem;
+    --okar-square-btn-icon-size: 2rem;
+    
     --bs-body-font-family: var(--editor-font-family);
     --site-offcanvas-width: clamp(280px, 34vw, 400px);
     --site-top-action-height: clamp(2.6rem, 4vw, 3.5rem);
@@ -39,12 +48,12 @@ body {
 
 
 a {
-    color: var(--okar-bg-colour);
+    color: var(--okar-colour-2);
     text-decoration: none;
 }
 
 a:visited {
-    color: var(--okar-link-visited-colour);
+    color: var(--okar-colour-3);
 }
 /* ==========================================================
    Site Header (fixed burger button)
@@ -105,7 +114,7 @@ body.page-search .site-header,
 /* ==========================================================
    Square / icon buttons (burger, close, action)
    ========================================================== */
-.site-button {
+.square-btn {
     font-family: sans-serif;
     display: inline-flex;
     align-items: center;
@@ -118,17 +127,17 @@ body.page-search .site-header,
     box-shadow: none;
     background-image: none !important;
     color: var(--bs-white) !important;
-    background-color: var(--okar-bg-colour) !important;
+    background-color: var(--okar-bg-colour-1) !important;
     font-size: var(--okar-square-btn-icon-size);
     line-height: 1;
 }
 
-.site-button-bis {
+.square-btn-bis {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: var(--okar-square-btn-size);
-    height: calc(var(--okar-square-btn-size) * 2);
+    height: calc(var(--okar-square-btn-size) * 3);
     border: 0 !important;
     border-radius: 0 !important;
     padding: 0 !important;
@@ -136,7 +145,7 @@ body.page-search .site-header,
     box-shadow: none;
     font-family: var(--bs-font-sans-serif) !important;
     background-image: none !important;
-    color: var(--okar-button-bg-hover) !important;
+    color: var(--okar-bg-colour-1) !important;
     background-color: transparent !important;
     font-size: small;
     text-decoration: none !important;
@@ -150,71 +159,28 @@ body.page-search .site-header,
     z-index: 2000;
 }
 
-.site-button:focus-visible {
+.square-btn:focus-visible {
     outline: 2px solid var(--bs-white);
     outline-offset: 2px;
 }
 
-.site-button:hover,
-.site-button:active,
-.site-button:focus {
+.square-btn:hover,
+.square-btn:active,
+.square-btn:focus {
     background-color: var(--okar-button-bg-hover) !important;
     color: var(--bs-white) !important;
     box-shadow: none !important;
 }
 
-.site-burger::before {
-  content: "☰";
+
+.square-btn-bis:hover, .square-btn-bis:focus {
+    background-color: transparent !important;
+    color: var(--okar-bg-colour-1) !important;
 }
-
-.site-close::before {
-  content: "×";
-}
-
-.load-more-btn::before {
-    content: "⏷";
-}
-
-
-.scroll-to-top::before{
-    content: "⏶";
-}
-
-.site-bottom-button::before{
-content: "⏵" ;
-}
-
-.site-play-button::before{
-content: "▸" ;
-font-size: .75em;
-line-height: 1;
-vertical-align: middle;
-transform: translateY(-0.15em);
-display: inline-block;
-}
-
-.site-ff-button::before{
-content: "⏩\FE0E" ;
-}
-
-.site-frew-button::before{
-content: "⏪\FE0E" ;
-}
-
-
-.site-rew-button::before{
-content: "◂" ;
-font-size: .75em;
-line-height: 1;
-vertical-align: middle;
-transform: translateY(-0.15em);
-display: inline-block;
-}
-
 /* Semitrans utility */
 .semitrans {
     color: var(--bs-white) !important;
-    background-color: var(--okar-button-bg-hover: #3f6aA5) !important;
+    background-color: var(--okar-bg-colour-1) ;
 }
 
 .semitrans .bi {
@@ -225,15 +191,19 @@ display: inline-block;
 .semitrans:focus,
 .semitrans:focus-visible,
 .semitrans:active {
-    background-color: var(--okar-button-bg-hover) !important;
+    background-color: var(--okar-bg-1-hover) !important;
     cursor: pointer;
+}
+
+.nav-buttons {
+    text-align: right
 }
 
 /* ==========================================================
    Offcanvas close button positioning
    ========================================================== */
 .site-close,
-button.btn-close.site-close {
+button.close-btn.site-close {
     display: none !important;
 }
 
@@ -284,10 +254,10 @@ button.btn-close.site-close {
 }
 
 /* Hide burger when offcanvas is showing */
-.site-burger[aria-expanded="true"],
-body:has(.offcanvas.show:not(.hiding), .offcanvas.showing) .site-burger,
-.site-header .site-button[aria-expanded="true"],
-body:has(.offcanvas.show:not(.hiding), .offcanvas.showing) .site-header .site-button[data-bs-toggle="offcanvas"] {
+.burger-btn[aria-expanded="true"],
+body:has(.offcanvas.show:not(.hiding), .offcanvas.showing) .burger-btn,
+.site-header .square-btn[aria-expanded="true"],
+body:has(.offcanvas.show:not(.hiding), .offcanvas.showing) .site-header .square-btn[data-bs-toggle="offcanvas"] {
     display: none !important;
 }
 
@@ -365,8 +335,8 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
    Site Top (banner area)
    ========================================================== */
 .site-top {
-    background-color: var( --okar-bg-colour);
-    padding: 5rem 0 0;
+    background-color: var(--okar-bg-colour-1);
+    padding: var(--okar-square-btn-size) 0 0;
     position: relative;
 }
 
@@ -375,13 +345,9 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
     grid-template-columns: 1.15fr 0.85fr;
     gap: 2rem;
     align-items: center;
-    /*padding-left: 5rem; */
-    padding-right: 2rem;
     width: 100%;
     max-width: 100%;
 }
-
-
 
 .site-top-title-link {
     display: inline-block;
@@ -406,10 +372,8 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
 .site-top-right {
     display: flex;
     justify-content: right;
-    align-items: right;
     position: relative;
 }
-
 
 .site-top-left {
     display: flex;
@@ -427,7 +391,7 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
     height: var(--site-top-action-height);
     padding: 0 1.50em;
     border: 0 !important;
-    background-color: var(--button-bg) !important;
+    background-color: var(--okar-bg-colour-1) !important;
     font-size: 1.25rem;
     color: var(--bs-white) !important;
     text-decoration: none;
@@ -920,9 +884,19 @@ div#map {
     .navbar-band-nav {
         margin-left: 0;
     }
-    .site-top-left{
+
+    
+    .site-top-grid {
+        justify-content: right;
+    }
+    .site-top-left *{
         display: none;
     }
+
+    .site-top-left{
+        width: 0;
+    }
+
 }
 
 @media (max-width: 992px) {
@@ -1021,8 +995,8 @@ body.page-edition .edition_container {
 }
 
 .edition-col-left {
-    background-color: var(--okar-background-colour-4, #343a40);
-    color: var(--bs-white, #fff);
+    background-color: var(--okar-bg-colour-2);
+    color: var(--okar-colour);
     padding: 2rem 1.5rem;
     position: sticky;
     top: 0;
@@ -1044,7 +1018,7 @@ body.page-edition .edition_container {
 .edition-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--bs-white, #fff);
+    color: var(--okar-colour-4);
     margin: 0 0 1.5rem;
     line-height: 1.3;
 }
@@ -1055,11 +1029,13 @@ body.page-edition .edition_container {
     gap: 0.75rem;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
+    justify-content: center;
+    color: var(--okar-colour) ;
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .edition-nav-links a {
-    color: var(--okar-bg-colour);
+
     text-decoration: none;
     font-size: 0.875rem;
     display: inline-flex;
@@ -1080,7 +1056,7 @@ body.page-edition .edition_container {
 
 .edition-metadata-list dt {
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.7);
+  color: var(--okar-colour-4);
     text-transform: uppercase;
     font-size: 0.6875rem;
     letter-spacing: 0.1em;
@@ -1093,7 +1069,6 @@ body.page-edition .edition_container {
 
 .edition-metadata-list dd {
     margin: 0.25rem 0 0;
-    color: var(--bs-white, #fff);
 }
 
 /* Edition page: Adjust wp-transcript for new layout */

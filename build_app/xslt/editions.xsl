@@ -98,21 +98,6 @@
                                     <h2 class="edition-title">
                                         <xsl:value-of select="$doc_title"/>
                                     </h2>
-                                    <div class="edition-nav-links">
-                                        <xsl:if test="ends-with($prev,'.html')">
-                                            <a class="edition-nav-prev" href="{$prev}" title="zurück">
-                                                <span aria-hidden="true">&#x25C0;&#xFE0E;</span> Zurück
-                                            </a>
-                                        </xsl:if>
-                                        <a href="{$teiSource}" class="edition-tei-link" title="TEI/XML">
-                                            <i class="fa-solid fa-file-code"></i> TEI/XML
-                                        </a>
-                                        <xsl:if test="ends-with($next, '.html')">
-                                            <a class="edition-nav-next" href="{$next}" title="weiter">
-                                                Weiter <span aria-hidden="true">&#x25B6;&#xFE0E;</span>
-                                            </a>
-                                        </xsl:if>
-                                    </div>
                                     <xsl:variable name="msDesc" select="//tei:sourceDesc/tei:msDesc"/>
                                     <xsl:variable name="msId" select="$msDesc/tei:msIdentifier"/>
                                     <xsl:variable name="msContents" select="$msDesc/tei:msContents"/>
@@ -180,6 +165,21 @@
                             
                             <!-- Right column: facsimile and transcript -->
                             <div class="edition-col-right">
+                                      <div class="edition-nav-links">
+                                        <xsl:if test="ends-with($prev,'.html')">
+                                            <a class="edition-nav-prev" href="{$prev}" title="zurück">
+                                                <span aria-hidden="true">&#x25C0;&#xFE0E;</span> Zurück
+                                            </a>
+                                        </xsl:if>
+                                        <a href="{$teiSource}" class="edition-tei-link" title="TEI/XML">
+                                            <i class="fa-solid fa-file-code"></i> TEI/XML
+                                        </a>
+                                        <xsl:if test="ends-with($next, '.html')">
+                                            <a class="edition-nav-next" href="{$next}" title="weiter">
+                                                Weiter <span aria-hidden="true">&#x25B6;&#xFE0E;</span>
+                                            </a>
+                                        </xsl:if>
+                                    </div>
                                 <div class="wp-transcript">
                                     <div id="container-resize" class="row transcript active">
                                         <div id="img-resize" class="col-md-6 col-lg-6 col-sm-12 facsimiles">
