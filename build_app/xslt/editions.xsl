@@ -70,9 +70,9 @@
                         display: none !important;
                     }
                 </style> -->
+                <link rel="stylesheet" href="css/toc.css" type="text/css"/>
             </head>
             <body class="d-flex flex-column h-100 has-site-top page-edition">
-                <xsl:call-template name="nav_bar"/>
                 <main class="hfeed site flex-grow" id="page">
                     <div class="edition_container">
                         <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavigation" aria-labelledby="offcanvasNavigationLabel" data-bs-scroll="true" data-bs-backdrop="false">
@@ -84,6 +84,9 @@
 
                         <!-- Two-column layout: metadata left, content right -->
                         <div class="edition-two-columns">
+                            <div class="edition-header-slot">
+                                <xsl:call-template name="nav_bar"/>
+                            </div>
                             <!-- Left column: metadata -->
                             <aside class="edition-col-left">
                                 <div id="edition_metadata">
@@ -121,45 +124,48 @@
                                     <xsl:variable name="contentNote" select="normalize-space(($msContents/tei:summary[normalize-space()], $msContents/tei:p[normalize-space(string-join(.//text(), ' '))][1])[1])"/>
 
                                     <xsl:if test="$shelfmark or string($repoName) or string($collection) or string($origDateText) or string($contentNote) or exists($beilageLabels)">
-                                        <dl class="edition-metadata-list">
-                                            <xsl:if test="$shelfmark">
-                                                <dt>Signatur</dt>
-                                                <dd>
-                                                    <xsl:value-of select="$shelfmark"/>
-                                                </dd>
-                                            </xsl:if>
-                                            <xsl:if test="string($repoName)">
-                                                <dt>Archiv</dt>
-                                                <dd>
-                                                    <xsl:value-of select="$repoName"/>
-                                                </dd>
-                                            </xsl:if>
-                                            <xsl:if test="string($collection)">
-                                                <dt>Sammlung</dt>
-                                                <dd>
-                                                    <xsl:value-of select="$collection"/>
-                                                </dd>
-                                            </xsl:if>
-                                            <xsl:if test="string($origDateText)">
-                                                <dt>Datierung</dt>
-                                                <dd>
-                                                    <xsl:value-of select="$origDateText"/>
-                                                </dd>
-                                            </xsl:if>
-                                            <xsl:if test="exists($beilageLabels)">
-                                                <div>
-                                                    <span class="fw-bold">Beilage:</span>
-                                                    <xsl:text></xsl:text>
-                                                    <xsl:value-of select="string-join($beilageLabels, ', ')"/>
-                                                </div>
-                                            </xsl:if>
-                                            <xsl:if test="string($contentNote)">
-                                                <dt>Inhalt</dt>
-                                                <dd>
-                                                    <xsl:value-of select="$contentNote"/>
-                                                </dd>
-                                            </xsl:if>
-                                        </dl>
+                                        <details class="edition-metadata-collapsible" open="open">
+                                            <summary class="edition-metadata-summary">Bibliographische Angabe</summary>
+                                            <dl class="edition-metadata-list">
+                                                <xsl:if test="$shelfmark">
+                                                    <dt>Signatur</dt>
+                                                    <dd>
+                                                        <xsl:value-of select="$shelfmark"/>
+                                                    </dd>
+                                                </xsl:if>
+                                                <xsl:if test="string($repoName)">
+                                                    <dt>Archiv</dt>
+                                                    <dd>
+                                                        <xsl:value-of select="$repoName"/>
+                                                    </dd>
+                                                </xsl:if>
+                                                <xsl:if test="string($collection)">
+                                                    <dt>Sammlung</dt>
+                                                    <dd>
+                                                        <xsl:value-of select="$collection"/>
+                                                    </dd>
+                                                </xsl:if>
+                                                <xsl:if test="string($origDateText)">
+                                                    <dt>Datierung</dt>
+                                                    <dd>
+                                                        <xsl:value-of select="$origDateText"/>
+                                                    </dd>
+                                                </xsl:if>
+                                                <xsl:if test="exists($beilageLabels)">
+                                                    <div>
+                                                        <span class="fw-bold">Beilage:</span>
+                                                        <xsl:text></xsl:text>
+                                                        <xsl:value-of select="string-join($beilageLabels, ', ')"/>
+                                                    </div>
+                                                </xsl:if>
+                                                <xsl:if test="string($contentNote)">
+                                                    <dt>Inhalt</dt>
+                                                    <dd>
+                                                        <xsl:value-of select="$contentNote"/>
+                                                    </dd>
+                                                </xsl:if>
+                                            </dl>
+                                        </details>
                                     </xsl:if>
                                     <div class="left-column-section flex">
                                         <button id="milestone-nav-btn" type="button" class="pill-btn" data-bs-toggle="modal" data-bs-target="#milestoneModal">
@@ -186,11 +192,19 @@
                                         </a>
                                     </xsl:if>
                                 </div>
+                                <input type="checkbox" id="edition-mobile-view-toggle" class="edition-mobile-view-input"/>
+                                <div class="view-toggle">
+                                    <label for="edition-mobile-view-toggle" class="pill-btn toc-view-toggle-btn edition-mobile-view-toggle" role="button">
+                                        <span class="edition-mobile-view-label edition-mobile-view-label--facs">Transkription</span>
+                                        <span class="edition-mobile-view-label edition-mobile-view-label--text">Faksimile</span>
+                                    </label>
+                                </div>
                                 <div class="wp-transcript">
                                     <div id="container-resize" class="row transcript active">
                                         <div id="img-resize" class="col-md-6 col-lg-6 col-sm-12 facsimiles">
                                             <div id="viewer">
                                                 <div id="container_facs_1" class="osd-container"/>
+                                                <div class="edition-facsimile-touch-guard" aria-hidden="true"></div>
                                             </div>
                                         </div>
                                         <div id="text-resize" lang="de" class="col-md-6 col-lg-6 col-sm-12 text yes-index">

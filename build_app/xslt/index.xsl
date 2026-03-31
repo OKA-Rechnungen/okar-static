@@ -71,16 +71,16 @@
                 </xsl:call-template>
 
                 <main class="flex-shrink-0 landing-main">
-                    <div class="landing-section">
+                    <div class="container landing-section">
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-md-6 col-12">
                                 <div class="landing-section-pic-wrapper">
                                     <img class="landing-section-pic" src="images/page_03.png" alt="Bild eines Rechnungsbuchs aus dem 18. Jahrhundert"/>
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <div class="col-md-6 col-12">
                                 <div class="landing-section-text">
-                                    <xsl:apply-templates select="." mode="landing"/>
+                                    <xsl:apply-templates select="$landing_divs" mode="landing"/>
                                 </div>
                             </div>
                         </div>

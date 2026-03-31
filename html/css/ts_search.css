@@ -33,11 +33,11 @@
    Left Column — Filter sections
    ----------------------------------------------------------------- */
 .toc-left-section {
-  margin-bottom: 1.5rem;
+  display: block;
 }
 
 .toc-left-heading {
-  font-size: 0.75rem;
+  width: 100%;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -46,6 +46,12 @@
   border-bottom: 1px solid --okar-fg-colour-2;
   padding-bottom: 0.5rem;
 }
+
+.facet-collapsible {
+  display: block;
+}
+
+
 
 /* Year slider container */
 .year-slider-container {
@@ -78,6 +84,47 @@
   height: 6px;
   top: 0;
   border-radius: 3px;
+#searchbox-mobile .ais-SearchBox-form {
+  display: flex;
+}
+
+#searchbox-mobile .ais-SearchBox-input {
+  flex: 1;
+  padding: 0.75rem 2rem 0.75rem 2rem;
+  border: 2px solid var(--okar-bg-colour));
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+#searchbox-mobile .ais-SearchBox-input:focus {
+  outline: none;
+  border-color: var(--okar-button-bg-hover);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+}
+
+#searchbox-mobile .ais-SearchBox-submit,
+#searchbox-mobile .ais-SearchBox-reset {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+}
+
+#searchbox-mobile .ais-SearchBox-submit {
+  left: 0.6rem;
+}
+
+#searchbox-mobile .ais-SearchBox-reset {
+  right: 0.6rem;
+}
+
+#searchbox-mobile .ais-SearchBox-submitIcon,
+#searchbox-mobile .ais-SearchBox-resetIcon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
 }
 
 .search-col-left .ais-RangeSlider .rheostat-handle {
@@ -343,14 +390,27 @@
 }
 
 /* Search box in right column */
+.toc-mobile-searchbox {
+  display: none;
+}
+
+.toc-search-pill {
+  width: 100%;
+}
+
+.toc-search-pill-inner {
+  width: 100%;
+}
+
 .toc-searchbox-container {
   padding: 1.5rem;
   background: #fff;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-#searchbox {
-  max-width: 600px;
+#searchbox,
+#searchbox-mobile {
+  max-width: 90%;
 }
 
 .ais-SearchBox-form {
@@ -398,6 +458,33 @@
 .ais-SearchBox-resetIcon {
   width: 1rem;
   height: 1rem;
+}
+
+#searchbox {
+  max-width: 30ch;
+}
+
+#searchbox .ais-SearchBox-form {
+  display: block;
+  position: static;
+}
+
+#searchbox .ais-SearchBox-input {
+  width: 100%;
+  min-height: calc(1.5em + 0.5rem + calc(var(--bs-border-width) * 2));
+  padding: 0.25rem 0.5rem;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-sm);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  box-shadow: none;
+}
+
+#searchbox .ais-SearchBox-input:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
 /* -----------------------------------------------------------------
@@ -506,6 +593,10 @@
 
 .card-view-toggle input[type="checkbox"] {
   accent-color: var(--okar-bg-colour);
+}
+
+.toc-view-toggle-btn {
+  width: 12rem;
 }
 
 .ais-RangeSlider .rheostat-progress {
@@ -711,6 +802,16 @@
 
   .toc-searchbox-container {
     padding: 1rem;
+  }
+}
+
+@media (max-width: 800px) {
+  .toc-mobile-searchbox {
+    display: block;
+  }
+
+  body.page-toc-search .toc-searchbox-container {
+    display: none;
   }
 }
 
