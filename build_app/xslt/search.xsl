@@ -17,16 +17,22 @@
                 </xsl:call-template>
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@8.1.0/themes/algolia-min.css"/>
                 <link rel="stylesheet" href="css/ts_search.css" type="text/css"/>
+                <link rel="stylesheet" href="css/toc.css" type="text/css"/>
             </head>
-            <body class="d-flex flex-column h-100 has-site-top page-search">
+            <body class="d-flex flex-column h-100 has-site-top page-search page-toc-search">
                 <main id="searchPage">
                     <div id="searchContainer" class="search-container">
+                        <div class="search-header-slot">
+                            <xsl:call-template name="nav_bar"/>
+                        </div>
                         <div class="search-col-left">
-                            <div class="toc-left-section">
+                            <div class="toc-left-section toc-mobile-searchbox">
                                 <h3 class="toc-left-heading">Suche</h3>
                                 <div class="toc-search-pill">
                                     <div class="toc-search-pill-inner">
-                                        <div id="searchbox"></div>
+                                        <form action="search.html" method="get">
+                                            <input id="searchbox-mobile" class="form-control form-control-sm navbar-search" type="search" name="q" placeholder="Suche…" autocomplete="off"/>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -44,25 +50,40 @@
                             </div>
                             <div class="toc-left-section">
                                 <div id="refinement-range-year" />
-                                <div id="refinement-list-kaemmerer" />
-                                <div id="refinement-list-beilage" />
+                                <details class="facet-collapsible" open="open">
+                                    <summary class="facet-collapsible-summary">Kämmerer</summary>
+                                    <div id="refinement-list-kaemmerer" />
+                                </details>
+                                <details class="facet-collapsible" open="open">
+                                    <summary class="facet-collapsible-summary">Beilage</summary>
+                                    <div id="refinement-list-beilage" />
+                                </details>
                             </div>
                             <div id="clear-refinements" />
+                            <div class="toc-left-tailpiece" aria-hidden="true"></div>
                         </div>
                         <div class="search-col-right">
-                            <xsl:call-template name="nav_bar"/>
-                            <div class="container">
-                                <!-- <h2 class="align-center">
-                                    <xsl:value-of select="$doc_title"/>
-                                </h2> -->
+                            <div class="contents-frame">
+                                <div class="scroller">
+                                    <section class="toc-content">
+                                        <div class="toc-content-header">
+                                            <p class="toc-eyebrow">Suche</p>
+                                            <h1>
+                                                <xsl:value-of select="$doc_title"/>
+                                            </h1>
+                                            <div class="toc-searchbox-container">
+                                                <div id="searchbox"></div>
+                                            </div>
+                                        </div>
+                                        <div id="hits"></div>
+                                        <div id="pagination"></div>
+                                    </section>
+                                </div>
                             </div>
-                            <!--- <div>
-                                <div class="d-flex flex-column align-items-center" id="current-refinements"></div>
-                            </div> -->
-                            <div id="hits"/>
-                            <div id="pagination"/>
                             <div class="search-col-right-strip"/>
-                            <button type="button" class="site-button scroll-to-top" id="scrollToTopBtn" aria-label="Nach oben scrollen" />
+                            <button type="button" class="square-btn scroll-to-top semitrans" id="scrollToTopBtn" aria-label="Nach oben scrollen">
+                                <i class="bi bi-chevron-up" aria-hidden="true"></i>
+                            </button>
                         </div>
                     </div>
                 </main>
