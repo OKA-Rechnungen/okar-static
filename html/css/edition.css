@@ -1,0 +1,286 @@
+/* Hoverable facsimile regions (for reverse highlight) */
+.facsimile-region-overlay {
+    background-color: rgba(255, 214, 102, 0.18);
+    border: 1px solid rgba(255, 183, 0, 0.6);
+    pointer-events: auto;
+}
+
+/* Render TEI unclear annotations like normal text (no dotted underline) */
+#transcript abbr[title="unclear"] {
+    text-decoration: none;
+    border: 0;
+    font-style: inherit;
+}
+
+/* ==========================================================
+   Edition Page Two-Column Layout
+   ========================================================== */
+
+.edition-two-columns {
+    display: grid;
+    grid-template-columns: var(--site-offcanvas-width) 1fr;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+}
+
+.edition-header-slot {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.edition-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--okar-colour-4);
+    margin: 0 0 1.5rem;
+    line-height: 1.3;
+}
+
+.edition-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem 0 1rem 0;
+    justify-content: center;
+    color: var(--okar-colour) ;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.edition-nav-links a {
+
+    text-decoration: none;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: color 0.15s;
+}
+
+.edition-nav-links a:hover {
+    color: #fff;
+}
+
+.edition-metadata-list {
+    margin: 0;
+    padding: 0;
+    font-size: 0.875rem;
+}
+
+.edition-metadata-collapsible {
+    display: block;
+}
+
+.edition-metadata-summary {
+    display: none;
+}
+
+.edition-metadata-collapsible > :not(summary) {
+    display: block;
+}
+
+.edition-metadata-list dt {
+    font-weight: 600;
+  color: var(--okar-colour-4);
+    text-transform: uppercase;
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    margin-top: 0.75rem;
+}
+
+.edition-metadata-list dt:first-child {
+    margin-top: 0;
+}
+
+.edition-metadata-list dd {
+    margin: 0.25rem 0 0;
+}
+
+/* Edition page: Adjust wp-transcript for new layout */
+body .wp-transcript {
+    padding: 1rem;
+}
+
+body .transcript.row {
+    margin: 0;
+}
+
+body  #viewer {
+    min-height: 50vh;
+    height: 100%
+}
+
+
+/* ==========================================================
+   Simplified Page Navigation
+   ========================================================== */
+.page-navigation.d-flex {
+    border-radius: 0.5rem;
+    margin-top: 0!important;
+}
+
+
+#transcript mark.search-highlight {
+    background-color: rgba(255, 193, 7, 0.45);
+    color: inherit;
+    padding: 0 .1em;
+}
+
+#transcript mark.search-highlight.search-highlight-active {
+    background-color: rgba(255, 153, 0, 0.85);
+}
+
+/* Vertical divider between left and right transcript columns */
+.transcript-column {
+    border-left: 1px solid var(--bs-border-color, black);
+}
+
+
+@media (max-width: 800px) {
+
+
+    .wp-transcript {
+        height: 100%;
+    }
+
+
+      .edition-metadata-summary {
+        display: block;
+        cursor: pointer;
+        list-style: none;
+        margin: 0 0 0.75rem 0;
+        font-weight: 700;
+        color: var(--okar-colour-4);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .edition-metadata-summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .edition-metadata-summary::after {
+        content: " \203A";
+        display: inline-block;
+        margin-left: 0.35rem;
+        transform: rotate(270deg);
+        transition: transform 0.2s ease;
+    }
+
+    .edition-metadata-collapsible[open] .edition-metadata-summary::after {
+        transform: rotate(90deg);
+    }
+
+    .edition-metadata-collapsible:not([open]) .edition-metadata-summary::after {
+        transform: rotate(270deg);
+    }
+
+    .edition-metadata-collapsible > :not(summary) {
+        display: block;
+    }
+
+    /* .edition-metadata-collapsible[open] > :not(summary) {
+        display: none;
+    } */
+
+    .edition-metadata-collapsible:not([open]) > :not(summary) {
+        display: block;
+    }
+
+
+     .edition-mobile-view-input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .view-toggle {
+        display: flex;
+        justify-content: center;
+        margin: 0 0 0.75rem;
+    }
+
+    .view-toggle .edition-mobile-view-toggle {
+        display: inline-flex !important;
+        width: auto;
+        margin: 0;
+    }
+
+    .edition-mobile-view-label {
+        display: inline;
+    }
+
+    .edition-mobile-view-label--text {
+        display: none;
+    }
+
+    #edition-mobile-view-toggle:checked + .view-toggle .edition-mobile-view-label--facs {
+        display: none;
+    }
+
+    #edition-mobile-view-toggle:checked + .view-toggle .edition-mobile-view-label--text {
+        display: inline;
+    }
+
+    #img-resize,
+    #text-resize {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+
+    #img-resize,
+    #viewer,
+    #container_facs_1 {
+        height: 100% !important;
+    }
+
+    /* Mobile default: show facsimile, hide transcription. */
+    #edition-mobile-view-toggle:not(:checked) ~ .wp-transcript #img-resize {
+        display: block !important;
+    }
+
+    #edition-mobile-view-toggle:not(:checked) ~ .wp-transcript #text-resize {
+        display: none !important;
+    }
+
+    #edition-mobile-view-toggle:checked ~ .wp-transcript #img-resize {
+        display: none !important;
+    }
+
+    #edition-mobile-view-toggle:checked ~ .wp-transcript #text-resize {
+        display: block !important;
+    }
+
+    #img-resize {
+        position: relative;
+    }
+
+    .edition-facsimile-touch-guard {
+        display: block !important;
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        background: transparent;
+        pointer-events: auto;
+    }
+
+    #edition-mobile-view-toggle:checked ~ .wp-transcript .edition-facsimile-touch-guard {
+        display: none !important;
+    }
+
+
+    #container-resize{
+        height: 100%;
+    }
+
+    #container_facs_1 {
+        min-height: 100%;
+    }
+
+    .edition-text-inner{
+        padding:1.5rem!important;
+    }
+
+}

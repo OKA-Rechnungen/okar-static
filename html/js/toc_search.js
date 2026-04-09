@@ -21,25 +21,6 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
   },
 });
 
-function getInitialQueryFromUrl() {
-  try {
-    var url = new URL(window.location.href);
-    var value = url.searchParams.get('q');
-    if (typeof value === 'string') {
-      return value.trim();
-    }
-  } catch (error) {
-    // ignore url parsing issues
-  }
-  return '';
-}
-
-var initialQuery = getInitialQueryFromUrl();
-var initialUiState = {};
-if (initialQuery) {
-  initialUiState[project_collection_name] = { query: initialQuery };
-}
-
 function renameLabel(label) {
   if (label === 'signature') return 'Signatur';
   if (label === 'year') return 'Jahr';
@@ -80,7 +61,6 @@ function getYear(value) {
 var search = instantsearch({
   indexName: project_collection_name,
   searchClient: typesenseInstantsearchAdapter.searchClient,
-  initialUiState: initialUiState,
 });
 
 // Custom infiniteHits using connector
@@ -241,8 +221,18 @@ search.start();
   var toggle = document.getElementById('detailViewToggle');
   var hitsContainer = document.getElementById('hits');
   if (!toggle || !hitsContainer) return;
-  toggle.addEventListener('change', function() {
-    hitsContainer.classList.toggle('detail-view', toggle.checked);
+
+  function syncDetailView(isActive) {
+    hitsContainer.classList.toggle('detail-view', isActive);
+    toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    toggle.textContent = isActive ? 'Vorschau' : 'Detailansicht';
+  }
+
+  syncDetailView(false);
+
+  toggle.addEventListener('click', function() {
+    var isActive = toggle.getAttribute('aria-pressed') === 'true';
+    syncDetailView(!isActive);
   });
 })();
 

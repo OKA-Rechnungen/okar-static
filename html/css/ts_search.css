@@ -5,29 +5,14 @@
 /* -----------------------------------------------------------------
    Search Container — Two-column grid layout
    ----------------------------------------------------------------- */
+/* Unused with the current XSL output; pages emit #searchContainer.container-fluid, not .search-container. */
+/*
 .search-container {
   display: grid;
   grid-template-columns: var(--site-offcanvas-width) 1fr;
   min-height: 100vh;
 }
-
-.search-col-left {
-  background-color: var(--okar-bg-colour-2) ;
-  padding: 2rem 1.5rem;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  z-index: 100;
-}
-
-.search-col-right {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  min-width: 0;
-  overflow: hidden;
-}
+*/
 
 /* -----------------------------------------------------------------
    Left Column — Filter sections
@@ -52,82 +37,35 @@
 }
 
 
-
-/* Year slider container */
-.year-slider-container {
-  padding: 0.5rem 0 1.5rem;
-}
-
 #yearSlider {
   margin: 1rem 0 2rem;
   padding: 0 0.5rem;
 }
 
 /* InstantSearch rangeSlider styling */
-.search-col-left .ais-RangeSlider {
+.col-left .ais-RangeSlider {
   padding: 1rem 0.5rem 2rem;
 }
 
-.search-col-left .ais-RangeSlider .rheostat {
+.col-left .ais-RangeSlider .rheostat {
   margin: 0;
 }
 
-.search-col-left .ais-RangeSlider .rheostat-background {
+.col-left .ais-RangeSlider .rheostat-background {
   background: rgba(255, 255, 255, 0.15);
   border: none;
   height: 6px;
   border-radius: 3px;
 }
 
-.search-col-left .ais-RangeSlider .rheostat-progress {
+.col-left .ais-RangeSlider .rheostat-progress {
   background: var(--okar-bg-1-hover);
   height: 6px;
   top: 0;
   border-radius: 3px;
-#searchbox-mobile .ais-SearchBox-form {
-  display: flex;
 }
 
-#searchbox-mobile .ais-SearchBox-input {
-  flex: 1;
-  padding: 0.75rem 2rem 0.75rem 2rem;
-  border: 2px solid var(--okar-bg-colour));
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-#searchbox-mobile .ais-SearchBox-input:focus {
-  outline: none;
-  border-color: var(--okar-button-bg-hover);
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-}
-
-#searchbox-mobile .ais-SearchBox-submit,
-#searchbox-mobile .ais-SearchBox-reset {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-}
-
-#searchbox-mobile .ais-SearchBox-submit {
-  left: 0.6rem;
-}
-
-#searchbox-mobile .ais-SearchBox-reset {
-  right: 0.6rem;
-}
-
-#searchbox-mobile .ais-SearchBox-submitIcon,
-#searchbox-mobile .ais-SearchBox-resetIcon {
-  width: 14px;
-  height: 14px;
-  fill: currentColor;
-}
-}
-
-.search-col-left .ais-RangeSlider .rheostat-handle {
+.col-left .ais-RangeSlider .rheostat-handle {
   background: var(--okar-bg-colour-1);
   border: none;
   border-radius: 50%;
@@ -139,12 +77,12 @@
   margin-left: -9px;
 }
 
-.search-col-left .ais-RangeSlider .rheostat-handle::before,
-.search-col-left .ais-RangeSlider .rheostat-handle::after {
+.col-left .ais-RangeSlider .rheostat-handle::before,
+.col-left .ais-RangeSlider .rheostat-handle::after {
   display: none;
 }
 
-.search-col-left .ais-RangeSlider .rheostat-tooltip {
+.col-left .ais-RangeSlider .rheostat-tooltip {
   background: var(--okar-bg-colour-1);
   border: none;
   border-radius: 4px;
@@ -156,12 +94,12 @@
 }
 
 /* Stats widget styling */
-.search-col-left .ais-Stats {
+.col-left .ais-Stats {
   color: var(--okar-fg-colour-2-semitrans) ;
   font-size: 0.875rem;
 }
 
-.search-col-left .ais-Stats-text {
+.col-left .ais-Stats-text {
   font-weight: 600;
  color: var(--okar-fg-colour-2-semitrans) ;
 }
@@ -217,25 +155,8 @@
   padding: 2px 6px;
 }
 
-/* Hit count pill */
-.toc-year-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.875rem;
-  color: var(--okar-fg-colour-2);
-}
-
-.toc-year-pill-count {
-  font-weight: 700;
-  color: var(--okar-bg-colour));
-}
-
 /* Refinement lists in left column */
-.search-col-left .ais-RefinementList-list {
+.col-left .ais-RefinementList-list {
   padding: 0;
   margin: 0;
   list-style: none;
@@ -243,11 +164,11 @@
   overflow-y: auto;
 }
 
-.search-col-left .ais-RefinementList-item {
+.col-left .ais-RefinementList-item {
   margin-bottom: 0.25rem;
 }
 
-.search-col-left .ais-RefinementList-label {
+.col-left .ais-RefinementList-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -258,21 +179,21 @@
   transition: color 0.15s;
 }
 
-.search-col-left .ais-RefinementList-label:hover {
+.col-left .ais-RefinementList-label:hover {
   color:var(--okar-fg-colour-2);
 }
 
-.search-col-left .ais-RefinementList-checkbox {
+.col-left .ais-RefinementList-checkbox {
   width: 1rem;
   height: 1rem;
   accent-color: var(--okar-bg-colour));
 }
 
-.search-col-left .ais-RefinementList-labelText {
+.col-left .ais-RefinementList-labelText {
   flex: 1;
 }
 
-.search-col-left .ais-RefinementList-count {
+.col-left .ais-RefinementList-count {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 0.5rem;
   font-size: 0.75rem;
@@ -281,7 +202,7 @@
 }
 
 /* Toggle refinement (Beilage checkbox) */
-.search-col-left .ais-ToggleRefinement-label {
+.col-left .ais-ToggleRefinement-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -290,20 +211,20 @@
   cursor: pointer;
 }
 
-.search-col-left .ais-ToggleRefinement-checkbox {
+.col-left .ais-ToggleRefinement-checkbox {
   width: 1rem;
   height: 1rem;
   accent-color: var(--okar-bg-colour));
 }
 
 /* Clear refinements */
-.search-col-left #clear-refinements {
+.col-left #clear-refinements {
   margin-top: 1rem;
   display: flex; 
   justify-content: center ;
 }
 
-.search-col-left .ais-ClearRefinements-button {
+.col-left .ais-ClearRefinements-button {
   display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -317,12 +238,12 @@
     border-radius: 9999px;
 }
 
-.search-col-left .ais-ClearRefinements-button:hover:not(:disabled) {
+.col-left .ais-ClearRefinements-button:hover:not(:disabled) {
     background-color: var(--okar-bg-1-hover) !important;
     text-decoration: none;
 }
 
-.search-col-left .ais-ClearRefinements-button--disabled {
+.col-left .ais-ClearRefinements-button--disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
@@ -511,6 +432,7 @@
   border-radius: 0.75rem;
   width: 100%;
   aspect-ratio: 4 / 3;
+  margin-left: 0;
 }
 
 .ais-InfiniteHits-empty {
@@ -534,12 +456,15 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
+/* Unused; toc_search.js renders .toc-hit-card-link instead. */
+/*
 .toc-hit-link {
   display: block;
   width: 100%;
   height: 100%;
   text-decoration: none;
 }
+*/
 
 .toc-hit-image {
   display: block;
@@ -580,19 +505,6 @@
 .ais-InfiniteHits-item:focus-within .toc-hit-overlay,
 .detail-view .toc-hit-overlay {
   display: flex;
-}
-
-/* Detail-view toggle styling */
-.card-view-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-}
-
-.card-view-toggle input[type="checkbox"] {
-  accent-color: var(--okar-bg-colour);
 }
 
 .toc-view-toggle-btn {
@@ -770,31 +682,13 @@
 /* -----------------------------------------------------------------
    Responsive Adjustments
    ----------------------------------------------------------------- */
-@media (max-width: 991.98px) {
-  .search-container {
-    grid-template-columns: 1fr;
-  }
 
-  .search-col-left {
-    position: relative;
-    height: auto;
-    max-height: none;
-    padding: 1.5rem;
-  }
-
-  .search-col-left .ais-RefinementList-list {
-    max-height: 150px;
-  }
-}
 
 @media (max-width: 767.98px) {
   .ais-InfiniteHits-list {
     grid-template-columns: 1fr;
   }
 
-  .toc-hit-link {
-    aspect-ratio: 4/3;
-  }
 
   #hits {
     padding: 1rem;
@@ -810,32 +704,6 @@
     display: block;
   }
 
-  body.page-toc-search .toc-searchbox-container {
-    display: none;
-  }
-}
-
-/* -----------------------------------------------------------------
-   Legacy Support — Keep old classes for other search pages
-   ----------------------------------------------------------------- */
-.search-panel {
-  margin-bottom: 2rem;
-}
-
-.search-panel__facets {
-  background-color: #f8f9fa;
-  border: 1px solid #e2e6ea;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  position: sticky;
-  top: 1.5rem;
-}
-
-.search-panel__results {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
 
 .ais-Hits-list {
   display: grid;
@@ -872,4 +740,9 @@
 
 .search-panel__hint,  .search-panel__hint *, #fuzzy-toggle, #fuzzy-toggle *, .card-view-toggle *{
 color: var(--okar-fg-colour-2);
+}
+
+.toc-left-section{
+    margin-bottom: .5rem;
+}
 }

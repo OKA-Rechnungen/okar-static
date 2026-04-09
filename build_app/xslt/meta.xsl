@@ -6,6 +6,7 @@
     <xsl:output encoding="UTF-8" media-type="text/html" method="html" version="5.0" indent="yes" omit-xml-declaration="yes"/>
     
     <xsl:import href="./partials/html_navbar.xsl"/>
+    <xsl:import href="./partials/html_pageheader.xsl"/>
     <xsl:import href="./partials/html_head.xsl"/>
     <xsl:import href="partials/html_footer.xsl"/>
 
@@ -23,7 +24,8 @@
             
             <body class="d-flex flex-column h-100 has-site-top">
                 <xsl:call-template name="nav_bar"/>
-                <main class="flex-shrink-0 flex-grow-1">
+                <xsl:call-template name="page_header"/>
+                <main id="metaPage" class="flex-shrink-0 flex-grow-1">
                     <div class="container py-4">                        
                         <h1><xsl:value-of select="$doc_title"/></h1>    
                         <xsl:apply-templates select=".//tei:body"></xsl:apply-templates>

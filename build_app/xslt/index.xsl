@@ -8,6 +8,7 @@
 
     <xsl:import href="./partials/html_head.xsl"/>
     <xsl:import href="./partials/html_navbar.xsl"/>
+    <xsl:import href="./partials/html_pageheader.xsl"/>
     <xsl:import href="./partials/html_footer.xsl"/>
     <xsl:import href="./partials/one_time_alert.xsl"/>
 
@@ -60,18 +61,17 @@
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        <html class="h-100" lang="de">
+        <html lang="de">
             <head>
                 <xsl:call-template name="html_head">
                     <xsl:with-param name="html_title" select="$doc_title"/>
                 </xsl:call-template>
             </head>
-            <body class="d-flex flex-column h-100 landing has-site-top">
-                <xsl:call-template name="nav_bar">
-                </xsl:call-template>
-
-                <main class="flex-shrink-0 landing-main">
-                    <div class="container landing-section">
+            <body class="d-flex flex-column landing">
+                <xsl:call-template name="nav_bar" />
+                <xsl:call-template name="page_header" />
+                <main id="indexPage" class="flex-shrink-0  flex-grow-1">
+                   <div class="container py-4">            
                         <div class="row">
                             <div class="col-md-6 col-12">
                                 <div class="landing-section-pic-wrapper">

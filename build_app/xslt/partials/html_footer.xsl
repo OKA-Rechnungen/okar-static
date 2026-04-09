@@ -10,7 +10,7 @@
                <div class="row">
                   <div class="col-md-7 col-12 footer-row row">
                      <div class="footer-row">
-                        <span class="texts mobile-0">Kontakt</span>
+                        <span class="texts hide_on_mobile">Kontakt</span>
                      </div>
                      <div class="col-5 row">
                         <div class="col-md-4 col-12 text-center">
@@ -18,7 +18,7 @@
                               <img src="images/logo_acdh.svg" class="mobile-50w" alt="Austrian Centre for Digital Humanities" title="Austrian Centre for Digital Humanities"/>
                            </a>
                         </div>
-                        <div class="col-md-8 col-0 text text-left mobile-0">
+                        <div class="col-md-8 col-0 text text-left hide_on_mobile">
                            <p>
                               <b>Austrian Centre<br/>for Digital Humanities</b>
                               <br/>
@@ -44,7 +44,7 @@
                   </div>
                   <div class="col-md-5 col-12 footer-row row">
                      <div class="footer-row">
-                        <span class="texts mobile-0">Förderung</span>
+                        <span class="texts hide_on_mobile">Förderung</span>
                      </div>
                      <div class="col-6 vfill">
                         <a href="https://www.bmkoes.gv.at/">

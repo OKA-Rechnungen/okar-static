@@ -8,6 +8,7 @@
     <xsl:import href="./partials/shared.xsl"/>
     <xsl:import href="./partials/osd-container.xsl" />
     <xsl:import href="./partials/html_navbar.xsl"/>
+    <xsl:import href="./partials/html_pageheader.xsl"/>
     <xsl:import href="./partials/html_head.xsl"/>
     <xsl:import href="./partials/html_footer.xsl"/>
     <xsl:import href="./partials/tei-facsimile.xsl"/>
@@ -60,35 +61,26 @@
 
 
     <xsl:template match="/">
-        <html class="h-100" lang="de">
+        <html lang="de">
             <head>
                 <xsl:call-template name="html_head">
                     <xsl:with-param name="html_title" select="$doc_title"></xsl:with-param>
                 </xsl:call-template>
-                <!-- <style>
-                    .navBarNavDropdown ul li:nth-child(2) {
-                        display: none !important;
-                    }
-                </style> -->
-                <link rel="stylesheet" href="css/toc.css" type="text/css"/>
+                <link rel="stylesheet" href="css/edition.css" type="text/css"/>
             </head>
-            <body class="d-flex flex-column h-100 has-site-top page-edition">
-                <main class="hfeed site flex-grow" id="page">
-                    <div class="edition_container">
-                        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavigation" aria-labelledby="offcanvasNavigationLabel" data-bs-scroll="true" data-bs-backdrop="false">
-                            <div class="offcanvas-header" />
-                            <div class="offcanvas-body" />
-                        </div>
-                        <div class="offcanvas offcanvas-end" tabindex="0" id="offcanvasOptions" aria-labelledby="offcanvasOptionsLabel" data-bs-scroll="true" data-bs-backdrop="false">
-                        </div>
-
+            <body class="d-flex flex-column offset-burger">
+                <xsl:call-template name="nav_bar">
+                    <xsl:with-param name="responsive_behaviour" select="true()"/>
+                </xsl:call-template>
+                <xsl:call-template name="page_header">
+                    <xsl:with-param name="responsive_behaviour" select="'hide_on_desktop'"/>
+                </xsl:call-template>
+                <main id="editionPage">
+                     <div id="editionContainer" class="container-fluid">
                         <!-- Two-column layout: metadata left, content right -->
-                        <div class="edition-two-columns">
-                            <div class="edition-header-slot">
-                                <xsl:call-template name="nav_bar"/>
-                            </div>
+                        <div class="row">
                             <!-- Left column: metadata -->
-                            <aside class="edition-col-left">
+                            <div class="col-left">
                                 <div id="edition_metadata">
                                     <xsl:variable name="doc_type" select="//tei:sourceDesc/tei:msDesc/tei:physDesc/tei:objectDesc/@form[1]"/>
                                     <h2 class="edition-title">
@@ -173,28 +165,31 @@
                                         </button>
                                     </div>
                                 </div>
-                            </aside>
+                            </div>
 
                             <!-- Right column: facsimile and transcript -->
-                            <div class="edition-col-right">
+                            <div class="col-right col">
+                             <xsl:call-template name="page_header">
+                                    <xsl:with-param name="responsive_behaviour" select="'hide_on_mobile'"/>
+                                </xsl:call-template>
                                 <div class="edition-nav-links">
                                     <xsl:if test="ends-with($prev,'.html')">
-                                        <a class="edition-nav-prev" href="{$prev}" title="zurück">
-                                            <span aria-hidden="true">&#x25C0;&#xFE0E;</span> Zurück
+                                        <a class="edition-nav-prev" href="{$prev}" title="Vorheriges Rechnungsbuch">
+                                            <span aria-hidden="true">&#x25C0;&#xFE0E;</span><span class="hide_on_mobile"> Vorheriges Rechnungsbuch</span>
                                         </a>
                                     </xsl:if>
                                     <a href="{$teiSource}" class="edition-tei-link" title="TEI/XML">
                                         <i class="fa-solid fa-file-code"></i> TEI/XML
                                     </a>
                                     <xsl:if test="ends-with($next, '.html')">
-                                        <a class="edition-nav-next" href="{$next}" title="weiter">
-                                            Weiter <span aria-hidden="true">&#x25B6;&#xFE0E;</span>
+                                        <a class="edition-nav-next" href="{$next}" title="Nächstes Rechnungsbuch">
+                                            <span class="hide_on_mobile">Nächstes Rechnungsbuch </span><span aria-hidden="true">&#x25B6;&#xFE0E;</span>
                                         </a>
                                     </xsl:if>
                                 </div>
-                                <input type="checkbox" id="edition-mobile-view-toggle" class="edition-mobile-view-input"/>
+                                <input type="checkbox" id="edition-mobile-view-toggle" class="edition-mobile-view-input hide_on_desktop"/>
                                 <div class="view-toggle">
-                                    <label for="edition-mobile-view-toggle" class="pill-btn toc-view-toggle-btn edition-mobile-view-toggle" role="button">
+                                    <label for="edition-mobile-view-toggle" class="pill-btn toc-view-toggle-btn edition-mobile-view-toggle hide_on_desktop" role="button">
                                         <span class="edition-mobile-view-label edition-mobile-view-label--facs">Transkription</span>
                                         <span class="edition-mobile-view-label edition-mobile-view-label--text">Faksimile</span>
                                     </label>
@@ -204,7 +199,7 @@
                                         <div id="img-resize" class="col-md-6 col-lg-6 col-sm-12 facsimiles">
                                             <div id="viewer">
                                                 <div id="container_facs_1" class="osd-container"/>
-                                                <div class="edition-facsimile-touch-guard" aria-hidden="true"></div>
+                                                <div class="edition-facsimile-touch-guard hide_on_desktop" aria-hidden="true" />
                                             </div>
                                         </div>
                                         <div id="text-resize" lang="de" class="col-md-6 col-lg-6 col-sm-12 text yes-index">

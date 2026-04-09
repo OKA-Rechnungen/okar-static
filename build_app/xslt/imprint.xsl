@@ -10,6 +10,7 @@
    
     <xsl:import href="./partials/html_navbar.xsl"/>
     <xsl:import href="./partials/html_head.xsl"/>
+    <xsl:import href="./partials/html_pageheader.xsl"/>
     <xsl:import href="./partials/html_footer.xsl"/>
 
 
@@ -24,7 +25,8 @@
             
             <body class="d-flex flex-column h-100 has-site-top">
                 <xsl:call-template name="nav_bar"/>
-                <main class="flex-shrink-0 flex-grow-1">
+                <xsl:call-template name="page_header"/>
+                <main id="imprintPage" class="flex-shrink-0 flex-grow-1">
                     <div class="container py-4">
                         <h1><xsl:value-of select="$doc_title"/></h1>
                         <xsl:copy-of select="/*/div"/>

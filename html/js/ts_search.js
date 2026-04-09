@@ -385,6 +385,21 @@ search.addWidgets([
 
   instantsearch.widgets.searchBox({
     container: '#searchbox',
+    placeholder: 'Suche…',
+    autofocus: false,
+    showReset: false,
+    showSubmit: false,
+    showLoadingIndicator: false,
+    cssClasses: {
+      form: 'w-100',
+      input: 'form-control form-control-sm navbar-search',
+      submit: 'btn btn-outline-secondary',
+      reset: 'btn btn-outline-secondary',
+    },
+  }),
+
+  instantsearch.widgets.searchBox({
+    container: '#searchbox-mobile',
     placeholder: 'Textsuche',
     autofocus: false,
     showReset: true,
