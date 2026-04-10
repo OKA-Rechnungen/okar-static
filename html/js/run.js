@@ -291,48 +291,131 @@ var editor = new LoadEditor({
 
     var BAND_SEARCH_DEBUG = true;
 
-    var form = document.querySelector('.navbar-search-form');
-    var input = document.getElementById('navbar-search');
-    var status = document.getElementById('band-search-status');
-    var scopeCheckbox = document.getElementById('band-search-scope');
-    var navControls = document.getElementById('band-search-nav-controls');
-    var prevButton = document.getElementById('band-search-prev');
-    var nextButton = document.getElementById('band-search-next');
+    var contexts = Array.prototype.slice.call(document.querySelectorAll('.navbar-search-form')).map(function (formNode) {
+      var context = {
+        form: formNode,
+        input: formNode.querySelector('#navbar-search, .navbar-search'),
+        status: formNode.querySelector('#band-search-status, .navbar-search-status'),
+        scopeCheckbox: formNode.querySelector('#band-search-scope'),
+        navControls: formNode.querySelector('#band-search-nav-controls'),
+        prevButton: formNode.querySelector('#band-search-prev'),
+        nextButton: formNode.querySelector('#band-search-next')
+      };
 
-    if (!form || !input) {
+      return context.input ? context : null;
+    }).filter(Boolean);
+
+    if (!contexts.length) {
       return;
     }
 
-    var bandScopeWrapper = scopeCheckbox ? scopeCheckbox.closest('.navbar-band-scope') : null;
-    if (bandScopeWrapper) bandScopeWrapper.classList.add('visible');
-    if (navControls) navControls.classList.add('visible');
+    function isVisible(node) {
+      if (!node) {
+        return false;
+      }
+      var style = window.getComputedStyle(node);
+      return style.display !== 'none' && style.visibility !== 'hidden' && node.getClientRects().length > 0;
+    }
+
+    function findContextForNode(node) {
+      if (!node) {
+        return null;
+      }
+      for (var i = 0; i < contexts.length; i += 1) {
+        if (contexts[i].form.contains(node)) {
+          return contexts[i];
+        }
+      }
+      return null;
+    }
+
+    function getActiveContext(preferredNode) {
+      var preferred = findContextForNode(preferredNode);
+      if (preferred) {
+        return preferred;
+      }
+
+      for (var i = 0; i < contexts.length; i += 1) {
+        var candidate = contexts[i];
+        var visibleRoot = candidate.form.closest('.site-top') || candidate.form;
+        if (isVisible(visibleRoot)) {
+          return candidate;
+        }
+      }
+
+      return contexts[0];
+    }
+
+    function getScopeChecked(preferredNode) {
+      var activeContext = getActiveContext(preferredNode);
+      if (!activeContext || !activeContext.scopeCheckbox) {
+        return true;
+      }
+      return !!activeContext.scopeCheckbox.checked;
+    }
+
+    function syncInputs(value, sourceContext) {
+      contexts.forEach(function (context) {
+        if (context !== sourceContext && context.input && context.input.value !== value) {
+          context.input.value = value;
+        }
+      });
+    }
+
+    function syncScopeCheckboxes(checked, sourceContext) {
+      contexts.forEach(function (context) {
+        if (context !== sourceContext && context.scopeCheckbox) {
+          context.scopeCheckbox.checked = checked;
+        }
+      });
+    }
+
+    function setStatusText(value) {
+      contexts.forEach(function (context) {
+        if (context.status) {
+          context.status.textContent = value;
+        }
+      });
+    }
+
+    contexts.forEach(function (context) {
+      var bandScopeWrapper = context.scopeCheckbox ? context.scopeCheckbox.closest('.navbar-band-scope') : null;
+      if (bandScopeWrapper) {
+        bandScopeWrapper.classList.add('visible');
+      }
+      if (context.navControls) {
+        context.navControls.classList.add('visible');
+      }
+    });
 
     var matches = [];
     var activeIndex = -1;
     var lastSearchKey = '';
     var pageMatchCache = Object.create(null);
 
-    function isBandScopeEnabled() {
-      return !scopeCheckbox || scopeCheckbox.checked;
+    function isBandScopeEnabled(preferredNode) {
+      return getScopeChecked(preferredNode);
     }
 
-    function updateBandScopeUi() {
-      if (!scopeCheckbox || !navControls) {
-        return;
-      }
-      navControls.classList.toggle('d-none', !scopeCheckbox.checked);
-      if (prevButton) {
-        prevButton.disabled = !scopeCheckbox.checked;
-      }
-      if (nextButton) {
-        nextButton.disabled = !scopeCheckbox.checked;
-      }
+    function updateBandScopeUi(preferredNode) {
+      var checked = getScopeChecked(preferredNode);
+
+      contexts.forEach(function (context) {
+        if (context.navControls) {
+          context.navControls.classList.toggle('d-none', !checked);
+        }
+        if (context.prevButton) {
+          context.prevButton.disabled = !checked;
+        }
+        if (context.nextButton) {
+          context.nextButton.disabled = !checked;
+        }
+      });
+
       if (BAND_SEARCH_DEBUG) {
         console.debug('[band-search] updateBandScopeUi', {
-          checked: scopeCheckbox.checked,
-          navHidden: navControls.classList.contains('d-none'),
-          prevDisabled: prevButton ? prevButton.disabled : null,
-          nextDisabled: nextButton ? nextButton.disabled : null,
+          checked: checked,
+          activeFormVisible: isVisible((getActiveContext(preferredNode).form.closest('.site-top') || getActiveContext(preferredNode).form)),
         });
       }
     }
@@ -392,16 +475,12 @@ var editor = new LoadEditor({
       });
       matches = [];
       activeIndex = -1;
-      if (status) {
-        status.textContent = '0/0';
-      }
+      setStatusText('0/0');
       lastSearchKey = '';
     }
 
     function updateStatus() {
-      if (status) {
-        status.textContent = matches.length ? String(activeIndex + 1) + '/' + String(matches.length) : '0/0';
-      }
+      setStatusText(matches.length ? String(activeIndex + 1) + '/' + String(matches.length) : '0/0');
     }
 
     function activateMatch(index) {
@@ -514,16 +593,19 @@ var editor = new LoadEditor({
       return matches.length > 0;
     }
 
-    function runBandSearch(options) {
+    function runBandSearch(options, preferredNode) {
       options = options || {};
-      var rawTerm = (input ? input.value : '').trim();
+      var context = getActiveContext(preferredNode);
+      var rawTerm = (context && context.input ? context.input.value : '').trim();
 
       if (!rawTerm) {
         clearHighlights();
         return;
       }
 
-      var onlyCurrentBand = isBandScopeEnabled();
+      syncInputs(rawTerm, context);
+
+      var onlyCurrentBand = isBandScopeEnabled(preferredNode);
       if (!onlyCurrentBand) {
         clearHighlights();
         return false;
@@ -553,19 +635,22 @@ var editor = new LoadEditor({
       return true;
     }
 
-    function navigateBandSearch(direction) {
+    function navigateBandSearch(direction, preferredNode) {
+      var context = getActiveContext(preferredNode);
+      var rawTerm = (context && context.input ? context.input.value : '').trim();
+
       if (BAND_SEARCH_DEBUG) {
         console.debug('[band-search] navigateBandSearch start', {
           direction: direction,
-          scopeEnabled: isBandScopeEnabled(),
-          inputValue: input ? input.value : '',
+          scopeEnabled: isBandScopeEnabled(preferredNode),
+          inputValue: rawTerm,
           matches: matches.length,
           activeIndex: activeIndex,
           lastSearchKey: lastSearchKey,
         });
       }
 
-      if (!isBandScopeEnabled()) {
+      if (!isBandScopeEnabled(preferredNode)) {
         clearHighlights();
         if (BAND_SEARCH_DEBUG) {
           console.debug('[band-search] abort: scope disabled');
@@ -573,7 +658,6 @@ var editor = new LoadEditor({
         return;
       }
 
-      var rawTerm = (input ? input.value : '').trim();
       if (!rawTerm) {
         clearHighlights();
         if (BAND_SEARCH_DEBUG) {
@@ -581,6 +665,8 @@ var editor = new LoadEditor({
         }
         return;
       }
+
+      syncInputs(rawTerm, context);
 
       var terms = normalizeTerms(rawTerm);
       var searchKey = terms.join(' ').toLowerCase();
@@ -762,25 +848,35 @@ var editor = new LoadEditor({
         });
     }
 
-    form.addEventListener('submit', function (event) {
-      var shouldHandleInBand = isBandScopeEnabled();
-      if (!shouldHandleInBand) {
-        clearHighlights();
-        return;
+    contexts.forEach(function (context) {
+      context.form.addEventListener('submit', function (event) {
+        var shouldHandleInBand = isBandScopeEnabled(context.form);
+        if (!shouldHandleInBand) {
+          clearHighlights();
+          return;
+        }
+        event.preventDefault();
+        runBandSearch({ advanceIfSame: true }, context.form);
+      });
+
+      if (context.input) {
+        context.input.addEventListener('input', function () {
+          syncInputs(context.input.value, context);
+        });
       }
-      event.preventDefault();
-      runBandSearch({ advanceIfSame: true });
+
+      if (context.scopeCheckbox) {
+        context.scopeCheckbox.addEventListener('change', function () {
+          syncScopeCheckboxes(context.scopeCheckbox.checked, context);
+          updateBandScopeUi(context.scopeCheckbox);
+          if (!context.scopeCheckbox.checked) {
+            clearHighlights();
+          }
+        });
+      }
     });
 
-    if (scopeCheckbox) {
-      scopeCheckbox.addEventListener('change', function () {
-        updateBandScopeUi();
-        if (!scopeCheckbox.checked) {
-          clearHighlights();
-        }
-      });
-      updateBandScopeUi();
-    }
+    updateBandScopeUi();
 
     // Delegation keeps controls clickable if the navbar is re-rendered.
     document.addEventListener('click', function (event) {
@@ -793,7 +889,7 @@ var editor = new LoadEditor({
             className: event.target ? event.target.className : null,
           });
         }
-        navigateBandSearch(-1);
+        navigateBandSearch(-1, event.target);
       }
       if (event.target && event.target.closest('#band-search-next')) {
         event.preventDefault();
@@ -804,7 +900,7 @@ var editor = new LoadEditor({
             className: event.target ? event.target.className : null,
           });
         }
-        navigateBandSearch(1);
+        navigateBandSearch(1, event.target);
       }
     });
 
@@ -813,8 +909,12 @@ var editor = new LoadEditor({
     var params = new URLSearchParams(window.location.search);
     var rawMark = params.get('mark');
     var hasExplicitPageParam = params.has('p');
-    if (rawMark && input) {
-      input.value = rawMark;
+    if (rawMark) {
+      contexts.forEach(function (context) {
+        if (context.input) {
+          context.input.value = rawMark;
+        }
+      });
 
       if (!applyHighlights(normalizeTerms(rawMark))) {
         var observer = new MutationObserver(function () {

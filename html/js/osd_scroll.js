@@ -6,13 +6,18 @@ Single page transcript navigation with OpenSeadragon image sync.
 (function() {
     console.log('[osd_scroll] Script started');
     var screenHeight = window.innerHeight || screen.height || 800;
+    var isMobileViewport = window.matchMedia('(max-width: 800px)').matches;
     var osdContainer = document.getElementById('container_facs_1');
     var facsimileWrapper = document.getElementsByClassName('facsimiles')[0];
     var sectionContainer = document.getElementById('section');
     var viewerWrapper = document.getElementById('viewer');
 
     if (osdContainer) {
-        osdContainer.style.height = `${String(screenHeight / 2)}px`;
+        if (isMobileViewport) {
+            osdContainer.style.removeProperty('height');
+        } else {
+            osdContainer.style.height = `${String(screenHeight / 2)}px`;
+        }
     }
 
     if (facsimileWrapper && sectionContainer && viewerWrapper) {

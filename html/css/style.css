@@ -532,7 +532,9 @@ div#map {
 
 }
 
-.footer-row{margin-bottom: 1rem;}
+.footer-row{
+    margin: 0 0 1rem 0;
+}
 
 #wrapper-footer-secondary{
     background-color: var(--okar-bg-colour-3);
@@ -746,4 +748,8 @@ div#map {
 .sic {
     /* hidden for now; will be styled later */
     display: none;
+}
+
+.text-left {
+    font-size: small ;
 }
