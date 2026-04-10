@@ -295,7 +295,7 @@ var editor = new LoadEditor({
       var context = {
         form: formNode,
         input: formNode.querySelector('#navbar-search, .navbar-search'),
-        status: formNode.querySelector('#band-search-status, .navbar-search-status'),
+        statusNodes: Array.prototype.slice.call(formNode.querySelectorAll('#band-search-status, .navbar-search-status')),
         scopeCheckbox: formNode.querySelector('#band-search-scope'),
         navControls: formNode.querySelector('#band-search-nav-controls'),
         prevButton: formNode.querySelector('#band-search-prev'),
@@ -372,26 +372,258 @@ var editor = new LoadEditor({
 
     function setStatusText(value) {
       contexts.forEach(function (context) {
-        if (context.status) {
-          context.status.textContent = value;
-        }
+        (context.statusNodes || []).forEach(function (statusNode) {
+          statusNode.textContent = value;
+        });
+      });
+    }
+
+    function createResultsPopup(context) {
+      if (!context || !context.input || !context.form) {
+        return;
+      }
+
+      var searchBox = context.form.querySelector('.navbar-search-box');
+      if (!searchBox || searchBox.querySelector('.navbar-band-results')) {
+        return;
+      }
+
+      var popup = document.createElement('div');
+      popup.className = 'navbar-band-results';
+      popup.setAttribute('aria-live', 'polite');
+
+      var popupHeader = document.createElement('div');
+      popupHeader.className = 'navbar-band-results-header';
+
+      var heading = document.createElement('span');
+      heading.className = 'navbar-band-results-heading small';
+      heading.innerHTML = '<span class="navbar-band-results-col-page">Seite</span><span class="navbar-band-results-col-hit">Treffer</span>';
+
+      var nav = document.createElement('div');
+      nav.className = 'navbar-band-results-nav';
+
+      var prev = document.createElement('button');
+      prev.type = 'button';
+      prev.className = 'navbar-band-nav-btn navbar-band-nav-btn-inline';
+      prev.setAttribute('aria-label', 'Vorheriges Ergebnis');
+      prev.textContent = '◀';
+
+      var next = document.createElement('button');
+      next.type = 'button';
+      next.className = 'navbar-band-nav-btn navbar-band-nav-btn-inline';
+      next.setAttribute('aria-label', 'Nächstes Ergebnis');
+      next.textContent = '▶';
+
+      var list = document.createElement('div');
+      list.className = 'navbar-band-results-list';
+
+      nav.appendChild(prev);
+      nav.appendChild(next);
+      popupHeader.appendChild(heading);
+      popupHeader.appendChild(nav);
+      popup.appendChild(popupHeader);
+      popup.appendChild(list);
+      searchBox.appendChild(popup);
+
+      context.popup = popup;
+      context.popupList = list;
+      context.popupPrevButton = prev;
+      context.popupNextButton = next;
+
+      prev.addEventListener('click', function (event) {
+        event.preventDefault();
+        navigateBandSearch(-1, prev);
+      });
+
+      next.addEventListener('click', function (event) {
+        event.preventDefault();
+        navigateBandSearch(1, next);
       });
     }
 
     contexts.forEach(function (context) {
+      if (context.navControls && context.navControls.parentNode) {
+        context.navControls.parentNode.removeChild(context.navControls);
+        context.navControls = null;
+        context.prevButton = null;
+        context.nextButton = null;
+      }
+
       var bandScopeWrapper = context.scopeCheckbox ? context.scopeCheckbox.closest('.navbar-band-scope') : null;
       if (bandScopeWrapper) {
         bandScopeWrapper.classList.add('visible');
       }
-      if (context.navControls) {
-        context.navControls.classList.add('visible');
+      if (context.prevButton) {
+        context.prevButton.textContent = '▲';
       }
+      if (context.nextButton) {
+        context.nextButton.textContent = '▼';
+      }
+      createResultsPopup(context);
     });
 
     var matches = [];
     var activeIndex = -1;
     var lastSearchKey = '';
     var pageMatchCache = Object.create(null);
+    var pageAnchors = Array.prototype.slice.call(container.querySelectorAll('.pb[data-page-number]'));
+
+    function getPageForMatch(node) {
+      if (!node || !pageAnchors.length) {
+        return getCurrentPageFromUrl();
+      }
+
+      var currentPage = getCurrentPageFromUrl();
+      for (var i = 0; i < pageAnchors.length; i += 1) {
+        var anchor = pageAnchors[i];
+        var rel = anchor.compareDocumentPosition(node);
+
+        if (anchor === node || (rel & Node.DOCUMENT_POSITION_CONTAINED_BY)) {
+          currentPage = parseInt(anchor.getAttribute('data-page-number') || String(currentPage), 10) || currentPage;
+          continue;
+        }
+
+        if (rel & Node.DOCUMENT_POSITION_FOLLOWING) {
+          currentPage = parseInt(anchor.getAttribute('data-page-number') || String(currentPage), 10) || currentPage;
+          continue;
+        }
+
+        if (rel & Node.DOCUMENT_POSITION_PRECEDING) {
+          break;
+        }
+      }
+
+      return currentPage;
+    }
+
+    function buildMatchSnippet(node) {
+      if (!node || !node.parentNode) {
+        return '';
+      }
+
+      var source = String(node.parentNode.textContent || '').replace(/\s+/g, ' ').trim();
+      var needle = String(node.textContent || '').trim();
+      if (!source) {
+        return needle;
+      }
+
+      if (!needle) {
+        return source.slice(0, 80);
+      }
+
+      var lowerSource = source.toLowerCase();
+      var lowerNeedle = needle.toLowerCase();
+      var hitIndex = lowerSource.indexOf(lowerNeedle);
+      if (hitIndex < 0) {
+        return source.slice(0, 80);
+      }
+
+      var start = Math.max(0, hitIndex - 18);
+      var end = Math.min(source.length, hitIndex + needle.length + 64);
+      var prefix = start > 0 ? '…' : '';
+      var suffix = end < source.length ? '…' : '';
+      return prefix + source.slice(start, end) + suffix;
+    }
+
+    function collectPageRows() {
+      var rowsByPage = Object.create(null);
+      var rows = [];
+
+      for (var i = 0; i < matches.length; i += 1) {
+        var matchNode = matches[i];
+        var page = String(getPageForMatch(matchNode));
+        if (rowsByPage[page]) {
+          continue;
+        }
+
+        var row = {
+          page: page,
+          matchIndex: i,
+          snippet: buildMatchSnippet(matchNode),
+        };
+        rowsByPage[page] = row;
+        rows.push(row);
+      }
+
+      return rows;
+    }
+
+    function renderResultsList() {
+      var hasResults = matches.length > 0;
+
+      contexts.forEach(function (context) {
+        var popup = context.popup;
+        var list = context.popupList;
+        var checked = getScopeChecked(context.form);
+        var hasTerm = !!(context.input && context.input.value && context.input.value.trim());
+
+        if (!popup || !list) {
+          return;
+        }
+
+        popup.classList.toggle('visible', checked && hasTerm);
+        list.innerHTML = '';
+
+        if (!checked || !hasTerm) {
+          return;
+        }
+
+        if (!hasResults) {
+          var empty = document.createElement('div');
+          empty.className = 'navbar-band-results-empty';
+          empty.textContent = 'Keine Treffer im Band';
+          list.appendChild(empty);
+          return;
+        }
+
+        var pageRows = collectPageRows();
+        var maxItems = Math.min(pageRows.length, 8);
+        for (var i = 0; i < maxItems; i += 1) {
+          var row = pageRows[i];
+          var item = document.createElement('button');
+          item.type = 'button';
+          item.className = 'navbar-band-results-item';
+
+          var pageFirstMatch = parseInt(row.matchIndex, 10);
+          var pageNumber = String(row.page);
+          var activeMatchPage = activeIndex >= 0 && matches[activeIndex]
+            ? String(getPageForMatch(matches[activeIndex]))
+            : '';
+
+          if (activeMatchPage && activeMatchPage === pageNumber) {
+            item.classList.add('active');
+          }
+          item.dataset.matchIndex = String(pageFirstMatch);
+
+          var pageBadge = document.createElement('span');
+          pageBadge.className = 'navbar-band-results-page';
+          pageBadge.textContent = pageNumber;
+
+          var snippet = document.createElement('span');
+          snippet.className = 'navbar-band-results-snippet';
+          snippet.textContent = row.snippet;
+
+          item.appendChild(pageBadge);
+          item.appendChild(snippet);
+
+          item.addEventListener('click', function () {
+            var idx = parseInt(this.dataset.matchIndex || '', 10);
+            if (Number.isFinite(idx)) {
+              activateMatch(idx);
+            }
+          });
+
+          list.appendChild(item);
+        }
+
+        if (pageRows.length > maxItems) {
+          var more = document.createElement('div');
+          more.className = 'navbar-band-results-empty';
+          more.textContent = '+' + String(pageRows.length - maxItems) + ' weitere Seiten';
+          list.appendChild(more);
+        }
+      });
+    }
 
     function isBandScopeEnabled(preferredNode) {
       return getScopeChecked(preferredNode);
@@ -401,16 +633,21 @@ var editor = new LoadEditor({
       var checked = getScopeChecked(preferredNode);
 
       contexts.forEach(function (context) {
-        if (context.navControls) {
-          context.navControls.classList.toggle('d-none', !checked);
-        }
         if (context.prevButton) {
           context.prevButton.disabled = !checked;
         }
         if (context.nextButton) {
           context.nextButton.disabled = !checked;
         }
+        if (context.popupPrevButton) {
+          context.popupPrevButton.disabled = !checked;
+        }
+        if (context.popupNextButton) {
+          context.popupNextButton.disabled = !checked;
+        }
       });
+
+      renderResultsList();
 
       if (BAND_SEARCH_DEBUG) {
         console.debug('[band-search] updateBandScopeUi', {
@@ -477,10 +714,12 @@ var editor = new LoadEditor({
       activeIndex = -1;
       setStatusText('0/0');
       lastSearchKey = '';
+      renderResultsList();
     }
 
     function updateStatus() {
       setStatusText(matches.length ? String(activeIndex + 1) + '/' + String(matches.length) : '0/0');
+      renderResultsList();
     }
 
     function activateMatch(index) {
