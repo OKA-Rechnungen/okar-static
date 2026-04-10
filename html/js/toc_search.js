@@ -17,7 +17,7 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
     highlight_full_fields: 'title',
     group_by: 'rec_id',
     group_limit: 1,
-    sort_by: 'title:asc',
+    sort_by: 'rec_id:asc',
   },
 });
 
@@ -58,6 +58,93 @@ function getYear(value) {
   return value || '';
 }
 
+var tocDebugEnabled = /[?&]debugToc=1(?:&|$)/.test(window.location.search) || window.localStorage.getItem('okar_toc_debug') === '1';
+var tocDebugState = {
+  renderCount: 0,
+  lastRawHitsCount: 0,
+  lastProcessedHitsCount: 0,
+};
+
+function ensureTocDebugPanel() {
+  if (!tocDebugEnabled) return null;
+  var panel = document.getElementById('toc-debug-panel');
+  if (panel) return panel;
+
+  panel = document.createElement('pre');
+  panel.id = 'toc-debug-panel';
+  panel.style.position = 'fixed';
+  panel.style.left = '0';
+  panel.style.right = '0';
+  panel.style.bottom = '0';
+  panel.style.maxHeight = '35vh';
+  panel.style.overflow = 'auto';
+  panel.style.margin = '0';
+  panel.style.padding = '0.5rem 0.75rem';
+  panel.style.background = 'rgba(0, 0, 0, 0.88)';
+  panel.style.color = '#b9f6ca';
+  panel.style.font = '12px/1.4 monospace';
+  panel.style.zIndex = '99999';
+  panel.style.whiteSpace = 'pre-wrap';
+  panel.style.pointerEvents = 'none';
+  panel.textContent = 'TOC debug enabled\n';
+  document.body.appendChild(panel);
+  return panel;
+}
+
+function tocDebugLog(message, payload) {
+  if (!tocDebugEnabled) return;
+  var stamp = new Date().toISOString().split('T')[1].replace('Z', '');
+  if (payload !== undefined) {
+    console.log('[toc-debug][' + stamp + '] ' + message, payload);
+  } else {
+    console.log('[toc-debug][' + stamp + '] ' + message);
+  }
+
+  var panel = ensureTocDebugPanel();
+  if (!panel) return;
+  var line = '[' + stamp + '] ' + message;
+  if (payload !== undefined) {
+    try {
+      line += ' ' + JSON.stringify(payload);
+    } catch (err) {
+      line += ' [payload not serializable]';
+    }
+  }
+  panel.textContent += line + '\n';
+  if (panel.textContent.length > 50000) {
+    panel.textContent = panel.textContent.slice(-45000);
+  }
+  panel.scrollTop = panel.scrollHeight;
+}
+
+function getGridColumnCount() {
+  var listEl = document.querySelector('.ais-InfiniteHits-list');
+  if (!listEl) return 0;
+  var template = window.getComputedStyle(listEl).gridTemplateColumns || '';
+  if (!template) return 0;
+  return template.split(' ').filter(function(token) { return token && token !== '/'; }).length;
+}
+
+function logGridPlacement(sourceLabel) {
+  if (!tocDebugEnabled) return;
+  var listEl = document.querySelector('.ais-InfiniteHits-list');
+  if (!listEl) {
+    tocDebugLog(sourceLabel + ' grid-state', { listPresent: false });
+    return;
+  }
+  var items = listEl.querySelectorAll('.ais-InfiniteHits-item').length;
+  var columns = getGridColumnCount();
+  var lastRowFill = columns > 0 ? (items % columns || columns) : 0;
+  var rows = columns > 0 ? Math.ceil(items / columns) : 0;
+  tocDebugLog(sourceLabel + ' grid-state', {
+    listPresent: true,
+    items: items,
+    columns: columns,
+    rows: rows,
+    lastRowFill: lastRowFill,
+  });
+}
+
 var search = instantsearch({
   indexName: project_collection_name,
   searchClient: typesenseInstantsearchAdapter.searchClient,
@@ -66,6 +153,52 @@ var search = instantsearch({
 // Custom infiniteHits using connector
 var infiniteHitsShowMore = null;
 var infiniteHitsIsLastPage = true;
+var tocLoadState = {
+  targetVisibleCount: 20,
+  awaitingShowMoreResult: false,
+  lastRequestedRawHits: 0,
+  lastRawHitsCount: 0,
+  lastProcessedHits: [],
+  lastContainer: null,
+};
+
+function renderProcessedHits(container, processedHits, visibleCount) {
+  var visibleHits = processedHits.slice(0, visibleCount);
+  var hitsHtml = visibleHits.length === 0
+    ? '<div class="ais-InfiniteHits-empty">Keine Resultate für diese Suche</div>'
+    : '<ol class="ais-InfiniteHits-list">' + visibleHits.map(function(hit) {
+        return '<li class="ais-InfiniteHits-item">' +
+          '<a class="toc-hit-card-link" href="' + hit.link + '" aria-label="Details zu ' + hit.display_title_plain + '">' +
+          '<div class="toc-hit-card">' +
+              (hit.thumbnail ? '<img class="toc-hit-image" src="' + hit.thumbnail + '" alt="Seitenvorschau" loading="lazy" />' : '<div class="toc-hit-placeholder"></div>') +
+          '</div>' +
+          '<div class="toc-hit-overlay">' +
+            '<h4 class="toc-hit-title">' + hit.display_title_highlight + '</h4>' +
+            '<ul class="toc-hit-list">' +
+              '<li><span class="toc-hit-label">SIGNATUR</span><span class="toc-hit-value">' + (hit.signature || '–') + '</span></li>' +
+              '<li><span class="toc-hit-label">JAHR</span><span class="toc-hit-value">' + (hit.year || '–') + '</span></li>' +
+              '<li><span class="toc-hit-label">KÄMMERER</span><span class="toc-hit-value">' + (Array.isArray(hit.kaemmerer) ? hit.kaemmerer.join(', ') : hit.kaemmerer || '–') + '</span></li>' +
+              (hit.beilage_text ? '<li><span class="toc-hit-label">BEILAGE</span><span class="toc-hit-value">' + hit.beilage_text + '</span></li>' : '') +
+            '</ul>' +
+          '</div>' +
+          '</a>' +
+        '</li>';
+      }).join('') + '</ol>';
+
+  container.innerHTML = '<div class="ais-InfiniteHits">' + hitsHtml + '</div>';
+  window.dispatchEvent(new CustomEvent('infiniteHitsRendered'));
+  window.requestAnimationFrame(function() {
+    logGridPlacement('post-render');
+  });
+}
+
+function requestShowMoreIfNeeded(showMore, currentRawHitsCount) {
+  if (!showMore || infiniteHitsIsLastPage || tocLoadState.awaitingShowMoreResult) return false;
+  tocLoadState.awaitingShowMoreResult = true;
+  tocLoadState.lastRequestedRawHits = currentRawHitsCount;
+  showMore();
+  return true;
+}
 
 var connectInfiniteHits = instantsearch.connectors.connectInfiniteHits;
 
@@ -73,6 +206,7 @@ var renderInfiniteHits = function(renderOptions, isFirstRender) {
   var hits = renderOptions.hits;
   var showMore = renderOptions.showMore;
   var isLastPage = renderOptions.isLastPage;
+  var results = renderOptions.results;
   var widgetParams = renderOptions.widgetParams;
   var container = document.querySelector(widgetParams.container);
 
@@ -81,9 +215,24 @@ var renderInfiniteHits = function(renderOptions, isFirstRender) {
 
   if (!container) return;
 
+  if (hits.length < tocLoadState.lastRawHitsCount) {
+    tocLoadState.targetVisibleCount = 20;
+    tocLoadState.awaitingShowMoreResult = false;
+    tocLoadState.lastRequestedRawHits = 0;
+    tocDebugLog('state reset on new result set', {
+      previousRawHits: tocLoadState.lastRawHitsCount,
+      currentRawHits: hits.length,
+    });
+  }
+
+  if (tocLoadState.awaitingShowMoreResult && (hits.length > tocLoadState.lastRequestedRawHits || isLastPage)) {
+    tocLoadState.awaitingShowMoreResult = false;
+  }
+
   // Deduplicate by rec_id, keep the best page
   var seenByRecId = Object.create(null);
   var orderedRecIds = [];
+  var duplicateRecIds = Object.create(null);
 
   hits.forEach(function(item) {
     var recId = item.rec_id || '';
@@ -93,6 +242,7 @@ var renderInfiniteHits = function(renderOptions, isFirstRender) {
       orderedRecIds.push(recId);
       return;
     }
+    duplicateRecIds[recId] = (duplicateRecIds[recId] || 1) + 1;
     var currentBest = seenByRecId[recId];
     var currentPage = parsePageNumber(currentBest.id);
     var candidatePage = parsePageNumber(item.id);
@@ -130,31 +280,43 @@ var renderInfiniteHits = function(renderOptions, isFirstRender) {
     };
   });
 
-  var hitsHtml = processedHits.length === 0
-    ? '<div class="ais-InfiniteHits-empty">Keine Resultate für diese Suche</div>'
-    : '<ol class="ais-InfiniteHits-list">' + processedHits.map(function(hit) {
-        var titleUpper = String(hit.display_title_plain).toLocaleUpperCase('de-DE');
-        return '<li class="ais-InfiniteHits-item">' +
-          '<a class="toc-hit-card-link" href="' + hit.link + '" aria-label="Details zu ' + hit.display_title_plain + '">' +
-          '<div class="toc-hit-card">' +
-              (hit.thumbnail ? '<img class="toc-hit-image" src="' + hit.thumbnail + '" alt="Seitenvorschau" loading="lazy" />' : '<div class="toc-hit-placeholder"></div>') +
-          '</div>' +
-          '<div class="toc-hit-overlay">' +
-            '<h4 class="toc-hit-title">' + hit.display_title_highlight + '</h4>' +
-            '<ul class="toc-hit-list">' +
-              '<li><span class="toc-hit-label">SIGNATUR</span><span class="toc-hit-value">' + (hit.signature || '–') + '</span></li>' +
-              '<li><span class="toc-hit-label">JAHR</span><span class="toc-hit-value">' + (hit.year || '–') + '</span></li>' +
-              '<li><span class="toc-hit-label">KÄMMERER</span><span class="toc-hit-value">' + (Array.isArray(hit.kaemmerer) ? hit.kaemmerer.join(', ') : hit.kaemmerer || '–') + '</span></li>' +
-              (hit.beilage_text ? '<li><span class="toc-hit-label">BEILAGE</span><span class="toc-hit-value">' + hit.beilage_text + '</span></li>' : '') +
-            '</ul>' +
-          '</div>' +
-          '</a>' +
-        '</li>';
-      }).join('') + '</ol>';
+  tocDebugState.renderCount += 1;
+  var duplicateEntries = Object.keys(duplicateRecIds).map(function(recId) {
+    return { rec_id: recId, occurrences: duplicateRecIds[recId] };
+  }).sort(function(a, b) {
+    return b.occurrences - a.occurrences;
+  });
 
-  container.innerHTML = '<div class="ais-InfiniteHits">' + hitsHtml + '</div>';
+  tocDebugLog('render #' + tocDebugState.renderCount, {
+    isFirstRender: isFirstRender,
+    resultPage: results && typeof results.page === 'number' ? results.page : null,
+    resultNbPages: results && typeof results.nbPages === 'number' ? results.nbPages : null,
+    resultHitsPerPage: results && typeof results.hitsPerPage === 'number' ? results.hitsPerPage : null,
+    resultNbHits: results && typeof results.nbHits === 'number' ? results.nbHits : null,
+    connectorIsLastPage: isLastPage,
+    rawHitsCount: hits.length,
+    rawHitsDelta: hits.length - tocDebugState.lastRawHitsCount,
+    uniqueRecIdsCount: orderedRecIds.length,
+    processedHitsCount: processedHits.length,
+    processedHitsDelta: processedHits.length - tocDebugState.lastProcessedHitsCount,
+    duplicateRecIdsCount: duplicateEntries.length,
+    topDuplicateRecIds: duplicateEntries.slice(0, 5),
+    firstThreeRecIds: orderedRecIds.slice(0, 3),
+    lastThreeRecIds: orderedRecIds.slice(Math.max(orderedRecIds.length - 3, 0)),
+  });
+  tocDebugState.lastRawHitsCount = hits.length;
+  tocDebugState.lastProcessedHitsCount = processedHits.length;
 
-  window.dispatchEvent(new CustomEvent('infiniteHitsRendered'));
+  tocLoadState.lastRawHitsCount = hits.length;
+  tocLoadState.lastProcessedHits = processedHits;
+  tocLoadState.lastContainer = container;
+
+  var visibleCount = Math.min(tocLoadState.targetVisibleCount, processedHits.length);
+  renderProcessedHits(container, processedHits, visibleCount);
+
+  if (processedHits.length < tocLoadState.targetVisibleCount && !isLastPage) {
+    requestShowMoreIfNeeded(showMore, hits.length);
+  }
 };
 
 var customInfiniteHits = connectInfiniteHits(renderInfiniteHits);
@@ -250,7 +412,24 @@ search.start();
   loadMoreBtn.className = 'square-btn load-more-btn semitrans';
   loadMoreBtn.innerHTML = '<i class="bi bi-chevron-double-down" aria-hidden="true"></i>';
   loadMoreBtn.addEventListener('click', function() {
-    if (infiniteHitsShowMore) infiniteHitsShowMore();
+    tocLoadState.targetVisibleCount += 20;
+    tocDebugLog('load-more click', {
+      beforeDisplayedItems: document.querySelectorAll('.ais-InfiniteHits-item').length,
+      beforeIsLastPage: infiniteHitsIsLastPage,
+      hasShowMoreHandler: Boolean(infiniteHitsShowMore),
+      targetVisibleCount: tocLoadState.targetVisibleCount,
+    });
+
+    if (tocLoadState.lastContainer && tocLoadState.lastProcessedHits.length >= tocLoadState.targetVisibleCount) {
+      renderProcessedHits(
+        tocLoadState.lastContainer,
+        tocLoadState.lastProcessedHits,
+        tocLoadState.targetVisibleCount
+      );
+      return;
+    }
+
+    requestShowMoreIfNeeded(infiniteHitsShowMore, tocLoadState.lastRawHitsCount);
   });
 
   var label = document.createElement('span');
@@ -269,6 +448,15 @@ search.start();
     var hasMore = displayedHits > 0 && !infiniteHitsIsLastPage;
     loadMoreBtn.disabled = !hasMore;
     loadMoreWrapper.style.display = hasMore ? '' : 'none';
+
+    tocDebugLog('load-more visibility update', {
+      displayedHits: displayedHits,
+      totalHits: totalHits,
+      connectorIsLastPage: infiniteHitsIsLastPage,
+      hasMore: hasMore,
+      buttonDisabled: loadMoreBtn.disabled,
+      buttonVisible: loadMoreWrapper.style.display !== 'none',
+    });
   }
 
   window.addEventListener('infiniteHitsRendered', updateButtonVisibility);
