@@ -15,8 +15,6 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
   additionalSearchParameters: {
     query_by: 'title,full_text',
     highlight_full_fields: 'title',
-    group_by: 'rec_id',
-    group_limit: 1,
     sort_by: 'rec_id:asc',
   },
 });
