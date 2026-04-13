@@ -94,6 +94,11 @@ def main():
         help="Typesense collection name (default: OKAR)",
     )
     parser.add_argument(
+        "--toc-collection",
+        default="OKAR",
+        help="Typesense collection name for TOC browse documents (default: OKAR)",
+    )
+    parser.add_argument(
         "--source-glob",
         default="./data/editions/**/*.xml",
         help="Glob for TEI sources (default: ./data/editions/**/*.xml)",
@@ -103,10 +108,15 @@ def main():
     files = glob.glob(args.source_glob, recursive=True)
 
     collection_name = args.collection
+    toc_collection_name = args.toc_collection
 
     if args.recreate:
         try:
             client.collections[collection_name].delete()
+        except ObjectNotFound:
+            pass
+        try:
+            client.collections[toc_collection_name].delete()
         except ObjectNotFound:
             pass
 
@@ -134,11 +144,39 @@ def main():
         ],
     }
 
+    toc_schema = {
+        "name": toc_collection_name,
+        "fields": [
+            {"name": "id", "type": "string", "sort": True},
+            {"name": "rec_id", "type": "string", "facet": True, "sort": True},
+            {"name": "title", "type": "string", "sort": True},
+            {"name": "full_text", "type": "string"},
+            {
+                "name": "year",
+                "type": "int32",
+                "optional": True,
+                "facet": True,
+                "sort": True,
+            },
+            {"name": "signature", "type": "string", "facet": True, "optional": True},
+            {"name": "kaemmerer", "type": "string[]", "facet": True, "optional": True},
+            {"name": "beilage_present", "type": "bool", "facet": True, "optional": True},
+            {"name": "beilage_text", "type": "string", "optional": True},
+            {"name": "image_source", "type": "string", "optional": True},
+            {"name": "thumbnail", "type": "string", "optional": True},
+        ],
+    }
+
     # Create collection if it doesn't exist (or if --recreate deleted it).
     try:
         client.collections[collection_name].retrieve()
     except ObjectNotFound:
         client.collections.create(current_schema)
+
+    try:
+        client.collections[toc_collection_name].retrieve()
+    except ObjectNotFound:
+        client.collections.create(toc_schema)
 
     def iter_import_rows(rows):
         if rows is None:
@@ -183,13 +221,13 @@ def main():
                 continue
             yield {"success": False, "error": f"Unexpected import response type: {type(row).__name__}", "raw": str(row)}
 
-    def import_in_batches(all_records, batch_size=1000):
+    def import_in_batches(target_collection_name, all_records, batch_size=1000):
         total = len(all_records)
         failures = []
         imported = 0
         for start in range(0, total, batch_size):
             batch = all_records[start : start + batch_size]
-            result_rows = client.collections[collection_name].documents.import_(
+            result_rows = client.collections[target_collection_name].documents.import_(
                 batch,
                 {
                     "action": "upsert",
@@ -199,7 +237,7 @@ def main():
                 if not row.get("success"):
                     failures.append(row)
             imported += len(batch)
-            print(f"imported batch {imported}/{total}")
+            print(f"imported batch {imported}/{total} into {target_collection_name}")
         return failures
 
     records = []
@@ -415,14 +453,54 @@ def main():
                 record["beilage_text"] = trimmed_beilage
             records.append(record)
 
-    print(f"prepared {len(records)} records for import")
+    print(f"prepared {len(records)} page-level records for import")
 
-    failed = import_in_batches(records, batch_size=1000)
+    toc_candidates = {}
+    for rec in records:
+        rid = rec.get("rec_id")
+        if not rid:
+            continue
+        current = toc_candidates.get(rid)
+        if current is None:
+            toc_candidates[rid] = rec
+            continue
+        current_page = current.get("page", 10**9)
+        candidate_page = rec.get("page", 10**9)
+        if candidate_page == 1 and current_page != 1:
+            toc_candidates[rid] = rec
+            continue
+        if candidate_page < current_page:
+            toc_candidates[rid] = rec
+
+    toc_records = []
+    for rid in sorted(toc_candidates.keys()):
+        src = toc_candidates[rid]
+        toc_rec = {
+            "id": rid.replace(".xml", ".html?p=1"),
+            "rec_id": rid,
+            "title": re.sub(r"\s*·\s*Seite\s+\d+\s*$", "", src.get("title", "")).strip(),
+            "full_text": src.get("full_text", ""),
+            "beilage_present": src.get("beilage_present", False),
+        }
+        for optional_key in ("year", "signature", "kaemmerer", "beilage_text", "image_source", "thumbnail"):
+            if optional_key in src:
+                toc_rec[optional_key] = src[optional_key]
+        toc_records.append(toc_rec)
+
+    print(f"prepared {len(toc_records)} toc records for import")
+
+    failed = import_in_batches(collection_name, records, batch_size=1000)
+    toc_failed = import_in_batches(toc_collection_name, toc_records, batch_size=1000)
     if failed:
         print(f"{len(failed)} records failed to import")
         print(failed[:5])
     else:
         print(f"imported {len(records)} records")
+    if toc_failed:
+        print(f"{len(toc_failed)} TOC records failed to import")
+        print(toc_failed[:5])
+    else:
+        print(f"imported {len(toc_records)} TOC records")
     print("done with indexing OKAR")
 
 
