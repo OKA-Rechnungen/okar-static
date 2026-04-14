@@ -48,7 +48,7 @@
                                         </div>
                                     </div>
                                     <div class="toc-left-section">
-                                        <h3 class="toc-left-heading">Jahr</h3>
+                                        <h3 class="toc-left-heading">Rechnungszeitraum</h3>
                                         <div id="yearSlider"></div>
                                         <div id="yearCount" class="toc-year-count"></div>
                                     </div>
