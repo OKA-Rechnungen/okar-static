@@ -109,16 +109,18 @@ def main():
 
     collection_name = args.collection
     toc_collection_name = args.toc_collection
+    same_collection_for_toc = toc_collection_name == collection_name
 
     if args.recreate:
         try:
             client.collections[collection_name].delete()
         except ObjectNotFound:
             pass
-        try:
-            client.collections[toc_collection_name].delete()
-        except ObjectNotFound:
-            pass
+        if not same_collection_for_toc:
+            try:
+                client.collections[toc_collection_name].delete()
+            except ObjectNotFound:
+                pass
 
     current_schema = {
         "name": collection_name,
@@ -173,10 +175,11 @@ def main():
     except ObjectNotFound:
         client.collections.create(current_schema)
 
-    try:
-        client.collections[toc_collection_name].retrieve()
-    except ObjectNotFound:
-        client.collections.create(toc_schema)
+    if not same_collection_for_toc:
+        try:
+            client.collections[toc_collection_name].retrieve()
+        except ObjectNotFound:
+            client.collections.create(toc_schema)
 
     def iter_import_rows(rows):
         if rows is None:
@@ -490,17 +493,22 @@ def main():
     print(f"prepared {len(toc_records)} toc records for import")
 
     failed = import_in_batches(collection_name, records, batch_size=1000)
-    toc_failed = import_in_batches(toc_collection_name, toc_records, batch_size=1000)
+    toc_failed = []
+    if not same_collection_for_toc:
+        toc_failed = import_in_batches(toc_collection_name, toc_records, batch_size=1000)
+    else:
+        print("skipping TOC import because --collection and --toc-collection are identical")
     if failed:
         print(f"{len(failed)} records failed to import")
         print(failed[:5])
     else:
         print(f"imported {len(records)} records")
-    if toc_failed:
-        print(f"{len(toc_failed)} TOC records failed to import")
-        print(toc_failed[:5])
-    else:
-        print(f"imported {len(toc_records)} TOC records")
+    if not same_collection_for_toc:
+        if toc_failed:
+            print(f"{len(toc_failed)} TOC records failed to import")
+            print(toc_failed[:5])
+        else:
+            print(f"imported {len(toc_records)} TOC records")
     print("done with indexing OKAR")
 
 

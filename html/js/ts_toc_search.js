@@ -16,9 +16,7 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
     query_by: 'title,full_text,rec_id',
     highlight_full_fields: 'title',
     group_by: 'rec_id',
-    // Fetch multiple pages per record so we can avoid using the cover (p=1)
-    // as thumbnail if later pages exist.
-    group_limit: 50,
+    group_limit: 1,
     sort_by: 'title:asc',
   },
 });
