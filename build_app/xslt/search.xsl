@@ -44,7 +44,7 @@
                                     <div class="toc-search-pill">
                                         <div class="toc-search-pill-inner">
                                             <form class="navbar-search-form hide_on_mobile px-0"  action="search.html" method="get">
-                                                <div class="navbar-search-item navbar-search-box" style="flex:1; max-width: unset">
+                                                <div class="navbar-search-item navbar-search-box" style="flex:1; max-width: unset;">
                                                     <input id="navbar-search" class="form-control form-control-sm navbar-search" type="search" name="q" placeholder="Suche…" autocomplete="off"/>
                                                     <button type="submit" class="navbar-search-submit" aria-label="Suche starten">
                                                         <i class="bi bi-search" aria-hidden="true"></i>
