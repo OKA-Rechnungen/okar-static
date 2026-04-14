@@ -15,9 +15,8 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
   additionalSearchParameters: {
     query_by: 'title,full_text,rec_id',
     highlight_full_fields: 'title',
-    group_by: 'rec_id',
-    group_limit: 1,
-    sort_by: 'title:asc',
+    filter_by: 'record_kind:=toc',
+    sort_by: 'rec_id:asc',
   },
 });
 
@@ -530,7 +529,7 @@ search.addWidgets([
 
       return orderedRecIds.map(function (recId) {
         var sourceItem = seenByRecId[recId];
-        var resolvedLink = sourceItem && sourceItem.id ? String(sourceItem.id) : '';
+        var resolvedLink = sourceItem && sourceItem.href ? String(sourceItem.href) : '';
         if (!resolvedLink) {
           resolvedLink = recId.replace(/\.xml$/i, '.html') + '?p=2';
         }
