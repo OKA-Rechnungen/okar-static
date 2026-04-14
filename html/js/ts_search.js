@@ -1,6 +1,10 @@
 'use strict';
 
 var project_collection_name = 'OKAR';
+var SEARCH_QUERY_FIELDS = 'full_text,title,rec_id';
+var SEARCH_NUM_TYPOS_OFF = '0,0,0';
+var SEARCH_NUM_TYPOS_ON = '2,2,2';
+var rawSearchClient = null;
 var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
   server: {
   apiKey: 'GXo33l5N2v9XbHXodWfAv68CvQLWLPWe',
@@ -13,14 +17,54 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
     ],
   },
   additionalSearchParameters: {
-    query_by: 'full_text,title,rec_id',
+    query_by: SEARCH_QUERY_FIELDS,
     highlight_full_fields: 'full_text,title',
     filter_by: 'record_kind:=page',
     sort_by: 'title:asc,rec_id:asc',
   },
 });
 
+rawSearchClient = typesenseInstantsearchAdapter.searchClient;
+
 var searchState = { fuzzySearch: false };
+
+function shouldForceExactSingleTokenQuery(query) {
+  var trimmed = String(query || '').trim();
+  if (!trimmed) {
+    return false;
+  }
+  if (trimmed.indexOf('"') !== -1) {
+    return false;
+  }
+  return !/\s/.test(trimmed);
+}
+
+function buildOutboundQuery(query) {
+  var trimmed = String(query || '').trim();
+  if (!trimmed) {
+    return trimmed;
+  }
+  if (searchState.fuzzySearch) {
+    return trimmed;
+  }
+  if (shouldForceExactSingleTokenQuery(trimmed)) {
+    return '"' + trimmed + '"';
+  }
+  return trimmed;
+}
+
+var searchClient = {
+  search: function (requests) {
+    var rewrittenRequests = (requests || []).map(function (request) {
+      var params = Object.assign({}, request.params || {});
+      if (typeof params.query === 'string') {
+        params.query = buildOutboundQuery(params.query);
+      }
+      return Object.assign({}, request, { params: params });
+    });
+    return rawSearchClient.search(rewrittenRequests);
+  },
+};
 
 function getInitialQueryFromUrl() {
   try {
@@ -111,7 +155,7 @@ function fallbackTitle(recId) {
 
 var search = instantsearch({
   indexName: project_collection_name,
-  searchClient: typesenseInstantsearchAdapter.searchClient,
+  searchClient: searchClient,
   // Don't run a search on empty query by default, but ensure that a query
   // provided via the URL (search.html?q=...) actually triggers a search.
   searchFunction: function (helper) {
@@ -383,7 +427,7 @@ search.addWidgets([
 
       checkbox.addEventListener('change', function (event) {
         searchState.fuzzySearch = Boolean(event.target.checked);
-        helper.setQueryParameter('typoTolerance', searchState.fuzzySearch ? 'true' : 'false');
+        helper.setQueryParameter('numTypos', searchState.fuzzySearch ? SEARCH_NUM_TYPOS_ON : SEARCH_NUM_TYPOS_OFF);
         var hasQuery = (helper.state.query || '').trim().length > 0;
         if (hasQuery || hasActiveRefinements(helper.state)) {
           helper.search();
@@ -494,7 +538,7 @@ search.addWidgets([
     hitsPerPage: 20,
     attributesToSnippet: ['full_text:50'],
     snippetEllipsisText: '...',
-    typoTolerance: 'false',
+    numTypos: SEARCH_NUM_TYPOS_OFF,
   }),
 ]);
 
