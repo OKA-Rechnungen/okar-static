@@ -126,6 +126,8 @@ def main():
         "name": collection_name,
         "fields": [
             {"name": "id", "type": "string", "sort": True},
+            {"name": "href", "type": "string", "optional": True},
+            {"name": "record_kind", "type": "string", "facet": True, "sort": True},
             {"name": "rec_id", "type": "string", "facet": True, "sort": True},
             {"name": "page", "type": "int32", "sort": True},
             {"name": "title", "type": "string", "sort": True},
@@ -150,7 +152,10 @@ def main():
         "name": toc_collection_name,
         "fields": [
             {"name": "id", "type": "string", "sort": True},
+            {"name": "href", "type": "string", "optional": True},
+            {"name": "record_kind", "type": "string", "facet": True, "sort": True},
             {"name": "rec_id", "type": "string", "facet": True, "sort": True},
+            {"name": "page", "type": "int32", "sort": True},
             {"name": "title", "type": "string", "sort": True},
             {"name": "full_text", "type": "string"},
             {
@@ -306,6 +311,8 @@ def main():
             record["id"] = os.path.split(x)[-1].replace(
                 ".xml", f".html?p={str(page_number)}"
             )
+            record["href"] = record["id"]
+            record["record_kind"] = "page"
             record["rec_id"] = os.path.split(x)[-1]
             record["page"] = page_number
             r_title = " ".join(
@@ -387,6 +394,8 @@ def main():
             record["id"] = os.path.split(x)[-1].replace(
                 ".xml", f".html?p={str(fallback_page)}"
             )
+            record["href"] = record["id"]
+            record["record_kind"] = "page"
             record["rec_id"] = os.path.split(x)[-1]
             record["page"] = fallback_page
             r_title = " ".join(
@@ -478,9 +487,13 @@ def main():
     toc_records = []
     for rid in sorted(toc_candidates.keys()):
         src = toc_candidates[rid]
+        toc_href = rid.replace(".xml", ".html?p=1")
         toc_rec = {
-            "id": rid.replace(".xml", ".html?p=1"),
+            "id": f"toc::{rid}",
+            "href": toc_href,
+            "record_kind": "toc",
             "rec_id": rid,
+            "page": 1,
             "title": re.sub(r"\s*·\s*Seite\s+\d+\s*$", "", src.get("title", "")).strip(),
             "full_text": src.get("full_text", ""),
             "beilage_present": src.get("beilage_present", False),
@@ -493,22 +506,17 @@ def main():
     print(f"prepared {len(toc_records)} toc records for import")
 
     failed = import_in_batches(collection_name, records, batch_size=1000)
-    toc_failed = []
-    if not same_collection_for_toc:
-        toc_failed = import_in_batches(toc_collection_name, toc_records, batch_size=1000)
-    else:
-        print("skipping TOC import because --collection and --toc-collection are identical")
+    toc_failed = import_in_batches(toc_collection_name, toc_records, batch_size=1000)
     if failed:
         print(f"{len(failed)} records failed to import")
         print(failed[:5])
     else:
         print(f"imported {len(records)} records")
-    if not same_collection_for_toc:
-        if toc_failed:
-            print(f"{len(toc_failed)} TOC records failed to import")
-            print(toc_failed[:5])
-        else:
-            print(f"imported {len(toc_records)} TOC records")
+    if toc_failed:
+        print(f"{len(toc_failed)} TOC records failed to import")
+        print(toc_failed[:5])
+    else:
+        print(f"imported {len(toc_records)} TOC records")
     print("done with indexing OKAR")
 
 

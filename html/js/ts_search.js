@@ -15,6 +15,7 @@ var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
   additionalSearchParameters: {
     query_by: 'full_text,title,rec_id',
     highlight_full_fields: 'full_text,title',
+    filter_by: 'record_kind:=page',
     sort_by: 'title:asc,rec_id:asc',
   },
 });
@@ -268,7 +269,7 @@ function transformSearchHits(items) {
     var uniqTerms = dedupeTerms(markTerms);
     var markValue = uniqTerms.join(' ');
 
-    var link = item.id;
+    var link = item.href || item.id;
     if (markValue) {
       var separator = link.indexOf('?') === -1 ? '?' : '&';
       link = link + separator + 'mark=' + encodeURIComponent(markValue);
