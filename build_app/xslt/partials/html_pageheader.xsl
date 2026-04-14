@@ -6,6 +6,7 @@
 
     <xsl:template match="/" name="page_header">
         <xsl:param name="responsive_behaviour" select="'no_responsiveness'" />
+        <xsl:param name="hide_on_demand" select="'do_not_hide'" />
         <section class="site-top {$responsive_behaviour}" aria-label="Start">
             <div class="container site-top-inner py-4">
                 <div class="row" id="site-top-grid">
@@ -18,7 +19,7 @@
                         </a>
                     </div>
                     <div id="site-top-right" class="col-md-6 col-12">
-                        <form class="navbar-search-form" action="search.html" method="get">
+                        <form class="navbar-search-form {$hide_on_demand}" action="search.html" method="get">
                             <div class="row">
                                 <div id="searchBox" class="col-12 col-md-7 d-flex justify-content-center">
                                     <div class="navbar-search-item navbar-search-box" style="flex:1">
