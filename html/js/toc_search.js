@@ -1,21 +1,25 @@
 'use strict';
 
 var project_collection_name = 'OKAR';
+var TOC_BASE_FILTER = 'record_kind:=toc';
+var TOC_SEARCH_API_KEY = 'GXo33l5N2v9XbHXodWfAv68CvQLWLPWe';
+var TOC_SEARCH_HOST = 'typesense.acdh-dev.oeaw.ac.at';
+var TOC_SEARCH_PORT = '443';
+var TOC_SEARCH_PROTOCOL = 'https';
 var typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
   server: {
-    apiKey: 'GXo33l5N2v9XbHXodWfAv68CvQLWLPWe',
+    apiKey: TOC_SEARCH_API_KEY,
     nodes: [
       {
-        host: 'typesense.acdh-dev.oeaw.ac.at',
-        port: '443',
-        protocol: 'https',
+        host: TOC_SEARCH_HOST,
+        port: TOC_SEARCH_PORT,
+        protocol: TOC_SEARCH_PROTOCOL,
       },
     ],
   },
   additionalSearchParameters: {
     query_by: 'title,full_text,rec_id',
     highlight_full_fields: 'title',
-    filter_by: 'record_kind:=toc',
     sort_by: 'rec_id:asc',
   },
 });
@@ -55,6 +59,207 @@ function getYear(value) {
     return String(Math.trunc(Number(value)));
   }
   return value || '';
+}
+
+function formatYearRange(fromValue, toValue, fallbackValue) {
+  var fromYear = getYear(fromValue);
+  var toYear = getYear(toValue);
+  if (fromYear && toYear && fromYear !== toYear) {
+    return fromYear + '-' + toYear;
+  }
+  return fromYear || toYear || getYear(fallbackValue) || '';
+}
+
+var tocYearRangeState = {
+  helper: null,
+  min: null,
+  max: null,
+  start: null,
+  end: null,
+  ready: false,
+};
+
+function buildTocFilters() {
+  var clauses = [TOC_BASE_FILTER];
+  if (
+    tocYearRangeState.ready &&
+    tocYearRangeState.start !== null &&
+    tocYearRangeState.end !== null &&
+    (tocYearRangeState.start > tocYearRangeState.min || tocYearRangeState.end < tocYearRangeState.max)
+  ) {
+    clauses.push('year_from:<=' + String(tocYearRangeState.end));
+    clauses.push('year_to:>=' + String(tocYearRangeState.start));
+  }
+  return clauses.join(' && ');
+}
+
+function applyTocFilters() {
+  if (!tocYearRangeState.helper) return;
+  tocYearRangeState.helper.setQueryParameter('filters', buildTocFilters());
+}
+
+function fetchTocYearBounds() {
+  var endpoint = TOC_SEARCH_PROTOCOL + '://' + TOC_SEARCH_HOST + ':' + TOC_SEARCH_PORT + '/collections/' + encodeURIComponent(project_collection_name) + '/documents/search';
+
+  function fetchBoundary(fieldName, direction) {
+    var params = new URLSearchParams({
+      q: '*',
+      query_by: 'title,full_text,rec_id',
+      filter_by: TOC_BASE_FILTER,
+      sort_by: fieldName + ':' + direction,
+      include_fields: fieldName,
+      per_page: '1',
+    });
+
+    return fetch(endpoint + '?' + params.toString(), {
+      headers: { 'X-TYPESENSE-API-KEY': TOC_SEARCH_API_KEY },
+    }).then(function(response) {
+      if (!response.ok) {
+        throw new Error('Could not fetch TOC year bounds');
+      }
+      return response.json();
+    }).then(function(payload) {
+      var hits = payload && payload.hits ? payload.hits : [];
+      if (!hits.length || !hits[0].document) return null;
+      var value = hits[0].document[fieldName];
+      return Number.isFinite(Number(value)) ? Number(value) : null;
+    });
+  }
+
+  return Promise.all([
+    fetchBoundary('year_from', 'asc'),
+    fetchBoundary('year_to', 'desc'),
+  ]).then(function(values) {
+    return { min: values[0], max: values[1] };
+  });
+}
+
+function createTocYearRangeWidget(containerSelector) {
+  var widgetState = {
+    container: null,
+    sliderElement: null,
+    valueLabel: null,
+    helper: null,
+    noUiInstance: null,
+  };
+
+  function updateLabel() {
+    if (!widgetState.valueLabel) return;
+    if (tocYearRangeState.start === null || tocYearRangeState.end === null) {
+      widgetState.valueLabel.textContent = '–';
+      return;
+    }
+    widgetState.valueLabel.textContent = String(tocYearRangeState.start) + ' - ' + String(tocYearRangeState.end);
+  }
+
+  function syncSlider() {
+    if (!widgetState.noUiInstance || !tocYearRangeState.ready) return;
+    widgetState.noUiInstance.updateOptions({
+      range: {
+        min: tocYearRangeState.min,
+        max: tocYearRangeState.max,
+      },
+      start: [tocYearRangeState.start, tocYearRangeState.end],
+    }, false);
+    updateLabel();
+  }
+
+  function applyRange(startValue, endValue, triggerSearch) {
+    if (!Number.isFinite(startValue) || !Number.isFinite(endValue)) return;
+    if (startValue > endValue) {
+      var swap = startValue;
+      startValue = endValue;
+      endValue = swap;
+    }
+    tocYearRangeState.start = startValue;
+    tocYearRangeState.end = endValue;
+    updateLabel();
+    applyTocFilters();
+    if (triggerSearch && widgetState.helper) {
+      widgetState.helper.search();
+    }
+  }
+
+  function ensureStructure(root) {
+    if (widgetState.container) return;
+
+    widgetState.container = document.createElement('div');
+    widgetState.container.className = 'toc-year-range-widget';
+
+    widgetState.sliderElement = document.createElement('div');
+    widgetState.sliderElement.className = 'toc-year-slider';
+    widgetState.container.appendChild(widgetState.sliderElement);
+
+    widgetState.valueLabel = document.createElement('div');
+    widgetState.valueLabel.className = 'toc-year-count';
+    widgetState.container.appendChild(widgetState.valueLabel);
+
+    root.innerHTML = '';
+    root.appendChild(widgetState.container);
+  }
+
+  function ensureSlider() {
+    if (widgetState.noUiInstance || !widgetState.sliderElement || !window.noUiSlider || !tocYearRangeState.ready) return;
+
+    window.noUiSlider.create(widgetState.sliderElement, {
+      start: [tocYearRangeState.start, tocYearRangeState.end],
+      connect: true,
+      behaviour: 'tap-drag',
+      step: 1,
+      format: {
+        to: function(value) {
+          return String(Math.round(value));
+        },
+        from: function(value) {
+          return Number(value);
+        },
+      },
+      range: {
+        min: tocYearRangeState.min,
+        max: tocYearRangeState.max,
+      },
+    });
+
+    widgetState.noUiInstance = widgetState.sliderElement.noUiSlider;
+    widgetState.noUiInstance.on('update', function(values) {
+      applyRange(Number(values[0]), Number(values[1]), false);
+    });
+    widgetState.noUiInstance.on('change', function(values) {
+      applyRange(Number(values[0]), Number(values[1]), true);
+    });
+  }
+
+  return {
+    init: function(initOptions) {
+      var root = typeof containerSelector === 'string' ? document.querySelector(containerSelector) : containerSelector;
+      if (!root) return;
+      widgetState.helper = initOptions.helper;
+      tocYearRangeState.helper = initOptions.helper;
+      ensureStructure(root);
+      applyTocFilters();
+
+      fetchTocYearBounds().then(function(bounds) {
+        if (bounds.min === null || bounds.max === null) {
+          return;
+        }
+        tocYearRangeState.min = bounds.min;
+        tocYearRangeState.max = bounds.max;
+        tocYearRangeState.start = bounds.min;
+        tocYearRangeState.end = bounds.max;
+        tocYearRangeState.ready = true;
+        ensureSlider();
+        syncSlider();
+        applyTocFilters();
+        widgetState.helper.search();
+      }).catch(function(error) {
+        console.error(error);
+      });
+    },
+    render: function() {
+      ensureSlider();
+      syncSlider();
+    },
+  };
 }
 
 var tocDebugEnabled = /[?&]debugToc=1(?:&|$)/.test(window.location.search) || window.localStorage.getItem('okar_toc_debug') === '1';
@@ -273,7 +478,7 @@ var renderInfiniteHits = function(renderOptions, isFirstRender) {
       display_title_plain: plainTitle,
       thumbnail: sourceItem.thumbnail || '',
       beilage_text: sourceItem.beilage_text || '',
-      year: sourceItem.year || '',
+      year: formatYearRange(sourceItem.year_from, sourceItem.year_to, sourceItem.year),
       kaemmerer: sourceItem.kaemmerer || '',
       signature: sourceItem.signature || ''
     };
@@ -330,15 +535,7 @@ search.addWidgets([
     },
   }),
 
-  instantsearch.widgets.rangeSlider({
-    container: '#yearSlider',
-    attribute: 'year',
-    tooltips: {
-      format: function(rawValue) {
-        return getYear(rawValue);
-      },
-    },
-  }),
+  createTocYearRangeWidget('#yearSlider'),
 
   customInfiniteHits({
     container: '#hits',

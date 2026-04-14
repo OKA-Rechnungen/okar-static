@@ -27,6 +27,25 @@ YEAR_CANDIDATE_TEXTS = (
     "//tei:sourceDesc//tei:date/text()",
 )
 
+YEAR_FROM_ATTRS = (
+    "//tei:origin/tei:origDate/@notBefore",
+    "//tei:origin/tei:origDate/@from",
+    "//tei:sourceDesc//tei:date/@notBefore",
+    "//tei:sourceDesc//tei:date/@from",
+)
+
+YEAR_TO_ATTRS = (
+    "//tei:origin/tei:origDate/@notAfter",
+    "//tei:origin/tei:origDate/@to",
+    "//tei:sourceDesc//tei:date/@notAfter",
+    "//tei:sourceDesc//tei:date/@to",
+)
+
+YEAR_WHEN_ATTRS = (
+    "//tei:origin/tei:origDate/@when",
+    "//tei:sourceDesc//tei:date/@when",
+)
+
 
 def extract_year_from_string(value):
     if not value:
@@ -52,6 +71,38 @@ def resolve_year(doc):
             if year:
                 return year
     return None
+
+
+def resolve_first_year(doc, paths):
+    for path in paths:
+        for candidate in doc.any_xpath(path):
+            year = extract_year_from_string(candidate)
+            if year:
+                return year
+    return None
+
+
+def resolve_year_range(doc):
+    year_from = resolve_first_year(doc, YEAR_FROM_ATTRS)
+    year_to = resolve_first_year(doc, YEAR_TO_ATTRS)
+    fallback_when = resolve_first_year(doc, YEAR_WHEN_ATTRS)
+
+    if year_from is None:
+        fallback_text = resolve_first_year(doc, YEAR_CANDIDATE_TEXTS)
+        year_from = fallback_when if fallback_when is not None else fallback_text
+    if year_to is None:
+        fallback_text = resolve_first_year(doc, YEAR_CANDIDATE_TEXTS)
+        year_to = fallback_when if fallback_when is not None else fallback_text
+
+    if year_from is None and year_to is not None:
+        year_from = year_to
+    if year_to is None and year_from is not None:
+        year_to = year_from
+
+    if year_from is not None and year_to is not None and year_from > year_to:
+        year_from, year_to = year_to, year_from
+
+    return year_from, year_to
 
 
 def extract_graphic_filename(value):
@@ -139,6 +190,20 @@ def main():
                 "facet": True,
                 "sort": True,
             },
+            {
+                "name": "year_from",
+                "type": "int32",
+                "optional": True,
+                "facet": True,
+                "sort": True,
+            },
+            {
+                "name": "year_to",
+                "type": "int32",
+                "optional": True,
+                "facet": True,
+                "sort": True,
+            },
             {"name": "signature", "type": "string", "facet": True, "optional": True},
             {"name": "kaemmerer", "type": "string[]", "facet": True, "optional": True},
             {"name": "beilage_present", "type": "bool", "facet": True, "optional": True},
@@ -160,6 +225,20 @@ def main():
             {"name": "full_text", "type": "string"},
             {
                 "name": "year",
+                "type": "int32",
+                "optional": True,
+                "facet": True,
+                "sort": True,
+            },
+            {
+                "name": "year_from",
+                "type": "int32",
+                "optional": True,
+                "facet": True,
+                "sort": True,
+            },
+            {
+                "name": "year_to",
                 "type": "int32",
                 "optional": True,
                 "facet": True,
@@ -255,6 +334,7 @@ def main():
         doc = TeiReader(xml=x)
         record_id = os.path.splitext(os.path.split(x)[-1])[0]
         record_year = resolve_year(doc)
+        record_year_from, record_year_to = resolve_year_range(doc)
         shelfmarks = doc.any_xpath("//tei:msIdentifier/tei:idno[@type='shelfmark']/text()")
         signature = " ".join(" ".join(shelfmarks).split())
 
@@ -335,6 +415,10 @@ def main():
             record["title"] = f"{r_title} · Seite {str(page_number)}"
             if record_year is not None:
                 record["year"] = record_year
+            if record_year_from is not None:
+                record["year_from"] = record_year_from
+            if record_year_to is not None:
+                record["year_to"] = record_year_to
 
             record["full_text"] = "\n".join(
                 " ".join("".join(p.itertext()).split()) for p in body
@@ -418,6 +502,10 @@ def main():
             record["title"] = f"{r_title} · Seite {str(fallback_page)}"
             if record_year is not None:
                 record["year"] = record_year
+            if record_year_from is not None:
+                record["year_from"] = record_year_from
+            if record_year_to is not None:
+                record["year_to"] = record_year_to
 
             # Use the msContents-derived scope as searchable text when there is
             # no page transcription.
@@ -498,7 +586,7 @@ def main():
             "full_text": src.get("full_text", ""),
             "beilage_present": src.get("beilage_present", False),
         }
-        for optional_key in ("year", "signature", "kaemmerer", "beilage_text", "image_source", "thumbnail"):
+        for optional_key in ("year", "year_from", "year_to", "signature", "kaemmerer", "beilage_text", "image_source", "thumbnail"):
             if optional_key in src:
                 toc_rec[optional_key] = src[optional_key]
         toc_records.append(toc_rec)
