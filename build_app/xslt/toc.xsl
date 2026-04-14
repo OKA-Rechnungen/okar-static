@@ -72,10 +72,10 @@
                                         <section class="toc-content">
                                             <div class="toc-content-header" />
                                             <div>
-                                                <div class="d-flex flex-column align-items-center" id="current-refinements"></div>
+                                                <div class="d-flex flex-column align-items-center" id="current-refinements" />
                                             </div>
-                                            <div id="hits"></div>
-                                            <div id="pagination"></div>
+                                            <div id="hits" />
+                                            <div id="pagination" />
                                         </section>
                                     </div>
                                 </div>

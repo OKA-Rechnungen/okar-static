@@ -30,12 +30,26 @@
                     <div id="searchContainer" class="container-fluid">
                         <div class="row">
                             <div class="col-left">
-                                <div class="toc-left-section toc-mobile-searchbox">
-                                    <h3 class="toc-left-heading">Suche</h3>
+                                <div class="toc-left-section toc-mobile-searchbox" style="display:none;">
+                                    <!-- <h3 class="toc-left-heading">Suche</h3> -->
                                     <div class="toc-search-pill">
                                         <div class="toc-search-pill-inner">
                                             <form action="search.html" method="get">
                                                 <input id="searchbox-mobile" class="form-control form-control-sm navbar-search" type="search" name="q" placeholder="Suche…" autocomplete="off"/>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="toc-left-section">
+                                    <div class="toc-search-pill">
+                                        <div class="toc-search-pill-inner">
+                                            <form class="navbar-search-form hide_on_mobile px-0"  action="search.html" method="get">
+                                                <div class="navbar-search-item navbar-search-box" style="flex:1; max-width: unset;">
+                                                    <input id="navbar-search" class="form-control form-control-sm navbar-search" type="search" name="q" placeholder="Suche…" autocomplete="off"/>
+                                                    <button type="submit" class="navbar-search-submit" aria-label="Suche starten">
+                                                        <i class="bi bi-search" aria-hidden="true"></i>
+                                                    </button>
+                                                </div>
                                             </form>
                                         </div>
                                     </div>
@@ -69,6 +83,7 @@
                             <div class="col-right col">
                                 <xsl:call-template name="page_header">
                                     <xsl:with-param name="responsive_behaviour" select="'hide_on_mobile'"/>
+                                    <xsl:with-param name="hide_on_demand" select="'hide_on_desktop'"/>
                                 </xsl:call-template>
                                 <div class="contents-frame">
                                     <div class="scroller">
@@ -79,11 +94,11 @@
                                                     <xsl:value-of select="$doc_title"/>
                                                 </h1>
                                                 <div class="toc-searchbox-container">
-                                                    <div id="searchbox"></div>
+                                                    <div id="searchbox" />
                                                 </div>
                                             </div>
-                                            <div id="hits"></div>
-                                            <div id="pagination"></div>
+                                            <div id="hits" />
+                                            <div id="pagination" />
                                         </section>
                                     </div>
                                 </div>
