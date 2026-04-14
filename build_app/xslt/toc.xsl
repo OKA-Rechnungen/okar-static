@@ -17,6 +17,7 @@
                     <xsl:with-param name="html_title" select="$doc_title"/>
                 </xsl:call-template>
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@8.1.0/themes/algolia-min.css"/>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css"/>
                 <link rel="stylesheet" href="css/ts_search.css" type="text/css"/>
             </head>
             <body class="d-flex flex-column offset-burger">
@@ -48,7 +49,7 @@
                                         </div>
                                     </div>
                                     <div class="toc-left-section">
-                                        <h3 class="toc-left-heading">Jahr</h3>
+                                        <h3 class="toc-left-heading">Rechnungszeitraum</h3>
                                         <div id="yearSlider"></div>
                                         <div id="yearCount" class="toc-year-count"></div>
                                     </div>
@@ -90,6 +91,7 @@
                 <xsl:call-template name="html_footer"/>
                 <script src="https://cdn.jsdelivr.net/npm/typesense-instantsearch-adapter@2/dist/typesense-instantsearch-adapter.min.js"/>
                 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.66.0/dist/instantsearch.production.min.js"/>
+                <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js"/>
                 <script src="js/toc_search.js"/>
             </body>
         </html>

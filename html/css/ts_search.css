@@ -32,6 +32,13 @@
   padding-bottom: 0.5rem;
 }
 
+
+/* Fix properly this workaround site-wide */
+/* Perhaps h4 for leftcol titles */
+h3 {
+  font-size: 1.2rem;
+}
+
 .facet-collapsible {
   display: block;
 }
@@ -107,52 +114,46 @@
 .toc-year-count {
   margin-top: 0.5rem;
   font-size: 0.8125rem;
-  color: var(--okar-fg-colour-2-semitrans) ;
+  color: var(--okar-fg-colour-2-semitrans);
 }
 
 .toc-year-count .ais-Stats-text {
-  color: var(--okar-fg-colour-2)); 
+  color: var(--okar-fg-colour-2);
   font-weight: 600;
 }
 
-/* noUiSlider styling (fallback) */
-.noUi-target {
-  background: var(--okar-fg-colour-2)
+/* TOC noUiSlider styling */
+.toc-year-slider.noUi-target {
+  background: rgba(255, 255, 255, 0.15);
   border: none;
-  border-radius: 4px;
+  border-radius: 3px;
   box-shadow: none;
-  height: 8px;
+  height: 6px;
 }
 
-.noUi-connect {
-  background: var(--okar-bg-colour));
+.toc-year-slider .noUi-connect {
+  background: var(--okar-bg-1-hover);
 }
 
-.noUi-handle {
-  background: var(--okar-bg-colour));
+.toc-year-slider .noUi-handle {
+  background: var(--okar-bg-colour-1);
   border: none;
   border-radius: 50%;
-  box-shadow: var(--okar-fg-colour-1-semitrans) ;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   height: 18px !important;
   width: 18px !important;
-  top: -5px !important;
+  top: -6px !important;
   right: -9px !important;
 }
 
-.noUi-handle::before,
-.noUi-handle::after {
+.toc-year-slider .noUi-handle::before,
+.toc-year-slider .noUi-handle::after {
   display: none;
 }
 
-.noUi-tooltip {
-  background: var(--okar-bg-colour));
-  border: none;
-  border-radius: 4px;
-  color: var(--okar-fg-colour-2);
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 2px 6px;
+.toc-year-slider {
+  margin-top: 0.25rem;
 }
 
 /* Refinement lists in left column */
