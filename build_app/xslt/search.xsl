@@ -79,11 +79,11 @@
                                                     <xsl:value-of select="$doc_title"/>
                                                 </h1>
                                                 <div class="toc-searchbox-container">
-                                                    <div id="searchbox"></div>
+                                                    <div id="searchbox" />
                                                 </div>
                                             </div>
-                                            <div id="hits"></div>
-                                            <div id="pagination"></div>
+                                            <div id="hits" />
+                                            <div id="pagination" />
                                         </section>
                                     </div>
                                 </div>
