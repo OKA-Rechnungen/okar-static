@@ -32,6 +32,13 @@
   padding-bottom: 0.5rem;
 }
 
+
+/* Fix properly this workaround site-wide */
+/* Perhaps h4 for leftcol titles */
+h3 {
+  font-size: 1.2rem;
+}
+
 .facet-collapsible {
   display: block;
 }
