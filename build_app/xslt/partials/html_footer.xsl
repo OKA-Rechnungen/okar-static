@@ -5,7 +5,7 @@
    <xsl:template match="/" name="html_footer">
       <xsl:param name="show_full_footer" as="xs:boolean" select="false()"/>
       <footer class="footer mt-auto">
-         <xsl:if test="$show_full_footer">
+         <!-- <xsl:if test="$show_full_footer"> -->
             <div class="container px-0" id="footer-full-content" tabindex="-1">
                <div class="row">
                   <div class="col-7">
@@ -71,7 +71,7 @@
                   </div>
                </div>
             </div>
-         </xsl:if>
+         <!-- </xsl:if> -->
          <div class="footer-imprint-bar hide-reading" id="wrapper-footer-secondary" style="text-align:center; padding:0.4rem 0; font-size: 0.9rem;"> © 2026 ÖAW | <a href="imprint.html">Impressum</a> |            <a href="{$github_url}">
                <i class="bi bi-github" title="GitHub" alt="GitHub" aria-hidden="true">
                   <span class="visually-hidden">GitHub</span>
