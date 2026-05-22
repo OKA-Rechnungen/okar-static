@@ -12,13 +12,22 @@
     font-style: inherit;
 }
 
+:root {
+    -
+}
+
+@media (max-width: 1921px) {
+    :root {
+      
+    }
+}
 /* ==========================================================
    Edition Page Two-Column Layout
    ========================================================== */
 
 .edition-two-columns {
     display: grid;
-    grid-template-columns: var(--site-offcanvas-width) 1fr;
+    grid-template-columns: var(--okar-offcanvas-width) 1fr;
     grid-template-rows: auto 1fr;
     min-height: 100vh;
 }
@@ -29,11 +38,11 @@
 }
 
 .edition-title {
-    font-size: 1.25rem;
+    font-size: var(--okar-lcol-title-font-size);
     font-weight: 700;
     color: var(--okar-colour-4);
     margin: 0 0 1.5rem;
-    line-height: 1.3;
+    line-height:  var(--okar-lcol-title-line-height);
 }
 
 .edition-nav-links {
@@ -64,7 +73,7 @@
 .edition-metadata-list {
     margin: 0;
     padding: 0;
-    font-size: 0.875rem;
+    font-size: var(--okar-lcol-list-font-size);
 }
 
 .edition-metadata-collapsible {
@@ -83,7 +92,7 @@
     font-weight: 600;
   color: var(--okar-colour-4);
     text-transform: uppercase;
-    font-size: 0.6875rem;
+    font-size: var(--okar-lcol-list-font-size);
     letter-spacing: 0.1em;
     margin-top: 0.75rem;
 }
@@ -135,10 +144,11 @@ body  #viewer {
     border-left: 1px solid var(--bs-border-color, black);
 }
 
+@media (max-width: 1921px) {
+
+}
 
 @media (max-width: 800px) {
-
-
     .wp-transcript {
         height: 100%;
     }

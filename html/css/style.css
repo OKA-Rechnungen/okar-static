@@ -36,10 +36,40 @@
     --okar-square-btn-icon-size: 2rem;
     
     --bs-body-font-family: var(--editor-font-family);
-    --site-offcanvas-width: clamp(280px, 34vw, 400px);
+    --okar-offcanvas-width: clamp(280px, 34vw, 400px);
     --site-top-action-height: clamp(2.6rem, 4vw, 3.5rem);
     --okar-footer-primary-height: 3rem;
-    --okar-footer-secondary-height: 3rem; 
+    --okar-footer-secondary-height: 3rem;
+    --okar-pill-btn-font-size: 1.25rem;
+    --site-menu-section-font-size: 2rem;
+    --okar-site-menu-link-font-size:1.5rem;
+    --site-menu-padding-left: 4rem;
+    --okar-lcol-title-font-size: 1.25rem;
+    --okar-lcol-title-line-height: 1.3rem;
+    --okar-lcol-list-font-size: 0.6875rem;
+    --okar-lcol-list-item-font-size:0.8125rem;
+    --okar-toc-card-width: 20rem;
+}
+
+@media (max-width: 1921px) {
+    :root {
+        --okar-offcanvas-width: clamp(280px, 34vw, 280px);
+        --okar-square-btn-size: 1.5rem;--okar-square-btn-icon-size: 1.5rem;
+        --site-top-action-height: clamp(2rem, 2vw, 3.3rem);
+        --okar-pill-btn-font-size: 0.9rem;
+        --site-menu-section-font-size: 1.6rem;
+        --okar-site-menu-link-font-size: 1.1rem;
+        --site-menu-padding-left: 2rem;
+        --okar-lcol-title-font-size: 0.9rem;
+        --okar-lcol-title-line-height: 1.1rem;
+        --okar-lcol-list-font-size: 0.65rem;
+        --okar-lcol-list-item-font-size:0.65rem;
+        --okar-toc-card-width: 14rem;
+  }
+}
+
+.offcanvas.offcanvas-start{
+width: var(--okar-offcanvas-width)!important;
 }
 
 body {
@@ -70,7 +100,7 @@ a:visited {
 }
 
 body.offset-burger .site-header {
-    left: var(--site-offcanvas-width);
+    left: var(--okar-offcanvas-width);
 }
 
 .site-header-inner {
@@ -208,7 +238,7 @@ body:has(.offcanvas.show:not(.hiding), .offcanvas.showing) .site-header .square-
    Offcanvas menu styling
    ========================================================== */
 .site-offcanvas {
-    width: var(--site-offcanvas-width);
+    width: var(--okar-offcanvas-width);
     background-color: var(--okar-bg-colour-1) !important;
     color: var(--bs-white) !important;
     overflow: visible !important;
@@ -229,12 +259,12 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
 }
 
 .site-menu {
-    padding-left: 4rem;
+    padding-left: var(--site-menu-padding-left);
 }
 
 .site-menu-section {
     font-variant: small-caps;
-    font-size: 2rem;
+    font-size: var(--site-menu-section-font-size);
     letter-spacing: 0.02em;
     margin-top: 1rem;
     margin-bottom: 0.25rem;
@@ -250,7 +280,7 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
     text-decoration: none;
     color: white !important;
     background-color: transparent;
-    font-size: 1.5rem;
+    font-size: var(--okar-site-menu-link-font-size);
 }
 
 .site-menu .site-menu-link--leaf {
@@ -329,7 +359,7 @@ body.landing .landing-offcanvas .offcanvas-body::-webkit-scrollbar {
     padding: 0 1.50em;
     border: 0 !important;
     background-color: var(--okar-bg-colour-1) !important;
-    font-size: 1.25rem;
+    font-size: var(--okar-pill-btn-font-size);
     color: var(--bs-white) !important;
     text-decoration: none;
     border-radius: 9999px;
@@ -468,8 +498,8 @@ body.landing .landing-thumbs.landing-thumbs--carousel .landing-thumbs-cta-title 
    ========================================================== */
 
 .col-left {
-    width: var(--site-offcanvas-width);
-    min-width: var(--site-offcanvas-width);
+    width: var(--okar-offcanvas-width);
+    min-width: var(--okar-offcanvas-width);
     background-color: var(--okar-bg-colour-2);
     color: var(--okar-colour);
     overflow-y: auto;
