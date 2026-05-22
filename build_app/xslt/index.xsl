@@ -67,7 +67,7 @@
                     <xsl:with-param name="html_title" select="$doc_title"/>
                 </xsl:call-template>
             </head>
-            <body class="d-flex flex-column landing">
+            <body class="d-flex flex-column landing indexPage">
                 <xsl:call-template name="nav_bar" />
                 <xsl:call-template name="page_header" />
                 <main id="indexPage" class="flex-shrink-0  flex-grow-1">

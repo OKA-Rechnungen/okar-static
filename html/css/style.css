@@ -37,9 +37,9 @@
     
     --bs-body-font-family: var(--editor-font-family);
     --okar-offcanvas-width: clamp(280px, 34vw, 400px);
-    --site-top-action-height: clamp(2.6rem, 4vw, 3.5rem);
+    --site-top-action-height: clamp(2.6rem, 4vw, 3rem);
     --okar-footer-primary-height: 3rem;
-    --okar-footer-secondary-height: 3rem;
+    --okar-footer-secondary-height: 2rem;
     --okar-pill-btn-font-size: 1.25rem;
     --site-menu-section-font-size: 2rem;
     --okar-site-menu-link-font-size:1.5rem;
@@ -50,13 +50,13 @@
     --okar-lcol-list-item-font-size:0.8125rem;
     --okar-toc-card-width: 20rem;
 }
-
+/*
 @media (max-width: 1921px) {
     :root {
         --okar-offcanvas-width: clamp(280px, 34vw, 280px);
         --okar-square-btn-size: 1.5rem;--okar-square-btn-icon-size: 1.5rem;
         --site-top-action-height: clamp(2rem, 2vw, 3.3rem);
-        --okar-pill-btn-font-size: 0.9rem;
+        --okar-pill-btn-font-size: 1rem;
         --site-menu-section-font-size: 1.6rem;
         --okar-site-menu-link-font-size: 1.1rem;
         --site-menu-padding-left: 2rem;
@@ -65,8 +65,10 @@
         --okar-lcol-list-font-size: 0.65rem;
         --okar-lcol-list-item-font-size:0.65rem;
         --okar-toc-card-width: 14rem;
+         --okar-footer-primary-height: 2rem;
+        --okar-footer-secondary-height: 2rem;
   }
-}
+} */
 
 .offcanvas.offcanvas-start{
 width: var(--okar-offcanvas-width)!important;
@@ -558,8 +560,11 @@ div#map {
 }
 
 .mobile-50w{
-    width: 100%;
+    width: 60%;
+}
 
+.indexPage .mobile-50w{
+    width: 100%;
 }
 
 .footer-row{
@@ -889,6 +894,10 @@ div#map {
     display: none;
 }
 
-.text-left {
-    font-size: small ;
+.indexPage .text-left {
+    font-size: x-small ;
+}
+
+body:not(.indexPage) .text-left p {
+display: none
 }
