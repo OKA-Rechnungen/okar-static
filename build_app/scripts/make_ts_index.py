@@ -211,6 +211,11 @@ def main():
             {"name": "image_source", "type": "string", "optional": True},
             {"name": "thumbnail", "type": "string", "optional": True},
         ],
+        "metadata": {
+            "owners": ["Fernando Sanz-Lázaro"],
+            "description": "Used for Register of https://okar.acdh.oeaw.ac.at",
+            "service_ids": [24844]
+        }
     }
 
     toc_schema = {
@@ -251,6 +256,11 @@ def main():
             {"name": "image_source", "type": "string", "optional": True},
             {"name": "thumbnail", "type": "string", "optional": True},
         ],
+        "metadata": {
+            "owners": ["Fernando Sanz-Lázaro"],
+            "description": "Used for TOC of https://okar.acdh.oeaw.ac.at",
+            "service_ids": [24844]
+        }
     }
 
     # Create collection if it doesn't exist (or if --recreate deleted it).
@@ -339,7 +349,10 @@ def main():
         signature = " ".join(" ".join(shelfmarks).split())
 
         kaemmerer_nodes = doc.any_xpath(
-            "//tei:standOff/tei:listPerson/tei:person[contains(translate(@role, 'ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜẞ', 'abcdefghijklmnopqrstuvwxyzäöüß'), 'kämmerer')]"
+            "//tei:standOff/tei:listPerson/tei:person[contains(translate(@role, "
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜẞ', "
+            "'abcdefghijklmnopqrstuvwxyzäöüß'), "
+            "'kämmerer')]"
         )
         kaemmerer = []
         for person in kaemmerer_nodes:
@@ -586,7 +599,8 @@ def main():
             "full_text": src.get("full_text", ""),
             "beilage_present": src.get("beilage_present", False),
         }
-        for optional_key in ("year", "year_from", "year_to", "signature", "kaemmerer", "beilage_text", "image_source", "thumbnail"):
+        for optional_key in ("year", "year_from", "year_to", "signature", "kaemmerer", "beilage_text", "image_source",
+                             "thumbnail"):
             if optional_key in src:
                 toc_rec[optional_key] = src[optional_key]
         toc_records.append(toc_rec)
