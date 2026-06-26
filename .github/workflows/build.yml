@@ -38,7 +38,7 @@ jobs:
       - name: Fetch the data
         run: ./build_app/scripts/fetch_data.sh
       - name: Fetch imprint
-        run: ./scripts/dl_imprint.sh
+        run: ./build_app/scripts/dl_imprint.sh
       - name: Build the app
         run: ant -f build_app/xslt/build.xml
       - name: Rebuild Typesense index
