@@ -6,4 +6,5 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [ 
     "acdh-tei-pyutils>=2.3.0",
+    "acdh-cfts-pyutils"
 ]
