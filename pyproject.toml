@@ -1,0 +1,9 @@
+[project]
+name = "okar-static"
+version = "0.1.0"
+description = "OKA Rechnungen: okar-static"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [ 
+    "acdh-tei-pyutils>=2.3.0",
+]
