@@ -4,7 +4,7 @@ import glob
 import os
 import re
 from urllib.parse import quote, urlparse
-from typesense.api_call import ObjectNotFound
+from typesense.exceptions import ObjectNotFound
 from typing import Any
 from acdh_cfts_pyutils import TYPESENSE_CLIENT
 from acdh_tei_pyutils.tei import TeiReader
