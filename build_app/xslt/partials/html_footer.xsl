@@ -78,8 +78,34 @@
                </i>
             </a>
          </div>
+                         <!-- Usage hints modal -->
+                <div class="modal fade" id="usageHintsModal" tabindex="-1" aria-labelledby="usageHintsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-ls modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title translate-de" id="usageHintsModalLabel">Hinweis</h3>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="translate-de">
+                                    <p>Die Digitalisierung und Transkription befinden sich noch in Arbeit. Einige Dokumente enthalten bereits markierte Textregionen, die Transkriptionen sind jedoch noch nicht vollständig verfügbar. Weitere Transkriptionen werden laufend ergänzt.</p>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="form-check me-auto">
+                                    <input class="form-check-input" type="checkbox" id="usageHintsDismiss"/>
+                                    <label class="form-check-label translate-de" for="usageHintsDismiss">Nicht mehr anzeigen</label>
+                                    <label class="form-check-label translate-en" for="usageHintsDismiss">Do not show again</label>
+                                </div>
+                                <button type="button" class="btn btn-primary translate-de" data-bs-dismiss="modal">Verstanden</button>
+                                <button type="button" class="btn btn-primary translate-en" data-bs-dismiss="modal">Got it</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
       </footer>
       <!-- <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script> -->
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous" />
+      <script src="js/disclaimer.js" />
    </xsl:template>
 </xsl:stylesheet>
