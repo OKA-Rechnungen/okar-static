@@ -42,7 +42,7 @@ jobs:
       - name: Build the app
         run: ant -f build_app/xslt/build.xml
       - name: Rebuild Typesense index
-        run: ./build_app/scripts/make_ts_index.py
+        run: ./build_app/scripts/make_ts_index.py --recreate
       - name: Setup Pages
         uses: actions/configure-pages@v6
       - name: Upload artifact
