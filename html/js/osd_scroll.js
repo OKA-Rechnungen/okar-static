@@ -1455,7 +1455,7 @@ Single page transcript navigation with OpenSeadragon image sync.
         }
 
         var safeSource = encodeURIComponent(source);
-    return `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${safeRecordId}/files/images/${safeSource}/full/full/0/default.jpg`;
+    return `https://viewer.acdh.oeaw.ac.at/viewer/api/v1/records/${safeRecordId}/files/images/${safeSource}/full/1920,/0/default.jpg`;
     }
 
     function loadOsdImage(source) {

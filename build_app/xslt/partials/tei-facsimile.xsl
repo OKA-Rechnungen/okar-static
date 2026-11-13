@@ -13,7 +13,7 @@
     </doc>
     
     <xsl:template match="tei:facsimile">
-        <xsl:param name="iiif-ext" select="'full/full/0/default.jpg'"/>        
+        <xsl:param name="iiif-ext" select="'full/1920,/0/default.jpg'"/>        
         <xsl:if test="./tei:surface">
             <xsl:for-each select="./tei:surface/tei:graphic">
                 <xsl:variable name="graphic_url" select="@url"/>
